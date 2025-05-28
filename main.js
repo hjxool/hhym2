@@ -1,22 +1,8 @@
 import App from './App'
-
-// #ifndef VUE3
-import Vue from 'vue'
+import store from '/Store/main.js' // 引入Vuex仓库
+import { createApp } from "vue"; // 引入 createApp 方法
 import './uni.promisify.adaptor'
-Vue.config.productionTip = false
-App.mpType = 'app'
-const app = new Vue({
-  ...App
-})
-app.$mount()
-// #endif
 
-// #ifdef VUE3
-import { createSSRApp } from 'vue'
-export function createApp() {
-  const app = createSSRApp(App)
-  return {
-    app
-  }
-}
-// #endif
+const app = createApp(App)
+app.use(store) // 应用Vuex仓库配置
+app.mount('#app')

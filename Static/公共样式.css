@@ -1,0 +1,63 @@
+.bgImg {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: -1;
+}
+
+.center {
+	display: flex;
+	align-items: center;
+	justify-content: space-evenly;
+	flex-wrap: wrap;
+	align-content: center;
+	position: relative;
+	z-index: 10;
+}
+
+.noShrink {
+	flex-shrink: 0;
+}
+
+.button {
+	position: relative;
+	z-index: 10;
+	cursor: pointer;
+}
+
+.button:active {
+	transform: scale(0.9);
+}
+
+.textEllipsis {
+	overflow: hidden;
+	max-width: 100%;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.rowLayout {
+	display: flex;
+	align-items: center;
+}
+
+.colLayout {
+	display: flex;
+	flex-direction: column;
+}
+
+.flexGrow {
+	flex-grow: 1;
+}
+
+.page {
+	position: absolute;
+	z-index: 10;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	user-select: none;
+}

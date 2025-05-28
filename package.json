@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@vant/weapp": "^1.11.7",
+    "vuex": "^4.1.0"
+  },
+  "devDependencies": {
+    "less": "^4.3.0"
+  }
+}

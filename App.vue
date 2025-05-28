@@ -1,17 +1,15 @@
-<script>
-	export default {
-		onLaunch: function() {
-			console.log('App Launch')
-		},
-		onShow: function() {
-			console.log('App Show')
-		},
-		onHide: function() {
-			console.log('App Hide')
-		}
-	}
+<template>
+	<view></view>
+</template>
+
+<script setup>
+	wx.cloud.init({
+		env: "cloud1-0gzy726e39ba4d96",
+		traceUser: true,
+	});
 </script>
 
-<style>
-	/*每个页面公共css */
+<style lang="less">
+	@import '/wxcomponents/vant/common/index.wxss';
+	@import '/Static/公共样式.css';
 </style>
