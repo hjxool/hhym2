@@ -1,0 +1,7 @@
+.idea
+node_modules
+yarn.lock
+package-lock.json
+src/views/用户权限相关页面/项目管理/项目信息.vue
+.vscode/settings.json
+
