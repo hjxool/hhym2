@@ -1,5 +1,6 @@
 import {
-	弹窗
+	弹窗,
+	消息
 } from './提示.js'
 
 export async function 请求接口(name, data) {
@@ -18,10 +19,9 @@ export async function 请求接口(name, data) {
 			}
 		}) => {
 			if (code == 200) {
-				弹窗('成功')
 				return data
 			} else {
-				弹窗('请求失败')
+				消息(msg, '失败')
 				return false
 			}
 		})

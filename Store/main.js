@@ -11,7 +11,8 @@ export default createStore({
 			提示: {
 				show: false,
 				msg: '',
-				type: ''
+				type: '',
+				msgType: ''
 			}
 		};
 	},
