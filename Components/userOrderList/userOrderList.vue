@@ -133,8 +133,8 @@ function 状态格式化(type, value) {
 			return type == '样式' ? 'color3' : '已取消';
 	}
 }
-async function 查询订单(args) {
-	console.log(args);
+async function 查询订单(type) {
+	console.log(type);
 	return new Promise((a) => {
 		setTimeout(() => {
 			a();

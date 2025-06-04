@@ -1,8 +1,14 @@
 <template>
-	<view class="body">11111</view>
+	<view class="body">
+		<userSwiper />
+		<userPlace />
+	</view>
 </template>
 
-<script setup></script>
+<script setup>
+import userSwiper from '../userSwiper/userSwiper.vue';
+import userPlace from '../userPlace/userPlace.vue';
+</script>
 
 <style lang="less" scoped>
 .body {
