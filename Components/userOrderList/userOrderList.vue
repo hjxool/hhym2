@@ -4,31 +4,34 @@
 			<van-tab v-for="item in 过滤显示.options" :title="item" :key="item"></van-tab>
 		</van-tabs>
 
-		<view class="flexGrow">
-			<view class="card" v-for="item in 列表" :key="item.订单id">
-				<view class="head rowLayout">
-					<view class="text1">{{ item.房间名 }}</view>
-					<view :class="['text2', 状态格式化('样式', item.状态)]">{{ 状态格式化('文字', item.状态) }}</view>
-				</view>
+		<cusScrollView :加载="查询订单" style="flex-grow: 1; overflow: hidden">
+			<view class="listBox">
+				<view class="card" v-for="item in 列表" :key="item.订单id">
+					<view class="head rowLayout">
+						<view class="text1">{{ item.房间名 }}</view>
+						<view :class="['text2', 状态格式化('样式', item.状态)]">{{ 状态格式化('文字', item.状态) }}</view>
+					</view>
 
-				<view style="padding: 20rpx 30rpx">
-					<view class="text3">{{ item.入住时间 }}至{{ item.离店时间 }}</view>
-					<view class="text3">共{{ 历时(item.入住时间, item.离店时间) }}天</view>
-				</view>
+					<view style="padding: 20rpx 30rpx">
+						<view class="text3">{{ item.入住时间 }}至{{ item.离店时间 }}</view>
+						<view class="text3">共{{ 计算天数(item.入住时间, item.离店时间) }}天</view>
+					</view>
 
-				<view class="rowLayout" style="margin: 0 20rpx 10rpx 20rpx">
-					<van-button v-show="item.状态 == 0" color="#ff4d4f" plain hairline size="small">取消订单</van-button>
-					<van-button v-show="item.状态 == -1" color="#1890ff" plain hairline size="small">重新预定</van-button>
+					<view class="rowLayout" style="margin: 0 20rpx 10rpx 20rpx">
+						<van-button v-show="item.状态 == 0" color="#ff4d4f" plain hairline size="small">取消订单</van-button>
+						<van-button v-show="item.状态 == -1" color="#1890ff" plain hairline size="small">重新预定</van-button>
 
-					<view class="pay">{{ item.金额 }}</view>
+						<view class="pay">{{ item.金额 }}</view>
+					</view>
 				</view>
 			</view>
-		</view>
+		</cusScrollView>
 	</view>
 </template>
 
 <script setup>
-import { 一天 } from '/Api/时间参数.js';
+import cusScrollView from '../cusScrollView/cusScrollView.vue';
+import { 计算天数 } from '/Api/时间参数.js';
 import { ref } from 'vue';
 
 // 属性
@@ -75,6 +78,30 @@ let 总 = [
 		金额: '268',
 		状态: 1,
 		订单id: '4'
+	},
+	{
+		房间名: '标准间3',
+		入住时间: '2025-3-23',
+		离店时间: '2025-5-24',
+		金额: '268',
+		状态: 1,
+		订单id: '45'
+	},
+	{
+		房间名: '标准间3',
+		入住时间: '2025-3-23',
+		离店时间: '2025-5-24',
+		金额: '268',
+		状态: 1,
+		订单id: '46'
+	},
+	{
+		房间名: '标准间3',
+		入住时间: '2025-3-23',
+		离店时间: '2025-5-24',
+		金额: '268',
+		状态: 1,
+		订单id: '47'
 	}
 ];
 初始化();
@@ -106,19 +133,21 @@ function 状态格式化(type, value) {
 			return type == '样式' ? 'color3' : '已取消';
 	}
 }
-function 历时(start, end) {
-	start = start.replaceAll('-', '/');
-	end = end.replaceAll('-', '/');
-	return Math.floor((new Date(end).getTime() - new Date(start).getTime()) / 一天);
+async function 查询订单(args) {
+	console.log(args);
+	return new Promise((a) => {
+		setTimeout(() => {
+			a();
+		}, 2000);
+	});
 }
 </script>
 
 <style lang="less" scoped>
 .body {
-	overflow-x: hidden;
+	overflow: hidden;
 	height: 100%;
-	> .flexGrow {
-		overflow: auto;
+	.listBox {
 		padding: 20rpx;
 		> .card {
 			border: 1rpx solid #e6e6e6;
