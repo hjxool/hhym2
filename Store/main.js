@@ -4,6 +4,10 @@ import {
 import {
 	弹窗
 } from '../Api/提示.js'
+import {
+	今天,
+	明天
+} from '../Api/时间参数.js'
 
 export default createStore({
 	state() {
@@ -13,7 +17,9 @@ export default createStore({
 				msg: '',
 				type: '',
 				msgType: ''
-			}
+			},
+			入住日期: 今天,
+			离店日期: 明天
 		};
 	},
 	mutations: {

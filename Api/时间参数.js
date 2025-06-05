@@ -7,14 +7,17 @@ export function 计算天数(start, end) {
 }
 
 let today = new Date()
-const 今天 = new Date(`${today.getFullYear()}/${today.getMonth()+1}/${today.getDate()}`).getTime()
-const 明天 = new Date(今天 + 一天).getTime()
-const 后天 = new Date(明天 + 一天).getTime()
+export const 今天 = `${today.getFullYear()}/${today.getMonth()+1}/${today.getDate()}`
+const 今天_时间戳 = new Date(今天).getTime()
+let tomorrow = new Date(今天_时间戳 + 一天)
+export const 明天 = `${tomorrow.getFullYear()}/${tomorrow.getMonth()+1}/${tomorrow.getDate()}`
+const 明天_时间戳 = tomorrow.getTime()
+const 后天 = new Date(明天_时间戳 + 一天).getTime()
 const 大后天 = new Date(后天 + 一天).getTime()
 export function 判断是哪一天(date) {
 	date = date.replaceAll('-', '/');
 	date = new Date(date)
-	if (date < 明天.getTime() && date >= 今天.getTime()) {
+	if (date >= 今天_时间戳 && date < 明天_时间戳) {
 		return '今天'
 	} else if (date >= 明天 && date < 后天) {
 		return '明天'
