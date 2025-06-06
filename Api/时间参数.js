@@ -19,7 +19,7 @@ export function 判断是哪一天(date) {
 	date = new Date(date)
 	if (date >= 今天_时间戳 && date < 明天_时间戳) {
 		return '今天'
-	} else if (date >= 明天 && date < 后天) {
+	} else if (date >= 明天_时间戳 && date < 后天) {
 		return '明天'
 	} else if (date >= 后天 && date < 大后天) {
 		return '后天'

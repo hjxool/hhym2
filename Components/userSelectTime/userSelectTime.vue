@@ -1,5 +1,5 @@
 <template>
-	<view class="body rowLayout">
+	<view class="body rowLayout" @click="显示日历 = true">
 		<view class="rowLayout flexGrow">
 			<view class="date">{{ 入住.日期 }}</view>
 			<view class="text">{{ 入住.text }}入住</view>
@@ -8,16 +8,21 @@
 			<view class="text">{{ 离店.text }}离店</view>
 		</view>
 
-		<view class="noShrink total">共{{ total }}天</view>
+		<view class="noShrink total">共{{ store.getters.总天数 }}天</view>
 		<van-icon name="arrow" />
 	</view>
+
+	<cusCalendar :show="显示日历" @close="显示日历 = false" />
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { 判断是哪一天 } from '/Api/时间参数.js';
+import { useStore } from 'vuex';
+import cusCalendar from '../cusCalendar/cusCalendar.vue';
 
 // 属性
+const store = useStore();
 const 入住 = ref({
 	日期: '',
 	text: ''
@@ -26,6 +31,16 @@ const 离店 = ref({
 	日期: '',
 	text: ''
 });
+const 显示日历 = ref(false);
+
+watch(
+	() => store.state.日期,
+	(value) => {
+		入住.value = 格式化日期(value.入住);
+		离店.value = 格式化日期(value.离店);
+	},
+	{ immediate: true }
+);
 
 // 方法
 function 格式化日期(date) {

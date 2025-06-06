@@ -23,7 +23,8 @@
 			"van-tabs": "/wxcomponents/vant/tabs/index",
 			"van-button": "/wxcomponents/vant/button/index",
 			"van-transition": "/wxcomponents/vant/transition/index",
-			"van-icon": "/wxcomponents/vant/icon/index"
+			"van-icon": "/wxcomponents/vant/icon/index",
+			"van-calendar": "/wxcomponents/vant/calendar/index"
 		}
 	},
 	"uniIdRouter": {}
