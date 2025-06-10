@@ -1,6 +1,6 @@
 <template>
 	<view class="page colLayout">
-		<userReserve v-if="导航页.select == '主页'" class="flexGrow" />
+		<userReserve v-show="导航页.select == '主页'" class="flexGrow" />
 		<userOrderList v-if="导航页.select == '订单'" class="flexGrow" />
 
 		<van-tabbar :active="导航页.select" @change="切换页面($event)" :fixed="false">

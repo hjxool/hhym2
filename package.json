@@ -1,6 +1,8 @@
 {
   "dependencies": {
+    "@tweenjs/tween.js": "^25.0.0",
     "@vant/weapp": "^1.11.7",
+    "threejs-miniprogram": "^0.0.8",
     "vuex": "^4.1.0"
   },
   "devDependencies": {

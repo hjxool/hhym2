@@ -9,7 +9,7 @@
 				<view class="tips" style="color: #ff6333">{{ item.tip2 }}</view>
 
 				<view class="price">
-					<view class="colLayout" style="align-items: flex-end">
+					<view class="colLayout" style="align-items: flex-end; justify-content: flex-end">
 						<view class="rowLayout" style="align-items: flex-end">
 							<view v-show="item.优惠价 < item.原价" class="color1">{{ item.原价 }}</view>
 							<view class="color2">{{ item.优惠价 }}</view>
@@ -18,7 +18,7 @@
 						<view v-show="item.优惠价 < item.原价" class="color3">共省{{ 节省费用[item.name] }}元</view>
 					</view>
 
-					<view class="cusButton colLayout">
+					<view class="cusButton colLayout" @click="跳转页面()">
 						<view>VR</view>
 						<view>选房</view>
 					</view>
@@ -41,29 +41,32 @@ const 房间 = ref([
 		原价: computed(() => store.state.费用.标准间),
 		tip1: '最多可入住2只',
 		tip2: '离店当天18点前接走不计入第二天费用',
-		// 优惠价: computed(() => Math.round((store.getters.折扣总价.标准间优惠 / store.getters.总天数) * 10) / 10)
-		优惠价: 70
+		优惠价: computed(() => Math.round((store.getters.折扣总价.标准间优惠 / store.getters.总天数) * 10) / 10)
 	},
 	{
 		name: '豪华间',
 		封面: 'cloud://cloud1-0gzy726e39ba4d96.636c-cloud1-0gzy726e39ba4d96-1320186052/房间封面.jpg',
 		原价: computed(() => store.state.费用.豪华间),
-		tip1: '最多可入住3只',
+		tip1: '最多可入住4只',
 		tip2: '离店当天18点前接走不计入第二天费用',
-		// 优惠价: computed(() => Math.round((store.getters.折扣总价.豪华间优惠 / store.getters.总天数) * 10) / 10)
-		优惠价: 100
+		优惠价: computed(() => Math.round((store.getters.折扣总价.豪华间优惠 / store.getters.总天数) * 10) / 10)
 	}
 ]);
 const 节省费用 = computed(() => {
 	let 标准间原价 = 房间.value[0].原价 * store.getters.总天数;
 	let 豪华间原价 = 房间.value[1].原价 * store.getters.总天数;
 	return {
-		标准间: 标准间原价 - store.getters.折扣总价.标准间优惠,
-		豪华间: 豪华间原价 - store.getters.折扣总价.豪华间优惠
+		标准间: Math.round((标准间原价 - store.getters.折扣总价.标准间优惠) * 10) / 10,
+		豪华间: Math.round((豪华间原价 - store.getters.折扣总价.豪华间优惠) * 10) / 10
 	};
 });
 
 // 方法
+function 跳转页面() {
+	uni.navigateTo({
+		url: '/pages/UserVR/UserVR'
+	});
+}
 </script>
 
 <style lang="less" scoped>

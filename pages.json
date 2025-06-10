@@ -5,6 +5,20 @@
 		},
 		{
 			"path": "pages/UserHome/UserHome"
+		},
+		{
+			"path" : "pages/UserPhotos/UserPhotos",
+			"style" : 
+			{
+				"navigationBarTitleText" : "相册"
+			}
+		},
+		{
+			"path" : "pages/UserVR/UserVR",
+			"style" : 
+			{
+				"navigationBarTitleText" : ""
+			}
 		}
 	],
 	"globalStyle": {
