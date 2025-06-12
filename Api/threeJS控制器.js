@@ -25,10 +25,13 @@ const registerOrbit = (THREE) => {
 	//    Zoom - middle mouse, or mousewheel / touch: two-finger spread or squish
 	//    Pan - right mouse, or left mouse + ctrl/meta/shiftKey, or arrow keys / touch: two-finger move
 
-	var OrbitControls = function (object, domElement) {
+	var OrbitControls = function(object, domElement) {
 
-		if (domElement === undefined) console.warn('THREE.OrbitControls: The second parameter "domElement" is now mandatory.');
-		if (domElement === document) console.error('THREE.OrbitControls: "document" should not be used as the target "domElement". Please use "renderer.domElement" instead.');
+		if (domElement === undefined) console.warn(
+			'THREE.OrbitControls: The second parameter "domElement" is now mandatory.');
+		if (domElement === document) console.error(
+			'THREE.OrbitControls: "document" should not be used as the target "domElement". Please use "renderer.domElement" instead.'
+			);
 
 		this.object = object;
 		this.domElement = domElement;
@@ -115,19 +118,19 @@ const registerOrbit = (THREE) => {
 		// public methods
 		//
 
-		this.getPolarAngle = function () {
+		this.getPolarAngle = function() {
 
 			return spherical.phi;
 
 		};
 
-		this.getAzimuthalAngle = function () {
+		this.getAzimuthalAngle = function() {
 
 			return spherical.theta;
 
 		};
 
-		this.saveState = function () {
+		this.saveState = function() {
 
 			scope.target0.copy(scope.target);
 			scope.position0.copy(scope.object.position);
@@ -135,7 +138,7 @@ const registerOrbit = (THREE) => {
 
 		};
 
-		this.reset = function () {
+		this.reset = function() {
 
 			scope.target.copy(scope.target0);
 			scope.object.position.copy(scope.position0);
@@ -151,7 +154,7 @@ const registerOrbit = (THREE) => {
 		};
 
 		// this method is exposed, but perhaps it would be better if we can make it private...
-		this.update = function () {
+		this.update = function() {
 
 			var offset = new Vector3();
 
@@ -193,10 +196,12 @@ const registerOrbit = (THREE) => {
 				}
 
 				// restrict theta to be between desired limits
-				spherical.theta = Math.max(scope.minAzimuthAngle, Math.min(scope.maxAzimuthAngle, spherical.theta));
+				spherical.theta = Math.max(scope.minAzimuthAngle, Math.min(scope.maxAzimuthAngle,
+					spherical.theta));
 
 				// restrict phi to be between desired limits
-				spherical.phi = Math.max(scope.minPolarAngle, Math.min(scope.maxPolarAngle, spherical.phi));
+				spherical.phi = Math.max(scope.minPolarAngle, Math.min(scope.maxPolarAngle, spherical
+					.phi));
 
 				spherical.makeSafe();
 
@@ -204,7 +209,8 @@ const registerOrbit = (THREE) => {
 				spherical.radius *= scale;
 
 				// restrict radius to be between desired limits
-				spherical.radius = Math.max(scope.minDistance, Math.min(scope.maxDistance, spherical.radius));
+				spherical.radius = Math.max(scope.minDistance, Math.min(scope.maxDistance, spherical
+					.radius));
 
 				// move target to panned location
 
@@ -268,7 +274,7 @@ const registerOrbit = (THREE) => {
 
 		}();
 
-		this.dispose = function () {
+		this.dispose = function() {
 
 			scope.domElement.removeEventListener('contextmenu', onContextMenu, false);
 			scope.domElement.removeEventListener('mousedown', onMouseDown, false);
@@ -362,7 +368,7 @@ const registerOrbit = (THREE) => {
 
 		}
 
-		var panLeft = function () {
+		var panLeft = function() {
 
 			var v = new Vector3();
 
@@ -377,7 +383,7 @@ const registerOrbit = (THREE) => {
 
 		}();
 
-		var panUp = function () {
+		var panUp = function() {
 
 			var v = new Vector3();
 
@@ -403,7 +409,7 @@ const registerOrbit = (THREE) => {
 		}();
 
 		// deltaX and deltaY are in pixels; right and down are positive
-		var pan = function () {
+		var pan = function() {
 
 			var offset = new Vector3();
 
@@ -428,13 +434,17 @@ const registerOrbit = (THREE) => {
 				} else if (scope.object.isOrthographicCamera) {
 
 					// orthographic
-					panLeft(deltaX * (scope.object.right - scope.object.left) / scope.object.zoom / element.clientWidth, scope.object.matrix);
-					panUp(deltaY * (scope.object.top - scope.object.bottom) / scope.object.zoom / element.clientHeight, scope.object.matrix);
+					panLeft(deltaX * (scope.object.right - scope.object.left) / scope.object.zoom /
+						element.clientWidth, scope.object.matrix);
+					panUp(deltaY * (scope.object.top - scope.object.bottom) / scope.object.zoom /
+						element.clientHeight, scope.object.matrix);
 
 				} else {
 
 					// camera neither orthographic nor perspective
-					console.warn('WARNING: OrbitControls.js encountered an unknown camera type - pan disabled.');
+					console.warn(
+						'WARNING: OrbitControls.js encountered an unknown camera type - pan disabled.'
+						);
 					scope.enablePan = false;
 
 				}
@@ -450,13 +460,15 @@ const registerOrbit = (THREE) => {
 
 			} else if (scope.object.isOrthographicCamera) {
 
-				scope.object.zoom = Math.max(scope.minZoom, Math.min(scope.maxZoom, scope.object.zoom * dollyScale));
+				scope.object.zoom = Math.max(scope.minZoom, Math.min(scope.maxZoom, scope.object.zoom *
+					dollyScale));
 				scope.object.updateProjectionMatrix();
 				zoomChanged = true;
 
 			} else {
 
-				console.warn('WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.');
+				console.warn(
+					'WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.');
 				scope.enableZoom = false;
 
 			}
@@ -471,13 +483,15 @@ const registerOrbit = (THREE) => {
 
 			} else if (scope.object.isOrthographicCamera) {
 
-				scope.object.zoom = Math.max(scope.minZoom, Math.min(scope.maxZoom, scope.object.zoom / dollyScale));
+				scope.object.zoom = Math.max(scope.minZoom, Math.min(scope.maxZoom, scope.object.zoom /
+					dollyScale));
 				scope.object.updateProjectionMatrix();
 				zoomChanged = true;
 
 			} else {
 
-				console.warn('WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.');
+				console.warn(
+					'WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.');
 				scope.enableZoom = false;
 
 			}
@@ -937,7 +951,8 @@ const registerOrbit = (THREE) => {
 
 		function onMouseWheel(event) {
 
-			if (scope.enabled === false || scope.enableZoom === false || (state !== STATE.NONE && state !== STATE.ROTATE)) return;
+			if (scope.enabled === false || scope.enableZoom === false || (state !== STATE.NONE && state !==
+					STATE.ROTATE)) return;
 
 			event.preventDefault();
 			event.stopPropagation();
@@ -1145,6 +1160,9 @@ const registerOrbit = (THREE) => {
 
 	OrbitControls.prototype = Object.create(EventDispatcher.prototype);
 	OrbitControls.prototype.constructor = OrbitControls;
+	OrbitControls.prototype.handleResize = function() {
+		// 小程序不需要处理窗口大小变化
+	};
 
 
 	// This set of controls performs orbiting, dollying (zooming), and panning.
@@ -1155,7 +1173,7 @@ const registerOrbit = (THREE) => {
 	//    Zoom - middle mouse, or mousewheel / touch: two-finger spread or squish
 	//    Pan - left mouse, or arrow keys / touch: one-finger move
 
-	var MapControls = function (object, domElement) {
+	var MapControls = function(object, domElement) {
 
 		OrbitControls.call(this, object, domElement);
 

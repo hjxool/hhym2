@@ -7,17 +7,15 @@
 			"path": "pages/UserHome/UserHome"
 		},
 		{
-			"path" : "pages/UserPhotos/UserPhotos",
-			"style" : 
-			{
-				"navigationBarTitleText" : "相册"
+			"path": "pages/UserPhotos/UserPhotos",
+			"style": {
+				"navigationBarTitleText": "相册"
 			}
 		},
 		{
-			"path" : "pages/UserVR/UserVR",
-			"style" : 
-			{
-				"navigationBarTitleText" : ""
+			"path": "pages/UserVR/UserVR",
+			"style": {
+				"navigationBarTitleText": ""
 			}
 		}
 	],
@@ -39,7 +37,9 @@
 			"van-transition": "/wxcomponents/vant/transition/index",
 			"van-icon": "/wxcomponents/vant/icon/index",
 			"van-calendar": "/wxcomponents/vant/calendar/index"
-		}
+		},
+		"disableScroll": true,
+		"enablePullDownRefresh": false
 	},
 	"uniIdRouter": {}
 }
