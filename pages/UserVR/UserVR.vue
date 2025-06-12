@@ -6,7 +6,7 @@
 		<!-- 小地图 -->
 		<view class="minimap">
 			<!-- 必须用px -->
-			<view class="indicator center" :style="{ transform: `translate(${小地图定位.x}px, ${小地图定位.y}px) rotate(${初始朝向}deg)` }">
+			<view class="indicator center" :style="{ transform: `translate(${小地图定位.x}px, ${小地图定位.y}px)` }">
 				<view class="rotate center" :style="{ transform: `rotate(${小地图定位.deg}deg)` }">
 					<view class="direction"></view>
 					<view class="dot"></view>
@@ -41,7 +41,6 @@ const VR = {
 const query = uni.createSelectorQuery();
 query.select('#threeScene').node().exec(初始化);
 const 当前区域 = ref('大厅');
-const 初始朝向 = ref(0);
 const 房间 = ref({
 	大厅: {},
 	娱乐室: {}
@@ -105,11 +104,9 @@ function 初始化(res) {
 		VR.摄像头.getWorldDirection(direction);
 		// 计算角度（0-360度
 		// 注意！Three.js 使用的是 右手坐标系 因此需要反转x或z轴
-		let t = Math.atan2(direction.x, direction.z) * (180 / Math.PI);
-		console.log('相机原始角度', t);
-		const angle = Math.atan2(-direction.x, direction.z) * (180 / Math.PI);
-		小地图定位.value.deg = Math.floor((angle + 360) % 360);
-		console.log('小地图角度', 小地图定位.value.deg);
+		let angle = -Math.atan2(direction.x, direction.z) * (180 / Math.PI);
+		// angle = Math.floor((angle + 360) % 360);
+		小地图定位.value.deg = angle - 房间.value[当前区域.value].初始朝向;
 	});
 	const arrowPos = new THREE.Vector3(0, 0, 0); // 原点位置
 	const arrowX = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), arrowPos, 10, 0xff0000, 2, 1); // X轴（红色）
@@ -133,14 +130,14 @@ function 添加房间信息() {
 				{ label: '测试1', position: new THREE.Vector3(-2, 0.5, 1.5), opacity: 0, screenPosition: { x: 0, y: 0 } },
 				{ label: '娱乐室', position: new THREE.Vector3(1.8, 0.3, -1.2), opacity: 0, screenPosition: { x: 0, y: 0 } }
 			],
-			mapPosition: { x: 37, y: 70, deg: 180 },
-			初始朝向: 180
+			mapPosition: { x: 37, y: 70, deg: 0 },
+			初始朝向: 180 // 相机朝向与小地图扇形偏差角度
 		},
 		娱乐室: {
 			img: 'https://636c-cloud1-0gzy726e39ba4d96-1320186052.tcb.qcloud.la/%E5%A8%B1%E4%B9%90%E5%AE%A4%E9%97%A8%E5%89%8D.jpg?sign=b71436ef8861009b57ddeca3ec1e7952&t=1749537540',
 			hotspots: [{ label: '大厅', position: new THREE.Vector3(2, 0.4, 0.5), opacity: 0, screenPosition: { x: 0, y: 0 } }],
-			mapPosition: { x: 37, y: 20, deg: 150 },
-			初始朝向: 150
+			mapPosition: { x: 37, y: 20, deg: 240 },
+			初始朝向: 180
 		}
 	};
 }
@@ -148,7 +145,7 @@ function 场景内添加几何体() {
 	const geometry = new THREE.SphereGeometry(50, 60, 40);
 	// 反转几何体使贴图在内部
 	geometry.scale(-1, 1, 1);
-	textureLoader.load(房间.value[当前区域.value].img, (newTexture) => {
+	textureLoader.load(房间.value[当前区域.value].img, newTexture => {
 		const material = new THREE.MeshBasicMaterial({ map: newTexture });
 		VR.几何体 = new THREE.Mesh(geometry, material);
 		VR.场景.add(VR.几何体);
@@ -161,7 +158,6 @@ function 场景内添加几何体() {
 	小地图定位.value.x = x;
 	小地图定位.value.y = y;
 	小地图定位.value.deg = deg;
-	初始朝向.value = 房间.value[当前区域.value].初始朝向;
 }
 function 渲染() {
 	renderId = canvas节点.requestAnimationFrame(渲染);
@@ -221,17 +217,12 @@ function 切换区域(spot) {
 	textureLoader.load(
 		房间.value[当前区域.value].img,
 		// 加载图片回调
-		(newTexture) => {
+		newTexture => {
 			let { x, y, deg } = 房间.value[当前区域.value].mapPosition;
 			小地图定位.value.x = x;
 			小地图定位.value.y = y;
-			小地图定位.value.deg = deg;
-			// 小地图在1秒后完成移动 因此要在快结束的时候旋转相机视角
-			setTimeout(() => {
-				// 记得再将角度反转回去
-				VR.摄像头.rotation.y = (-deg * Math.PI) / 180;
-				初始朝向.value = 房间.value[当前区域.value].初始朝向;
-			}, 900);
+			// 小地图定位.value.deg = deg;
+			VR.摄像头.lookAt(new THREE.Vector3(-0.45152634489803495, -0.23661774744895336, -0.8603115723127315));
 			newTexture.encoding = THREE.sRGBEncoding; // 确保色彩正确
 			VR.几何体.material.map = newTexture;
 			setTimeout(() => {
