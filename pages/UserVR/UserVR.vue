@@ -2,7 +2,10 @@
 	<view class="page" @touchstart="控制('touchstart', $event)" @touchmove="控制('touchmove', $event)" @touchend="控制('touchend', $event)">
 		<canvas id="threeScene" type="webgl"></canvas>
 		<!-- 热点 -->
-		<view class="hotspot textEllipsis" v-for="item in 房间[当前区域].hotspots" @click="切换区域(item)" :style="热点显示(item)">{{ item.label }}</view>
+		<view class="hotspot textEllipsis" v-for="item in 房间[当前区域].hotspots" :style="热点显示(item)">
+			<view v-if="item.type == '区域'" class="area" @click="切换区域(item)">{{ item.label }}</view>
+			<view v-if="item.type == '房间'" class="room">{{ item.label }}</view>
+		</view>
 		<!-- 小地图 -->
 		<view class="minimap">
 			<!-- 必须用px -->
@@ -127,15 +130,15 @@ function 添加房间信息() {
 		大厅: {
 			img: 'https://636c-cloud1-0gzy726e39ba4d96-1320186052.tcb.qcloud.la/%E5%A4%A7%E5%8E%85.jpg?sign=4698aec1129c91668d43e40d4e3c316f&t=1749536714',
 			hotspots: [
-				{ label: '测试1', position: new THREE.Vector3(-2, 0.5, 1.5), opacity: 0, screenPosition: { x: 0, y: 0 } },
-				{ label: '娱乐室', position: new THREE.Vector3(1.8, 0.3, -1.2), opacity: 0, screenPosition: { x: 0, y: 0 } }
+				{ label: '测试1', position: new THREE.Vector3(-2, 0.5, 1.5), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间' },
+				{ label: '娱乐室', position: new THREE.Vector3(1.8, 0.3, -1.2), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '区域' }
 			],
 			mapPosition: { x: 37, y: 70, deg: 0 },
 			初始朝向: 180 // 相机朝向与小地图扇形偏差角度
 		},
 		娱乐室: {
 			img: 'https://636c-cloud1-0gzy726e39ba4d96-1320186052.tcb.qcloud.la/%E5%A8%B1%E4%B9%90%E5%AE%A4%E9%97%A8%E5%89%8D.jpg?sign=b71436ef8861009b57ddeca3ec1e7952&t=1749537540',
-			hotspots: [{ label: '大厅', position: new THREE.Vector3(2, 0.4, 0.5), opacity: 0, screenPosition: { x: 0, y: 0 } }],
+			hotspots: [{ label: '大厅', position: new THREE.Vector3(2, 0.4, 0.5), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '区域' }],
 			mapPosition: { x: 37, y: 20, deg: 240 },
 			初始朝向: 180
 		}
@@ -145,7 +148,7 @@ function 场景内添加几何体() {
 	const geometry = new THREE.SphereGeometry(50, 60, 40);
 	// 反转几何体使贴图在内部
 	geometry.scale(-1, 1, 1);
-	textureLoader.load(房间.value[当前区域.value].img, newTexture => {
+	textureLoader.load(房间.value[当前区域.value].img, (newTexture) => {
 		const material = new THREE.MeshBasicMaterial({ map: newTexture });
 		VR.几何体 = new THREE.Mesh(geometry, material);
 		VR.场景.add(VR.几何体);
@@ -199,9 +202,7 @@ function 更新热点数据() {
 	}
 }
 function 切换区域(spot) {
-	// 判断所点击的标签是否存在对应区域
-	const target = 房间.value[spot.label];
-	if (!target) return;
+	if (spot.type != '区域') return;
 
 	模糊过渡.value = true;
 	uni.showLoading({
@@ -217,7 +218,7 @@ function 切换区域(spot) {
 	textureLoader.load(
 		房间.value[当前区域.value].img,
 		// 加载图片回调
-		newTexture => {
+		(newTexture) => {
 			let { x, y, deg } = 房间.value[当前区域.value].mapPosition;
 			小地图定位.value.x = x;
 			小地图定位.value.y = y;
@@ -257,12 +258,24 @@ function 切换区域(spot) {
 	transform: translate(-50%, -50%);
 	transition: opacity 0.3s ease;
 	z-index: 10;
-	padding: 10rpx 20rpx;
-	font-size: 24rpx;
-	background: rgba(0, 0, 0, 0.5);
-	color: #fff;
-	overflow: hidden;
-	border-radius: 20rpx;
+	> .area {
+		padding: 10rpx 20rpx;
+		font-size: 24rpx;
+		background: rgba(0, 0, 0, 0.5);
+		color: #fff;
+		overflow: hidden;
+		border-radius: 20rpx;
+	}
+	> .room {
+		padding: 10rpx 20rpx;
+		background: linear-gradient(to right, #ff9966, #ff6600); /* 调整为更深的暖色 */
+		border-radius: 10rpx;
+		font-size: 24rpx;
+		font-weight: bold;
+		color: #ffffff; /* 仍然是白色字体，但增加阴影 */
+		text-shadow: 4rpx 4rpx 8rpx rgba(0, 0, 0, 0.6); /* 增加文字阴影，提高可读性 */
+		box-shadow: 4rpx 4rpx 10rpx rgba(255, 153, 102, 0.5);
+	}
 }
 .minimap {
 	position: absolute;
