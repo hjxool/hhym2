@@ -4,7 +4,7 @@
 		<!-- 热点 -->
 		<view class="hotspot textEllipsis" v-for="item in 房间[当前区域].hotspots" :style="热点显示(item)">
 			<view v-if="item.type == '区域'" class="area" @click="切换区域(item)">{{ item.label }}</view>
-			<view v-if="item.type == '房间'" class="room">{{ item.label }}</view>
+			<view v-if="item.type == '房间'" class="room" @click="选择房间(item)">{{ item.label }}</view>
 		</view>
 		<!-- 小地图 -->
 		<view class="minimap">
@@ -21,12 +21,16 @@
 		<!-- 加载遮罩 -->
 		<view v-show="loading" class="loading"></view>
 	</view>
+
+	<Notify @confirm="选择房间('确认')" @cancel="选择房间('取消')" />
 </template>
 
 <script setup>
 import { createScopedThreejs } from 'threejs-miniprogram';
 import Controller from '/Api/threeJS控制器.js';
 import { onBeforeUnmount, ref } from 'vue';
+import { 弹窗 } from '/Api/提示.js';
+import Notify from '/Components/notify/notify.vue';
 
 // 属性
 let THREE;
@@ -56,11 +60,13 @@ const 小地图定位 = ref({
 const loading = ref(true);
 const 模糊过渡 = ref(false);
 
+let 所选房间;
+
 onBeforeUnmount(() => {
 	// 页面关闭时卸载渲染任务 否则会一直执行
 	canvas节点.cancelAnimationFrame(renderId);
 	// 避免多个控制器
-	VR.控制器 && VR.控制器.dispose();
+	// VR.控制器 && VR.控制器.dispose();
 });
 
 // 方法
@@ -113,7 +119,7 @@ function 初始化(res) {
 	});
 	const arrowPos = new THREE.Vector3(0, 0, 0); // 原点位置
 	const arrowX = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), arrowPos, 10, 0xff0000, 2, 1); // X轴（红色）
-	const arrowY = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), arrowPos, 10, 0x00ff00, 2, 1); // Y轴（绿色）
+	const arrowY = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), arrowPos, 20, 0x00ff00, 2, 1); // Y轴（绿色）
 	const arrowZ = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), arrowPos, 10, 0x0000ff, 2, 1); // Z轴（蓝色）
 
 	VR.场景.add(arrowX);
@@ -130,8 +136,9 @@ function 添加房间信息() {
 		大厅: {
 			img: 'https://636c-cloud1-0gzy726e39ba4d96-1320186052.tcb.qcloud.la/%E5%A4%A7%E5%8E%85.jpg?sign=4698aec1129c91668d43e40d4e3c316f&t=1749536714',
 			hotspots: [
-				{ label: '测试1', position: new THREE.Vector3(-2, 0.5, 1.5), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间' },
-				{ label: '娱乐室', position: new THREE.Vector3(1.8, 0.3, -1.2), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '区域' }
+				{ label: '标准间1', position: new THREE.Vector3(-2, 0.5, 1.5), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间' },
+				{ label: '娱乐室', position: new THREE.Vector3(1.8, 0.3, -1.2), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '区域' },
+				{ label: '标准间2', position: new THREE.Vector3(0, 0, -1), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间' }
 			],
 			mapPosition: { x: 37, y: 70, deg: 0 },
 			初始朝向: 180 // 相机朝向与小地图扇形偏差角度
@@ -191,19 +198,17 @@ function 更新热点数据() {
 		VR.摄像头.getWorldDirection(cameraDirection);
 		const hotspotDirection = spot.position.clone().normalize();
 		const angle = cameraDirection.angleTo(hotspotDirection); // 弧度 所以要跟Math.PI的值进行比较
-		// 根据夹角计算透明度 (0-90度完全可见，90-120度渐变消失)
+		// 根据夹角计算透明度 (0-10度完全可见，10-30度渐变消失)
 		let opacity = 1;
-		if (angle > Math.PI / 2) {
-			opacity = Math.max(0, 1 - (angle - Math.PI / 2) / (Math.PI / 6));
+		if (angle > Math.PI / 18) {
+			opacity = Math.max(0, 1 - (angle - Math.PI / 18) / (Math.PI / 6));
 		}
 		// 更新热点状态
 		spot.screenPosition = { x, y };
-		spot.opacity = opacity;
+		spot.opacity = Math.floor(opacity * 100) / 100;
 	}
 }
 function 切换区域(spot) {
-	if (spot.type != '区域') return;
-
 	模糊过渡.value = true;
 	uni.showLoading({
 		title: '加载中...'
@@ -232,6 +237,14 @@ function 切换区域(spot) {
 			}, 200);
 		}
 	);
+}
+function 选择房间(args) {
+	if (typeof args == 'string' && args == '确认') {
+		console.log('跳转', 所选房间);
+	} else {
+		所选房间 = args.label;
+		弹窗(`确认选择 ${args.label} ？`, '确认');
+	}
 }
 </script>
 

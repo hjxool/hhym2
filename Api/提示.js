@@ -1,13 +1,17 @@
 import Store from '/Store/main.js'
 
-export function 弹窗(msg) {
+const 弹窗类型 = {
+	'提示': 'alert',
+	'确认': 'confirm'
+}
+export function 弹窗(msg, type = '提示') {
 	Store.commit('setState', {
 		key: '提示',
 		value: {
 			show: true,
 			msg,
 			type: '弹窗',
-			msgType: ''
+			msgType: 弹窗类型[type]
 		}
 	})
 }

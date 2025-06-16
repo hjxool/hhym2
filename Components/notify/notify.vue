@@ -1,6 +1,6 @@
 <template>
 	<view v-show="提示.show">
-		<van-dialog v-show="提示.type == '弹窗'" id="van-dialog" />
+		<van-dialog v-show="提示.type == '弹窗'" id="van-dialog" @confirm="$emit('confirm')" @cancel="$emit('cancel')" :confirm-button-color="'#ee0a24'" />
 		<van-notify v-show="提示.type == '消息'" id="van-notify" />
 	</view>
 </template>
@@ -18,14 +18,15 @@ const store = useStore();
 const 提示 = computed(() => store.state.提示);
 
 watch(
-	() => 提示.value.show,
-	(newValue) => {
-		if (newValue) {
+	() => 提示.value,
+	({ show }) => {
+		if (show) {
 			switch (提示.value.type) {
 				case '弹窗':
-					Dialog.alert({
+					Dialog[提示.value.msgType]({
 						message: 提示.value.msg,
-						context: 组件实例
+						confirmButtonColor: 'red',
+						context: 组件实例,
 					}).then(() => {
 						store.commit('setState', {
 							key: '提示',
@@ -33,7 +34,7 @@ watch(
 								show: false,
 								type: '',
 								msg: '',
-								msgType:''
+								msgType: ''
 							}
 						});
 					});
