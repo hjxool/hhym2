@@ -1,7 +1,7 @@
 <template>
 	<view class="body">
 		<view class="room" v-for="item in 房间">
-			<img class="img noShrink" :src="item.封面" />
+			<image class="img noShrink" :src="item.封面"></image>
 
 			<view class="flexGrow">
 				<view class="title">{{ item.name }}</view>
@@ -55,16 +55,24 @@ const 房间 = ref([
 const 节省费用 = computed(() => {
 	let 标准间原价 = 房间.value[0].原价 * store.getters.总天数;
 	let 豪华间原价 = 房间.value[1].原价 * store.getters.总天数;
+	let { 标准间优惠, 豪华间优惠 } = store.getters.折扣总价;
 	return {
-		标准间: Math.round((标准间原价 - store.getters.折扣总价.标准间优惠) * 10) / 10,
-		豪华间: Math.round((豪华间原价 - store.getters.折扣总价.豪华间优惠) * 10) / 10
+		标准间: Math.round((标准间原价 - 标准间优惠) * 10) / 10,
+		豪华间: Math.round((豪华间原价 - 豪华间优惠) * 10) / 10
 	};
 });
 
 // 方法
 function 跳转页面() {
+	// uni.navigateTo({
+	// 	url: '/pages/UserVR/UserVR'
+	// });
+	store.commit('setState', {
+		key: '房间',
+		value: '标准间2' // 测试数据
+	});
 	uni.navigateTo({
-		url: '/pages/UserVR/UserVR'
+		url: '/pages/UserOrder/UserOrder'
 	});
 }
 </script>

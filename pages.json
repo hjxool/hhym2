@@ -17,6 +17,12 @@
 			"style": {
 				"navigationBarTitleText": ""
 			}
+		},
+		{
+			"path": "pages/UserOrder/UserOrder",
+			"style": {
+				"navigationBarTitleText": ""
+			}
 		}
 	],
 	"globalStyle": {
@@ -36,7 +42,12 @@
 			"van-button": "/wxcomponents/vant/button/index",
 			"van-transition": "/wxcomponents/vant/transition/index",
 			"van-icon": "/wxcomponents/vant/icon/index",
-			"van-calendar": "/wxcomponents/vant/calendar/index"
+			"van-calendar": "/wxcomponents/vant/calendar/index",
+			"van-submit-bar": "/wxcomponents/vant/submit-bar/index",
+			"van-checkbox": "/wxcomponents/vant/checkbox/index",
+			"van-checkbox-group": "/wxcomponents/vant/checkbox-group/index",
+			"van-field": "/wxcomponents/vant/field/index",
+			"van-image": "/wxcomponents/vant/image/index"
 		},
 		"disableScroll": true,
 		"enablePullDownRefresh": false

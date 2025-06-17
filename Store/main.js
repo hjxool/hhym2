@@ -30,8 +30,10 @@ export default createStore({
 				规则: {
 					'10': 0.8,
 					'20': 0.6
-				}
-			}
+				},
+			},
+			房间: '',
+			宠物数量: 1
 		};
 	},
 	mutations: {
@@ -54,8 +56,8 @@ export default createStore({
 				}
 			}
 			return {
-				标准间优惠: state.费用.标准间 * total * 最低折扣,
-				豪华间优惠: state.费用.豪华间 * total * 最低折扣,
+				标准间优惠: Math.floor((state.费用.标准间 + 30 * (state.宠物数量 - 1)) * total * 最低折扣 * 100) / 100,
+				豪华间优惠: Math.floor((state.费用.豪华间 + 30 * (state.宠物数量 - 1)) * total * 最低折扣 * 100) / 100,
 			}
 		},
 		总天数(state) {
