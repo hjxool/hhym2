@@ -23,6 +23,13 @@
 			"style": {
 				"navigationBarTitleText": ""
 			}
+		},
+		{
+			"path" : "pages/UserPetInfo/UserPetInfo",
+			"style" : 
+			{
+				"navigationBarTitleText" : ""
+			}
 		}
 	],
 	"globalStyle": {
@@ -46,8 +53,7 @@
 			"van-submit-bar": "/wxcomponents/vant/submit-bar/index",
 			"van-checkbox": "/wxcomponents/vant/checkbox/index",
 			"van-checkbox-group": "/wxcomponents/vant/checkbox-group/index",
-			"van-field": "/wxcomponents/vant/field/index",
-			"van-image": "/wxcomponents/vant/image/index"
+			"van-field": "/wxcomponents/vant/field/index"
 		},
 		"disableScroll": true,
 		"enablePullDownRefresh": false

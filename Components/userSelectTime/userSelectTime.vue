@@ -12,14 +12,14 @@
 		<van-icon name="arrow" />
 	</view>
 
-	<cusCalendar :show="显示日历" @close="显示日历 = false" />
+	<CusCalendar :show="显示日历" @close="显示日历 = false" />
 </template>
 
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { 判断是哪一天 } from '/Api/时间参数.js';
 import { useStore } from 'vuex';
-import cusCalendar from '../cusCalendar/cusCalendar.vue';
+import CusCalendar from '../cusCalendar/cusCalendar.vue';
 
 // 属性
 const store = useStore();

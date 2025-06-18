@@ -1,7 +1,7 @@
 <template>
 	<view class="body">
-		<view class="room" v-for="item in 房间">
-			<image class="img noShrink" :src="item.封面"></image>
+		<view class="room" v-for="item in 房间" :key="item.name">
+			<CusImage class="img noShrink" :src="item.封面"/>
 
 			<view class="flexGrow">
 				<view class="title">{{ item.name }}</view>
@@ -31,6 +31,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
+import CusImage from '../cusImage/cusImage.vue';
 
 // 属性
 const store = useStore();
@@ -95,7 +96,6 @@ function 跳转页面() {
 		> .img {
 			width: 260rpx;
 			height: 400rpx;
-			object-fit: contain;
 			margin-right: 40rpx;
 		}
 		> .flexGrow {
