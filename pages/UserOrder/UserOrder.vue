@@ -28,7 +28,7 @@
 				</view>
 			</view>
 
-			<view class="formBox noShrink">
+			<view class="formBox noShrink" @click="跳转('VR')">
 				<view class="title">房间</view>
 				<view class="color1" style="justify-self: end">{{ 房间 }}</view>
 			</view>
@@ -57,7 +57,7 @@
 				<van-checkbox :value="form.阅读协议" @change="勾选协议($event)" shape="square">
 					<view class="rowLayout">
 						<view class="color2">已阅读并同意</view>
-						<view class="color3">《服务协议》</view>
+						<view class="color3" @click.stop="跳转('协议')">《服务协议》</view>
 					</view>
 				</van-checkbox>
 			</view>
@@ -74,7 +74,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, getCurrentInstance, ref } from 'vue';
 import { useStore } from 'vuex';
 import CusCalendar from '/Components/cusCalendar/cusCalendar.vue';
 import Notify from '/Components/notify/notify.vue';
@@ -82,6 +82,9 @@ import Swipe from '/Components/swipe/swipe.vue';
 import { 消息 } from '/Api/提示.js';
 
 // 属性
+const instance = getCurrentInstance().proxy;
+const channel = instance.getOpenerEventChannel();
+
 const store = useStore();
 const form = ref({
 	宠物列表: [],
@@ -94,7 +97,7 @@ const form = ref({
 const 总价 = computed(() => {
 	if (!form.value.宠物列表.length) return 0;
 	let { 标准间优惠, 豪华间优惠 } = store.getters.折扣总价;
-	let t = store.state.房间.substring(0, 3);
+	let t = 房间.value.substring(0, 3);
 	return t == '标准间' ? 标准间优惠 * 100 : 豪华间优惠 * 100;
 });
 const 提示 = computed(() => {
@@ -115,11 +118,38 @@ const 日期 = computed(() => {
 	return `${start[0]}年${start[1]}月${start[2]}日 ~ ${end[0]}年${end[1]}月${end[2]}日`;
 });
 const 显示日历 = ref(false);
-const 房间 = computed(() => store.state.房间);
+const 房间 = ref('标准间1');
 const 房间最大数量 = {
 	标准间: 2,
 	豪华间: 4
 };
+查询宠物();
+
+channel.on('数据', (data) => {
+	if (data) {
+		store.commit('setState', {
+			key: '日期',
+			value: {
+				入住: data.入住.replaceAll('-', '/'),
+				离店: data.离店.replaceAll('-', '/')
+			}
+		});
+
+		房间.value = data.房间名;
+		form.value.联系人 = data.联系人;
+		form.value.联系号 = data.联系号;
+		form.value.从何 = data.从何;
+		for (let val of form.value.宠物列表) {
+			if (data.寄养宠物.find((e) => e == val.name)) {
+				val.选中 = true;
+			}
+		}
+		勾选宠物();
+	}
+});
+channel.on('房间', (data) => {
+	房间.value = data;
+});
 
 // 方法
 function 提交() {
@@ -129,7 +159,7 @@ function 提交() {
 		return;
 	}
 	let phone = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/;
-	let 微信号 = /^[A-Za-z0-9_]+$/;
+	let 微信号 = /^[a-zA-Z][a-zA-Z\d_-]{5,19}$/;
 	if (!phone.test(form.value.联系号) && !微信号.test(form.value.联系号)) {
 		消息('联系号 请填写手机号或微信号', '失败');
 		return;
@@ -151,17 +181,18 @@ function 提交() {
 		消息(`当前房间类型不允许超过 ${房间最大数量[房间.value]} 只`, '失败');
 		return;
 	}
+	setTimeout(() => {
+		消息('预约成功');
+		uni.$emit('未读消息', '新增');
+		setTimeout(() => {
+			uni.navigateBack({ delta: 3 });
+		}, 1000);
+	}, 500);
 }
 function 勾选宠物(type, args) {
 	switch (type) {
 		case '单选':
 			args.选中 = !args.选中;
-			let t = form.value.宠物列表.find((e) => e.选中 == false);
-			if (t) {
-				form.value.全选 = false;
-			} else {
-				form.value.全选 = true;
-			}
 			break;
 		case '全选':
 			let { detail } = args;
@@ -171,6 +202,7 @@ function 勾选宠物(type, args) {
 			});
 			break;
 	}
+	// 记录勾选宠物数量 实时计算总价
 	let count = form.value.宠物列表.reduce((pre, cur) => {
 		return cur.选中 ? pre + 1 : pre;
 	}, 0);
@@ -178,6 +210,13 @@ function 勾选宠物(type, args) {
 		key: '宠物数量',
 		value: count || 1 // 最少也是1
 	});
+	// 看是否全选
+	let t = form.value.宠物列表.find((e) => e.选中 == false);
+	if (t) {
+		form.value.全选 = false;
+	} else {
+		form.value.全选 = true;
+	}
 }
 function 勾选协议({ detail }) {
 	form.value.阅读协议 = detail;
@@ -226,6 +265,31 @@ function 操作宠物(type, index) {
 			}
 		});
 	}
+}
+function 跳转(type) {
+	switch (type) {
+		case '协议':
+			uni.navigateTo({
+				url: '/pages/UserAgree/UserAgree'
+			});
+			break;
+		case 'VR':
+			uni.navigateTo({
+				url: '/pages/UserVR/UserVR',
+				success(res) {
+					res.eventChannel.emit('前一页', '预约');
+				},
+				events: {
+					房间(data) {
+						房间.value = data;
+					}
+				}
+			});
+			break;
+	}
+}
+function 查询宠物() {
+	form.value.宠物列表 = [{ name: '测试2', age: 11, 性别: 0, 品种: '11', 性格: '22', 绝育: 0, 耳螨: 0, 传染病: 0, 驱虫: '44', 疫苗: '55', 要求: '' }];
 }
 </script>
 

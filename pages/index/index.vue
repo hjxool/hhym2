@@ -1,14 +1,11 @@
 <template>
-	<view>
-		<Notify />
-	</view>
+	<view></view>
 </template>
 
 <script setup>
-import Notify from '/Components/notify/notify.vue';
 import { 请求接口 } from '/Api/请求接口.js';
 
-识别用户()
+识别用户();
 
 // 方法
 async function 识别用户() {

@@ -62,3 +62,12 @@
 	user-select: none;
 	background: #ECECEC;
 }
+
+page,
+text,
+view,
+image {
+	margin: 0px;
+	padding: 0px;
+	box-sizing: border-box;
+}

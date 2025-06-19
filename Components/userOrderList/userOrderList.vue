@@ -13,13 +13,13 @@
 					</view>
 
 					<view style="padding: 20rpx 30rpx">
-						<view class="text3">{{ item.入住时间 }}至{{ item.离店时间 }}</view>
-						<view class="text3">共{{ 计算天数(item.入住时间, item.离店时间) }}天</view>
+						<view class="text3">{{ item.入住 }}至{{ item.离店 }}</view>
+						<view class="text3">共{{ 计算天数(item.入住, item.离店) }}天</view>
 					</view>
 
 					<view class="rowLayout" style="margin: 0 20rpx 10rpx 20rpx">
-						<van-button v-show="item.状态 == 0" color="#ff4d4f" plain hairline size="small">取消订单</van-button>
-						<van-button v-show="item.状态 == -1" color="#1890ff" plain hairline size="small">重新预定</van-button>
+						<van-button v-show="按钮显示('取消订单', item)" color="#ff4d4f" @click="操作('取消订单', item)" plain hairline size="small">取消订单</van-button>
+						<van-button v-show="按钮显示('重新预定', item)" color="#1890ff" @click="操作('重新预定', item)" plain hairline size="small">重新预定</van-button>
 
 						<view class="pay">{{ item.金额 }}</view>
 					</view>
@@ -27,11 +27,15 @@
 			</view>
 		</cusScrollView>
 	</view>
+
+	<Notify @confirm="操作('确认')" @cancel="操作('撤销')" />
 </template>
 
 <script setup>
 import cusScrollView from '../cusScrollView/cusScrollView.vue';
-import { 计算天数 } from '/Api/时间参数.js';
+import Notify from '/Components/notify/notify.vue';
+import { 消息, 弹窗 } from '/Api/提示.js';
+import { 计算天数, 今天 } from '/Api/时间参数.js';
 import { ref } from 'vue';
 
 // 属性
@@ -49,62 +53,74 @@ const 订单状态 = {
 let 总 = [
 	{
 		房间名: '豪华间',
-		入住时间: '2025-5-23',
-		离店时间: '2025-5-27',
+		入住: '2025-7-23',
+		离店: '2025-8-27',
 		金额: '488',
+		状态: 0,
+		订单id: '198',
+		联系人: '测试1',
+		联系号: '133644321876',
+		从何: '',
+		寄养宠物: ['测试2']
+	},
+	{
+		房间名: '豪华间',
+		入住: '2025-5-23',
+		离店: '2025-5-27',
+		金额: '48',
 		状态: 0,
 		订单id: '1'
 	},
 	{
 		房间名: '标准间1',
-		入住时间: '2025-5-23',
-		离店时间: '2025-5-24',
+		入住: '2025-5-23',
+		离店: '2025-5-24',
 		金额: '238',
 		状态: 1,
 		订单id: '2'
 	},
 	{
 		房间名: '标准间2',
-		入住时间: '2025-5-22',
-		离店时间: '2025-5-24',
+		入住: '2025-5-22',
+		离店: '2025-5-24',
 		金额: '248',
 		状态: -1,
 		订单id: '3'
 	},
 	{
 		房间名: '标准间3',
-		入住时间: '2025-3-23',
-		离店时间: '2025-5-24',
+		入住: '2025-3-23',
+		离店: '2025-5-24',
 		金额: '268',
 		状态: 1,
 		订单id: '4'
 	},
 	{
 		房间名: '标准间3',
-		入住时间: '2025-3-23',
-		离店时间: '2025-5-24',
+		入住: '2025-3-23',
+		离店: '2025-5-24',
 		金额: '268',
 		状态: 1,
 		订单id: '45'
 	},
 	{
 		房间名: '标准间3',
-		入住时间: '2025-3-23',
-		离店时间: '2025-5-24',
+		入住: '2025-3-23',
+		离店: '2025-5-24',
 		金额: '268',
 		状态: 1,
 		订单id: '46'
 	},
 	{
 		房间名: '标准间3',
-		入住时间: '2025-3-23',
-		离店时间: '2025-5-24',
+		入住: '2025-3-23',
+		离店: '2025-5-24',
 		金额: '268',
 		状态: 1,
 		订单id: '47'
 	}
 ];
-初始化();
+let 当前操作订单;
 
 // 方法
 function 切换过滤条件({ detail }) {
@@ -118,11 +134,6 @@ function 切换过滤条件({ detail }) {
 			break;
 	}
 }
-function 初始化() {
-	过滤显示.value.select = '全部';
-	// 查询订单
-	列表.value = 总;
-}
 function 状态格式化(type, value) {
 	switch (value) {
 		case 0:
@@ -134,12 +145,60 @@ function 状态格式化(type, value) {
 	}
 }
 async function 查询订单(type) {
-	console.log(type);
+	console.log('查询订单', type);
+	type == '刷新' && (列表.value = []);
 	return new Promise((a) => {
 		setTimeout(() => {
+			if (type == '刷新') {
+				if (过滤显示.value.select == '全部') {
+					列表.value = 总;
+				} else {
+					列表.value = 总.filter((e) => e.状态 == 订单状态[过滤显示.value.select]);
+				}
+				if (过滤显示.value.select == '全部' || 过滤显示.value.select == '待确认') {
+					uni.$emit('未读消息', '已读');
+				}
+			}
 			a();
-		}, 2000);
+		}, 1000);
 	});
+}
+function 操作(type, item) {
+	switch (type) {
+		case '取消订单':
+			弹窗(`确定取消 ${item.入住}到${item.离店} 期间的预约？`, '确认');
+			当前操作订单 = item;
+			break;
+		case '确认':
+			// 请求接口后更改订单状态 不用刷新 避免调两次接口
+			当前操作订单.状态 = 订单状态['已取消'];
+			break;
+		case '撤销':
+			当前操作订单 = null;
+			break;
+		case '重新预定':
+			uni.navigateTo({
+				url: '/pages/UserOrder/UserOrder',
+				success(res) {
+					res.eventChannel.emit('数据', item);
+				}
+			});
+			
+			break;
+	}
+}
+function 按钮显示(type, item) {
+	if (type == '取消订单' && item.状态 != 0) return false;
+	if (type == '重新预定' && item.状态 != -1) return false;
+	// 其次判断时间是否在当天之后
+	let start = item.入住.replaceAll('-', '/');
+	start = new Date(start).getTime();
+	let today = new Date(今天).getTime();
+	// 过期的待确认订单变为取消
+	if (item.状态 == 0 && start < today) {
+		item.状态 = -1;
+	}
+	return start >= today;
 }
 </script>
 

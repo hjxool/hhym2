@@ -4,7 +4,7 @@
 		<!-- 热点 -->
 		<view class="hotspot textEllipsis" v-for="item in 房间[当前区域].hotspots" :style="热点显示(item)">
 			<view v-if="item.type == '区域'" class="area" @click="切换区域(item)">{{ item.label }}</view>
-			<view v-if="item.type == '房间'" class="room" @click="选择房间(item)">{{ item.label }}</view>
+			<view v-if="item.type == '房间'" class="room" @click="选择房间(item.label)">{{ item.label }}</view>
 		</view>
 		<!-- 小地图 -->
 		<view class="minimap">
@@ -28,11 +28,20 @@
 <script setup>
 import { createScopedThreejs } from 'threejs-miniprogram';
 import Controller from '/Api/threeJS控制器.js';
-import { onBeforeUnmount, ref } from 'vue';
+import { getCurrentInstance, onBeforeUnmount, ref } from 'vue';
 import { 弹窗 } from '/Api/提示.js';
 import Notify from '/Components/notify/notify.vue';
+import { useStore } from 'vuex';
 
 // 属性
+const instance = getCurrentInstance().proxy;
+const channel = instance.getOpenerEventChannel();
+let 前一页;
+channel.on('前一页', (data) => {
+	前一页 = data;
+});
+const store = useStore();
+
 let THREE;
 let canvas节点;
 let renderId;
@@ -238,12 +247,28 @@ function 切换区域(spot) {
 		}
 	);
 }
-function 选择房间(args) {
-	if (typeof args == 'string' && args == '确认') {
-		console.log('跳转', 所选房间);
-	} else {
-		所选房间 = args.label;
-		弹窗(`确认选择 ${args.label} ？`, '确认');
+function 选择房间(value) {
+	switch (value) {
+		case '确认':
+			if (前一页 == '首页') {
+				uni.navigateTo({
+					url: '/pages/UserOrder/UserOrder',
+					success(res) {
+						res.eventChannel.emit('房间', 所选房间);
+					}
+				});
+			} else if (前一页 == '预约') {
+				channel.emit('房间', 所选房间);
+				uni.navigateBack();
+			}
+			break;
+		case '取消':
+			所选房间 = '';
+			break;
+		default:
+			所选房间 = value;
+			弹窗(`确认选择 ${value} ？`, '确认');
+			break;
 	}
 }
 </script>

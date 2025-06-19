@@ -32,7 +32,6 @@ export default createStore({
 					'20': 0.6
 				},
 			},
-			房间: '',
 			宠物数量: 1
 		};
 	},

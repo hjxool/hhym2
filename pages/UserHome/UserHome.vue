@@ -8,23 +8,38 @@
 			<van-tabbar-item name="订单" :info="导航页.num" icon="todo-list-o">我的订单</van-tabbar-item>
 		</van-tabbar>
 	</view>
-
-	<Notify />
 </template>
 
 <script setup>
 import UserReserve from '/Components/userReserve/userReserve.vue';
 import UserOrderList from '/Components/userOrderList/userOrderList.vue';
-import Notify from '/Components/notify/notify.vue';
-import { getCurrentInstance, ref } from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
 
 // 跳转后不显示返回主页按钮
 uni.hideHomeButton();
 // 属性
-// const page = getCurrentInstance().proxy
 const 导航页 = ref({
 	select: '主页',
 	num: ''
+});
+
+uni.$on('未读消息', (type) => {
+	switch (type) {
+		case '新增':
+			if (!导航页.value.num) {
+				导航页.value.num = 1;
+			} else {
+				导航页.value.num++;
+			}
+			break;
+		case '已读':
+			导航页.value.num = '';
+			break;
+	}
+});
+
+onBeforeUnmount(() => {
+	uni.$off('未读消息');
 });
 
 // 方法

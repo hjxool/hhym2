@@ -23,7 +23,7 @@ function 轮播事件({ detail: { current } }) {
 }
 function 跳转相册() {
 	uni.navigateTo({
-		url: '/pages/userPhotos/userPhotos',
+		url: '/pages/UserPhotos/UserPhotos',
 		success(res) {
 			res.eventChannel.emit('图片列表', 图片列表.value);
 		}

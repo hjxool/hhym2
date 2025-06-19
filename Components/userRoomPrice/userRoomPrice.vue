@@ -1,7 +1,7 @@
 <template>
 	<view class="body">
 		<view class="room" v-for="item in 房间" :key="item.name">
-			<CusImage class="img noShrink" :src="item.封面"/>
+			<CusImage class="img noShrink" :src="item.封面" />
 
 			<view class="flexGrow">
 				<view class="title">{{ item.name }}</view>
@@ -65,15 +65,11 @@ const 节省费用 = computed(() => {
 
 // 方法
 function 跳转页面() {
-	// uni.navigateTo({
-	// 	url: '/pages/UserVR/UserVR'
-	// });
-	store.commit('setState', {
-		key: '房间',
-		value: '标准间2' // 测试数据
-	});
 	uni.navigateTo({
-		url: '/pages/UserOrder/UserOrder'
+		url: '/pages/UserVR/UserVR',
+		success(res) {
+			res.eventChannel.emit('前一页', '首页');
+		}
 	});
 }
 </script>
