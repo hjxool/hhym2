@@ -19,7 +19,9 @@ async function 识别用户() {
 			});
 			break;
 		case '管理员':
-			// 跳转管理员界面
+			uni.reLaunch({
+				url: '/pages/ManagerHome/ManagerHome'
+			});
 			break;
 	}
 }

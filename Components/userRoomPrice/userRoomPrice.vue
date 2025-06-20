@@ -57,10 +57,17 @@ const 节省费用 = computed(() => {
 	let 标准间原价 = 房间.value[0].原价 * store.getters.总天数;
 	let 豪华间原价 = 房间.value[1].原价 * store.getters.总天数;
 	let { 标准间优惠, 豪华间优惠 } = store.getters.折扣总价;
-	return {
-		标准间: Math.round((标准间原价 - 标准间优惠) * 10) / 10,
-		豪华间: Math.round((豪华间原价 - 豪华间优惠) * 10) / 10
-	};
+	if (标准间原价 >= 标准间优惠) {
+		return {
+			标准间: Math.round((标准间原价 - 标准间优惠) * 10) / 10,
+			豪华间: Math.round((豪华间原价 - 豪华间优惠) * 10) / 10
+		};
+	} else {
+		return {
+			标准间: 0,
+			豪华间: 0
+		};
+	}
 });
 
 // 方法
