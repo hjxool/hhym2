@@ -25,24 +25,28 @@
 			}
 		},
 		{
-			"path" : "pages/UserPetInfo/UserPetInfo",
-			"style" : 
-			{
-				"navigationBarTitleText" : ""
+			"path": "pages/UserPetInfo/UserPetInfo",
+			"style": {
+				"navigationBarTitleText": ""
 			}
 		},
 		{
-			"path" : "pages/UserAgree/UserAgree",
-			"style" : 
-			{
-				"navigationBarTitleText" : ""
+			"path": "pages/UserAgree/UserAgree",
+			"style": {
+				"navigationBarTitleText": ""
 			}
 		},
 		{
-			"path" : "pages/ManagerHome/ManagerHome",
-			"style" : 
-			{
-				"navigationBarTitleText" : "好好养猫"
+			"path": "pages/ManagerHome/ManagerHome",
+			"style": {
+				"navigationBarTitleText": "好好养猫"
+			}
+		},
+		{
+			"path": "pages/ManagerCalendar/ManagerCalendar",
+			"style": {
+				"navigationBarTitleText": "日程",
+				"navigationBarBackgroundColor": "#fff"
 			}
 		}
 	],

@@ -2,13 +2,13 @@
 	<cusScrollView :加载="查询数据" class="scroll">
 		<view class="page colLayout">
 			<view class="head">
-				<view class="border button colLayout">
+				<view class="border button colLayout" @click="跳转('日历')">
 					<image class="icon" src="/Static/img/icon1.png" mode="aspectFit"></image>
 					<view class="title">日历</view>
 					<view class="text">12个即将到来的客人</view>
 				</view>
 
-				<view class="border button colLayout">
+				<view class="border button colLayout" @click="跳转('待处理')">
 					<image class="icon" src="/Static/img/icon2.png" mode="aspectFit"></image>
 					<view class="title">待处理预约</view>
 					<view class="text">5个待处理</view>
@@ -37,7 +37,6 @@ import { ref } from 'vue';
 
 uni.hideHomeButton();
 // 属性
-const 图表卡片 = ref([]);
 const 功能 = ref(['客户', '订单', '计价规则', '单价设置', '上传图片', '添加收入']);
 const 图表 = ref([
 	{ X轴: ['1', '2', '3', '4', '5', '6', '7'], Y轴: [820, 932, 901, 934, 1290, 1330, 1320] },
@@ -50,7 +49,7 @@ const 显示图表 = ref(false);
 async function 查询数据(type) {
 	if (type == '刷新') {
 		显示图表.value = false;
-		return new Promise((a) => {
+		return new Promise(a => {
 			setTimeout(() => {
 				setTimeout(() => {
 					显示图表.value = true;
@@ -58,6 +57,23 @@ async function 查询数据(type) {
 				a();
 			}, 1000);
 		});
+	}
+}
+function 跳转(type) {
+	switch (type) {
+		case '日历':
+			uni.navigateTo({
+				url: '/pages/ManagerCalendar/ManagerCalendar',
+				success(res) {
+					res.eventChannel.emit('数据');
+				},
+				events: {
+					数据(data) {}
+				}
+			});
+			break;
+		case '待处理':
+			break;
 	}
 }
 </script>
