@@ -1,37 +1,76 @@
 <template>
-	<view class="page colLayout">
-		<view class="head">
-			<view class="border button colLayout">
-				<image class="icon" src="/Static/img/icon1.png" mode="aspectFit"></image>
-				<view class="title">日历</view>
-				<view class="text">12个即将到来的客人</view>
+	<cusScrollView :加载="查询数据" class="scroll">
+		<view class="page colLayout">
+			<view class="head">
+				<view class="border button colLayout">
+					<image class="icon" src="/Static/img/icon1.png" mode="aspectFit"></image>
+					<view class="title">日历</view>
+					<view class="text">12个即将到来的客人</view>
+				</view>
+
+				<view class="border button colLayout">
+					<image class="icon" src="/Static/img/icon2.png" mode="aspectFit"></image>
+					<view class="title">待处理预约</view>
+					<view class="text">5个待处理</view>
+				</view>
 			</view>
 
-			<view class="border button colLayout">
-				<image class="icon" src="/Static/img/icon2.png" mode="aspectFit"></image>
-				<view class="title">待处理预约</view>
-				<view class="text">5个待处理</view>
+			<swiper class="border echartCards">
+				<template v-if="显示图表">
+					<swiper-item v-for="(item, index) in 图表" :key="index" style="overflow: hidden">
+						<cusECharts :options="item" />
+					</swiper-item>
+				</template>
+			</swiper>
+
+			<view class="flexGrow">
+				<view class="border center button" v-for="item in 功能" :key="item">{{ item }}</view>
 			</view>
 		</view>
-
-		<view id="echartCards" class="border"></view>
-
-		<view class="flexGrow">
-			<view class="border center button" v-for="item in 功能">{{ item }}</view>
-		</view>
-	</view>
+	</cusScrollView>
 </template>
 
 <script setup>
+import cusScrollView from '/Components/cusScrollView/cusScrollView.vue';
+import cusECharts from '/Components/cusECharts/cusECharts.vue';
 import { ref } from 'vue';
 
 uni.hideHomeButton();
 // 属性
 const 图表卡片 = ref([]);
 const 功能 = ref(['客户', '订单', '计价规则', '单价设置', '上传图片', '添加收入']);
+const 图表 = ref([
+	{ X轴: ['1', '2', '3', '4', '5', '6', '7'], Y轴: [820, 932, 901, 934, 1290, 1330, 1320] },
+	{ X轴: ['a', 'b', 'c', 'd', 'e', 'f', 'g'], Y轴: [560, 700, 901, 934, 1190, 1330, 1320] },
+	{ X轴: ['q', 'w', 'e', 'r', 't', 'y', 'u'], Y轴: [0, 200, 260, 690, 1000, 1330, 1320] }
+]);
+const 显示图表 = ref(false);
+
+// 方法
+async function 查询数据(type) {
+	if (type == '刷新') {
+		显示图表.value = false;
+		return new Promise((a) => {
+			setTimeout(() => {
+				setTimeout(() => {
+					显示图表.value = true;
+				}, 800);
+				a();
+			}, 1000);
+		});
+	}
+}
 </script>
 
 <style lang="less" scoped>
+.scroll {
+	position: absolute;
+	width: 100vw;
+	height: 100vh;
+	left: 0%;
+	top: 0;
+	overflow: hidden;
+}
 .page {
 	padding: 40rpx 20rpx;
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -76,8 +115,9 @@ const 功能 = ref(['客户', '订单', '计价规则', '单价设置', '上传�
 		color: #696969;
 	}
 }
-#echartCards {
+.echartCards {
 	height: 360rpx;
 	margin-bottom: 20rpx;
+	overflow: hidden;
 }
 </style>

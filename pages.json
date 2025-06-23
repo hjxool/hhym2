@@ -42,7 +42,7 @@
 			"path" : "pages/ManagerHome/ManagerHome",
 			"style" : 
 			{
-				"navigationBarTitleText" : ""
+				"navigationBarTitleText" : "好好养猫"
 			}
 		}
 	],
@@ -67,7 +67,8 @@
 			"van-submit-bar": "/wxcomponents/vant/submit-bar/index",
 			"van-checkbox": "/wxcomponents/vant/checkbox/index",
 			"van-checkbox-group": "/wxcomponents/vant/checkbox-group/index",
-			"van-field": "/wxcomponents/vant/field/index"
+			"van-field": "/wxcomponents/vant/field/index",
+			"ec-canvas": "/wxcomponents/ec-canvas/ec-canvas"
 		},
 		"disableScroll": true,
 		"enablePullDownRefresh": false
