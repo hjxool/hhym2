@@ -48,6 +48,13 @@
 				"navigationBarTitleText": "日程",
 				"navigationBarBackgroundColor": "#fff"
 			}
+		},
+		{
+			"path" : "pages/ManagerHandle/ManagerHandle",
+			"style" : 
+			{
+				"navigationBarTitleText" : ""
+			}
 		}
 	],
 	"globalStyle": {
@@ -72,7 +79,8 @@
 			"van-checkbox": "/wxcomponents/vant/checkbox/index",
 			"van-checkbox-group": "/wxcomponents/vant/checkbox-group/index",
 			"van-field": "/wxcomponents/vant/field/index",
-			"ec-canvas": "/wxcomponents/ec-canvas/ec-canvas"
+			"ec-canvas": "/wxcomponents/ec-canvas/ec-canvas",
+			"van-popup": "/wxcomponents/vant/popup/index"
 		},
 		"disableScroll": true,
 		"enablePullDownRefresh": false

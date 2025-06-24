@@ -49,7 +49,7 @@ const 显示图表 = ref(false);
 async function 查询数据(type) {
 	if (type == '刷新') {
 		显示图表.value = false;
-		return new Promise(a => {
+		return new Promise((a) => {
 			setTimeout(() => {
 				setTimeout(() => {
 					显示图表.value = true;
@@ -73,6 +73,15 @@ function 跳转(type) {
 			});
 			break;
 		case '待处理':
+			uni.navigateTo({
+				url: '/pages/ManagerHandle/ManagerHandle',
+				success(res) {
+					res.eventChannel.emit('数据');
+				},
+				events: {
+					数据(data) {}
+				}
+			});
 			break;
 	}
 }

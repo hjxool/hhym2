@@ -39,7 +39,7 @@ function initChart(canvas, width, height, dpr) {
 		},
 		grid: {
 			top: 16,
-			bottom: 10,
+			bottom: 5,
 			left: 10,
 			right: 10,
 			containLabel: true
