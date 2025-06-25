@@ -1,5 +1,5 @@
 <template>
-	<view class="viewBox">
+	<view v-show="props.options" class="viewBox">
 		<ec-canvas canvas-id="mychart" :ec="ec" />
 	</view>
 </template>
@@ -11,48 +11,82 @@ import { ref } from 'vue';
 const echarts = require('../../wxcomponents/ec-canvas/echarts.js');
 
 // 属性
-const props = defineProps(['options'])
+const props = defineProps(['options']);
 const ec = ref({
 	// 配置项
 	onInit: initChart,
 	// lazyLoad: true
 	// 禁止触屏事件
-	disableTouch: true,
+	disableTouch: true
 });
 let chartObj;
 
 // 方法
 function initChart(canvas, width, height, dpr) {
+	if (!props.options) return;
 	const chart = echarts.init(canvas, null, {
 		width: width,
 		height: height,
 		devicePixelRatio: dpr
 	});
 	canvas.setChart(chart);
-	let option = {
-		xAxis: {
+	let option = {};
+	if (props.options.方向 == '横') {
+		option['xAxis'] = {
 			type: 'category',
-			data: props.options.X轴 || []
-		},
-		yAxis: {
+			data: props.options.labels || [],
+			axisTick: { show: false } // 刻度
+		};
+		option['yAxis'] = {
 			type: 'value'
-		},
-		grid: {
+		};
+		option['grid'] = {
 			top: 16,
 			bottom: 5,
 			left: 10,
 			right: 10,
 			containLabel: true
-		},
-		series: [
+		};
+		option['series'] = [
 			{
-				data: props.options.Y轴 || [],
+				data: props.options.values || [],
 				type: 'line',
 				smooth: true,
-				symbol: 'none', // 不显示折线上的点
+				symbol: 'none' // 不显示折线上的点
 			}
-		]
-	};
+		];
+	} else if (props.options.方向 == '纵') {
+		option['xAxis'] = {
+			type: 'value',
+			axisLine: { show: false }, // 隐藏坐标轴线
+			axisTick: { show: false }, // 隐藏刻度线
+			axisLabel: { show: false }, // 隐藏数值标签
+			show: true // 保持为 true，避免布局错乱
+		};
+		option['yAxis'] = {
+			type: 'category',
+			data: props.options.labels || [],
+			axisTick: { show: false }
+		};
+		option['grid'] = {
+			left: 10,
+			right: 20,
+			top: 20,
+			bottom: 15,
+			containLabel: true //是否把坐标轴算作网格区域
+		};
+		option['series'] = [
+			{
+				data: props.options.values || [],
+				type: 'bar',
+				label: {
+					normal: {
+						show: true //是否在柱体上显示文字
+					}
+				}
+			}
+		];
+	}
 	chart.setOption(option);
 	chartObj = chart;
 	return chart;

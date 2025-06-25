@@ -15,7 +15,7 @@
 				</view>
 			</view>
 
-			<swiper class="border echartCards">
+			<swiper class="border echartCards" @click="跳转('统计')">
 				<template v-if="显示图表">
 					<swiper-item v-for="(item, index) in 图表" :key="index" style="overflow: hidden">
 						<cusECharts :options="item" />
@@ -24,7 +24,7 @@
 			</swiper>
 
 			<view class="flexGrow">
-				<view class="border center button" v-for="item in 功能" :key="item">{{ item }}</view>
+				<view class="border center button" v-for="item in 功能" @click="跳转(item.page)" :key="item.name">{{ item.name }}</view>
 			</view>
 		</view>
 	</cusScrollView>
@@ -37,11 +37,17 @@ import { ref } from 'vue';
 
 uni.hideHomeButton();
 // 属性
-const 功能 = ref(['客户', '订单', '计价规则', '单价设置', '上传图片', '添加收入']);
+const 功能 = ref([
+	{ name: '客户', page: '/pages/ManagerCustomer/ManagerCustomer' },
+	{ name: '订单', page: '/pages/ManagerOrder/ManagerOrder' },
+	{ name: '计价规则', page: '/pages/ManagerRules/ManagerRules' },
+	{ name: '上传图片', page: '/pages/ManagerPhotos/ManagerPhotos' },
+	{ name: '添加收入', page: '/pages/ManagerAddOrder/ManagerAddOrder' }
+]);
 const 图表 = ref([
-	{ X轴: ['1', '2', '3', '4', '5', '6', '7'], Y轴: [820, 932, 901, 934, 1290, 1330, 1320] },
-	{ X轴: ['a', 'b', 'c', 'd', 'e', 'f', 'g'], Y轴: [560, 700, 901, 934, 1190, 1330, 1320] },
-	{ X轴: ['q', 'w', 'e', 'r', 't', 'y', 'u'], Y轴: [0, 200, 260, 690, 1000, 1330, 1320] }
+	{ labels: ['1', '2', '3', '4', '5', '6', '7'], values: [820, 932, 901, 934, 1290, 1330, 1320], 方向: '横' },
+	{ labels: ['a', 'b', 'c', 'd', 'e', 'f', 'g'], values: [560, 700, 901, 934, 1190, 1330, 1320], 方向: '横' },
+	{ labels: ['q', 'w', 'e', 'r', 't', 'y', 'u'], values: [0, 200, 260, 690, 1000, 1330, 1320], 方向: '横' }
 ]);
 const 显示图表 = ref(false);
 
@@ -81,6 +87,16 @@ function 跳转(type) {
 				events: {
 					数据(data) {}
 				}
+			});
+			break;
+		case '统计':
+			uni.navigateTo({
+				url: '/pages/ManagerStatistics/ManagerStatistics'
+			});
+			break;
+		default:
+			uni.navigateTo({
+				url: type
 			});
 			break;
 	}

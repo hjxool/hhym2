@@ -212,7 +212,6 @@ function 显示详情(detail) {
 	overflow: hidden;
 }
 .page {
-	font-family: -apple-system-font, Helvetica Neue, Arial, sans-serif;
 	padding: 0 32rpx 80rpx;
 	display: grid;
 	grid-template-rows: 80rpx auto;

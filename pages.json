@@ -13,28 +13,16 @@
 			}
 		},
 		{
-			"path": "pages/UserVR/UserVR",
-			"style": {
-				"navigationBarTitleText": ""
-			}
+			"path": "pages/UserVR/UserVR"
 		},
 		{
-			"path": "pages/UserOrder/UserOrder",
-			"style": {
-				"navigationBarTitleText": ""
-			}
+			"path": "pages/UserOrder/UserOrder"
 		},
 		{
-			"path": "pages/UserPetInfo/UserPetInfo",
-			"style": {
-				"navigationBarTitleText": ""
-			}
+			"path": "pages/UserPetInfo/UserPetInfo"
 		},
 		{
-			"path": "pages/UserAgree/UserAgree",
-			"style": {
-				"navigationBarTitleText": ""
-			}
+			"path": "pages/UserAgree/UserAgree"
 		},
 		{
 			"path": "pages/ManagerHome/ManagerHome",
@@ -50,11 +38,13 @@
 			}
 		},
 		{
-			"path" : "pages/ManagerHandle/ManagerHandle",
-			"style" : 
-			{
-				"navigationBarTitleText" : "待确认订单"
-			}
+			"path": "pages/ManagerHandle/ManagerHandle"
+		},
+		{
+			"path": "pages/ManagerStatistics/ManagerStatistics"
+		},
+		{
+			"path": "pages/ManagerCustomer/ManagerCustomer"
 		}
 	],
 	"globalStyle": {
@@ -80,7 +70,11 @@
 			"van-checkbox-group": "/wxcomponents/vant/checkbox-group/index",
 			"van-field": "/wxcomponents/vant/field/index",
 			"ec-canvas": "/wxcomponents/ec-canvas/ec-canvas",
-			"van-popup": "/wxcomponents/vant/popup/index"
+			"van-popup": "/wxcomponents/vant/popup/index",
+			"van-dropdown-menu": "/wxcomponents/vant/dropdown-menu/index",
+			"van-dropdown-item": "/wxcomponents/vant/dropdown-item/index",
+			"van-datetime-picker": "/wxcomponents/vant/datetime-picker/index",
+			"van-search": "/wxcomponents/vant/search/index"
 		},
 		"disableScroll": true,
 		"enablePullDownRefresh": false

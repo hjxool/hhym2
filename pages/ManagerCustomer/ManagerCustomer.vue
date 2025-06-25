@@ -1,33 +1,29 @@
 <template>
 	<cusScrollView :加载="查询数据" class="scroll">
-		<view class="page">
-			<view class="card colLayout" v-for="(item, index) in 列表" :key="index">
+		<view class="page colLayout">
+			<van-search class="noShrink" :value="关键字" @search="查询数据('刷新')" @clear="查询数据('刷新')" placeholder="客户名关键词" />
+
+			<view class="flexGrow">
 				<view class="viewBox">
-					<view>
-						<view class="label">姓名</view>
-						<view>{{ item.name }}</view>
+					<view class="card colLayout" v-for="item in 列表" :key="item.phone">
+						<view class="name">{{ item.name }}</view>
+						<view class="phone">{{ item.phone }}</view>
+						<view class="grid">
+							<view>
+								<view class="title">订单总数</view>
+								<view>{{ item.订单总数 }}</view>
+							</view>
+							<view>
+								<view class="title">在本店消费</view>
+								<view>{{ item.在本店消费 }}</view>
+							</view>
+							<view style="grid-column-start: 1; grid-column-end: 3">
+								<view class="title">从何了解</view>
+								<view>{{ item.从何了解 || '无' }}</view>
+							</view>
+						</view>
+						<view class="button">查看宠物</view>
 					</view>
-					<view>
-						<view class="label">时间</view>
-						<view>{{ item.start.replaceAll('/', '.') }} ~ {{ item.end.replaceAll('/', '.') }} 共{{ 计算天数(item.start, item.end) }}天</view>
-					</view>
-					<view>
-						<view class="label">房间</view>
-						<view>{{ item.room }}</view>
-					</view>
-					<view>
-						<view class="label">金额</view>
-						<view>{{ item.pay }}</view>
-					</view>
-				</view>
-
-				<van-button @click="显示弹窗(item.pets)" size="small" type="info" plain style="align-self: flex-end">宠物详情</van-button>
-
-				<view class="line"></view>
-
-				<view class="foot rowLayout">
-					<view class="button center" style="background: #3981c6; color: #fff">确认</view>
-					<view class="button center" style="background: #f4f3f3">取消</view>
 				</view>
 			</view>
 		</view>
@@ -50,17 +46,18 @@
 <script setup>
 import { ref } from 'vue';
 import cusScrollView from '/Components/cusScrollView/cusScrollView.vue';
-import { 计算天数 } from '/Api/时间参数.js';
 
 // 属性
+const 关键字 = ref('');
 const 列表 = ref([
 	{
-		name: '测试1',
-		start: '2025/6/27',
-		end: '2025/6/29',
-		room: '标准间1',
-		pay: 500,
+		name: '彰化',
+		phone: '13398978787',
+		订单总数: 5,
+		在本店消费: 1389,
+		从何了解: '奥数嗲手段是对安睡的哈岁的和',
 		pets: [
+			{ 昵称: '测试4', 年龄: 12, 性别: 1, 品种: '梨花', 性格: '普通', 是否绝育: 1, 是否有耳螨: 0, 是否携带传染病: 1, 上一次驱虫时间: '', 上一次疫苗时间: '', 特殊要求: '' },
 			{
 				昵称: '测试3',
 				年龄: 1,
@@ -73,16 +70,15 @@ const 列表 = ref([
 				上一次驱虫时间: '',
 				上一次疫苗时间: '',
 				特殊要求: '还的口味口哦懂啊水浇地哦嫁鸡随鸡爹较耐送到家哦i'
-			},
-			{ 昵称: '测试4', 年龄: 12, 性别: 1, 品种: '梨花', 性格: '普通', 是否绝育: 1, 是否有耳螨: 0, 是否携带传染病: 1, 上一次驱虫时间: '', 上一次疫苗时间: '', 特殊要求: '' }
+			}
 		]
 	},
 	{
 		name: '测试2',
-		start: '2025/7/1',
-		end: '2025/7/10',
-		room: '标准间3',
-		pay: 200,
+		phone: '13398978787',
+		订单总数: 2,
+		在本店消费: 530,
+		从何了解: '',
 		pets: [
 			{ 昵称: '测试5', 年龄: 1, 性别: 0, 品种: '银渐层', 性格: '普通', 是否绝育: 0, 是否有耳螨: 0, 是否携带传染病: 0, 上一次驱虫时间: '', 上一次疫苗时间: '', 特殊要求: '' }
 		]
@@ -96,16 +92,8 @@ const 弹窗 = ref({
 // 方法
 async function 查询数据(type) {
 	if (type == '刷新') {
-		return new Promise((a) => {
-			setTimeout(() => {
-				a();
-			}, 1000);
-		});
+	} else {
 	}
-}
-function 显示弹窗(pets) {
-	弹窗.value.show = true;
-	弹窗.value.list = pets;
 }
 function 回显(key, value) {
 	switch (key) {
@@ -141,10 +129,6 @@ function 回显样式(key, value) {
 </script>
 
 <style lang="less" scoped>
-::v-deep .van-center-enter-active,
-.van-center-leave-active {
-	border-radius: 32rpx;
-}
 .scroll {
 	position: absolute;
 	width: 100vw;
@@ -153,38 +137,55 @@ function 回显样式(key, value) {
 	top: 0;
 	overflow: hidden;
 }
-.label {
-	color: #555;
-}
 .page {
-	padding: 32rpx;
 	overflow: hidden;
-	.card {
-		padding: 24rpx;
-		border-radius: 12rpx;
-		background-color: #ffffff;
-		box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
-		& + .card {
-			margin-top: 40rpx;
-		}
+	padding-top: 32rpx;
+	> .flexGrow {
+		overflow: hidden;
+		padding: 32rpx;
+		padding-right: 0;
 		> .viewBox {
-			display: grid;
-			grid-template-columns: 30% auto;
-			gap: 20rpx;
-		}
-		.line {
-			height: 2rpx;
-			background-color: #eeeeee;
-			margin: 20rpx 0;
-		}
-		> .foot {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
-			gap: 20rpx;
-			padding: 0 20rpx;
-			> .button {
+			padding-right: 32rpx;
+			overflow: auto;
+			.card {
+				background-color: #ffffff;
 				border-radius: 32rpx;
-				padding: 26rpx 0;
+				padding: 24rpx;
+				box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.06);
+				gap: 16rpx;
+				& + .card {
+					margin-top: 40rpx;
+				}
+				> .name {
+					font-size: 36rpx;
+					font-weight: bold;
+					color: #333;
+				}
+				> .phone {
+					font-size: 32rpx;
+					color: #666;
+				}
+				> .grid {
+					display: grid;
+					grid-template-columns: 1fr 1fr;
+					gap: 16rpx;
+					font-size: 32rpx;
+					color: #444;
+					.title {
+						font-size: 30rpx;
+						color: #888;
+					}
+				}
+				> .button {
+					margin-top: 32rpx;
+					padding: 20rpx 28rpx;
+					border-radius: 24rpx;
+					background-color: #1989fa;
+					color: #ffffff;
+					font-size: 34rpx;
+					font-weight: bold;
+					text-align: center;
+				}
 			}
 		}
 	}
@@ -206,6 +207,9 @@ function 回显样式(key, value) {
 		.row {
 			grid-column-start: 1;
 			grid-column-end: 3;
+		}
+		.label {
+			color: #555;
 		}
 	}
 }
