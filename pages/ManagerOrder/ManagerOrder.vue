@@ -161,7 +161,6 @@ function 显示弹窗(pets) {
 				padding: 24rpx;
 				box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.06);
 				gap: 16rpx;
-				position: relative;
 				& + .card {
 					margin-top: 40rpx;
 				}

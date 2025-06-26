@@ -45,6 +45,13 @@
 		},
 		{
 			"path": "pages/ManagerCustomer/ManagerCustomer"
+		},
+		{
+			"path" : "pages/ManagerOrder/ManagerOrder",
+			"style" : 
+			{
+				"navigationBarTitleText" : ""
+			}
 		}
 	],
 	"globalStyle": {

@@ -63,6 +63,21 @@ export default createStore({
 				return;
 			}
 			State[args.key] = args.value;
+			// (\w+) 是一个捕获组 会提取中括号里的内容（比如 0 或 key）
+			// '$1' 代表 第一个捕获组的内容
+			let arr = args.keys.replace(/\[(\w+)\]/g, '.$1').split('.');
+			let current = State;
+			try {
+				// 注意 得取到最后一级的父级 不然修改对象属性值无效
+				for (let i = 0; i < arr.length - 1; i++) {
+					let key = arr[i];
+					current = current[key];
+				}
+				let key = arr[arr.length - 1];
+				current[key] = args.value;
+			} catch (error) {
+				弹窗('传参错误')
+			}
 		},
 	},
 	getters: {
