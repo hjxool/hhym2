@@ -218,6 +218,7 @@ function 显示弹窗(pets) {
 		}
 		.label {
 			color: #555;
+			margin-bottom: 10rpx;
 		}
 	}
 }

@@ -1,7 +1,7 @@
 <template>
 	<cusScrollView :加载="查询数据" class="scroll">
 		<view class="page">
-			<view class="card colLayout" v-for="(item, index) in 列表" :key="index">
+			<view class="card colLayout" v-for="item in 列表" :key="item.id">
 				<view class="viewBox">
 					<view>
 						<view class="label">姓名</view>
@@ -13,30 +13,42 @@
 					</view>
 					<view>
 						<view class="label">房间</view>
-						<view>{{ item.room }}</view>
+						<view @click="显示弹窗('选择房间', item)" :style="{ color: 编辑.当前 == item.id ? '#faad14' : '' }">{{ item.room }}</view>
 					</view>
 					<view>
 						<view class="label">金额</view>
-						<view>{{ item.pay }}</view>
+
+						<view v-show="编辑.当前 != item.id">{{ item.pay }}</view>
+						<input v-show="编辑.当前 == item.id" v-model="编辑.金额" style="width: 70%" type="number" />
 					</view>
 				</view>
 
-				<van-button @click="显示弹窗(item.pets)" size="small" type="info" plain style="align-self: flex-end">宠物详情</van-button>
+				<view class="rowLayout edit">
+					<van-button v-show="!编辑.当前" @click="编辑信息('编辑', item)" size="small" type="warning" plain>编辑</van-button>
+					<view v-show="编辑.当前 == item.id" class="button center" @click="编辑信息('确认', item)" style="background: #3981c6">
+						<van-icon name="success" color="#fff" />
+					</view>
+					<view v-show="编辑.当前 == item.id" class="button center" @click="编辑.当前 = ''" style="background: #eee">
+						<van-icon name="cross" />
+					</view>
+
+					<van-button @click="显示弹窗('宠物详情', item.pets)" size="small" type="info" plain style="margin-left: 20rpx">宠物详情</van-button>
+				</view>
 
 				<view class="line"></view>
 
 				<view class="foot rowLayout">
-					<view class="button center" style="background: #3981c6; color: #fff">确认</view>
-					<view class="button center" style="background: #f4f3f3">取消</view>
+					<view class="button center" @click="审核('通过', item)" style="background: #3981c6; color: #fff">同意</view>
+					<view class="button center" @click="审核('拒绝', item)" style="background: #f4f3f3">拒绝</view>
 				</view>
 			</view>
 		</view>
 	</cusScrollView>
 
-	<van-popup :show="弹窗.show" @close="弹窗.show = false">
+	<van-popup :show="宠物详情.show" @close="宠物详情.show = false">
 		<view class="popup">
 			<view style="overflow: auto; height: 100%; padding-right: 40rpx">
-				<view class="viewBox" v-for="item in 弹窗.list" :key="item.name">
+				<view class="viewBox" v-for="item in 宠物详情.list" :key="item.name">
 					<view :class="{ row: key == '特殊要求' }" v-for="[key, value] in Object.entries(item)" :key="key">
 						<view class="label">{{ key }}</view>
 						<view :style="回显样式(key, value)">{{ 回显(key, value) }}</view>
@@ -45,16 +57,23 @@
 			</view>
 		</view>
 	</van-popup>
+
+	<van-action-sheet :show="编辑.显示房间列表" :actions="编辑.房间列表" @close="编辑.显示房间列表 = false" @select="显示弹窗('选择房间', $event)" />
+
+	<Notify @confirm="弹窗操作('确认')" @cancel="弹窗操作('取消')" />
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import cusScrollView from '/Components/cusScrollView/cusScrollView.vue';
+import Notify from '/Components/notify/notify.vue';
 import { 计算天数 } from '/Api/时间参数.js';
+import { 消息, 弹窗 } from '/Api/提示.js';
 
 // 属性
 const 列表 = ref([
 	{
+		id: '1',
 		name: '测试1',
 		start: '2025/6/27',
 		end: '2025/6/29',
@@ -78,6 +97,7 @@ const 列表 = ref([
 		]
 	},
 	{
+		id: '2',
 		name: '测试2',
 		start: '2025/7/1',
 		end: '2025/7/10',
@@ -88,9 +108,15 @@ const 列表 = ref([
 		]
 	}
 ]);
-const 弹窗 = ref({
+const 宠物详情 = ref({
 	show: false,
 	list: []
+});
+const 编辑 = ref({
+	当前: '',
+	房间列表: [],
+	显示房间列表: false,
+	金额: ''
 });
 
 // 方法
@@ -103,9 +129,32 @@ async function 查询数据(type) {
 		});
 	}
 }
-function 显示弹窗(pets) {
-	弹窗.value.show = true;
-	弹窗.value.list = pets;
+function 显示弹窗(type, args) {
+	switch (type) {
+		case '宠物详情':
+			宠物详情.value.show = true;
+			宠物详情.value.list = args;
+			break;
+		case '选择房间':
+			编辑.value.显示房间列表 = !编辑.value.显示房间列表;
+			if (编辑.value.显示房间列表) {
+				编辑.value.房间列表 = [{ loading: true }];
+				setTimeout(() => {
+					// 根据开始结束时间查询房间可用情况
+					编辑.value.房间列表 = [
+						{ name: '标准间1', disabled: false },
+						{ name: '标准间2', disabled: true },
+						{ name: '标准间3', disabled: false },
+						{ name: '豪华间1', disabled: true }
+					];
+				}, 1000);
+			} else {
+				console.log(args.detail.name);
+				列表.value.find((e) => e.id == 编辑.value.当前).room = args.detail.name;
+				// 保存到服务器
+			}
+			break;
+	}
 }
 function 回显(key, value) {
 	switch (key) {
@@ -138,6 +187,37 @@ function 回显样式(key, value) {
 			};
 	}
 }
+function 编辑信息(type, item) {
+	switch (type) {
+		case '编辑':
+			编辑.value.当前 = item.id;
+			编辑.value.金额 = item.pay;
+			break;
+		case '确认':
+			let num = Number(编辑.value.金额);
+			if (isNaN(num)) {
+				消息('请输入正确的数字', '失败');
+				return;
+			}
+			item.pay = num;
+			编辑.value.当前 = '';
+			// 保存到服务器
+			break;
+	}
+}
+function 审核(type, item) {
+	弹窗(`确定${type} ${item.name} ${item.start}~${item.end} ${item.room} 的预约？`, '确认');
+}
+function 弹窗操作(type, item) {
+	switch (type) {
+		case '确认':
+			// 通过该订单 成功后删除该列表项
+			break;
+		case '取消':
+			// 拒绝该订单 成功后删除该列表项
+			break;
+	}
+}
 </script>
 
 <style lang="less" scoped>
@@ -155,6 +235,7 @@ function 回显样式(key, value) {
 }
 .label {
 	color: #555;
+	margin-bottom: 10rpx;
 }
 .page {
 	padding: 32rpx;
@@ -171,11 +252,29 @@ function 回显样式(key, value) {
 			display: grid;
 			grid-template-columns: 30% auto;
 			gap: 20rpx;
+			input {
+				background: #eee;
+				box-shadow: inset 0px 4rpx 10rpx rgba(0, 0, 0, 0.1);
+				border-radius: 16rpx;
+				padding: 6rpx 10rpx;
+				font-size: 30rpx;
+			}
 		}
 		.line {
 			height: 2rpx;
 			background-color: #eeeeee;
 			margin: 20rpx 0;
+		}
+		> .edit {
+			align-self: flex-end;
+			> .button {
+				border-radius: 20rpx;
+				width: 100rpx;
+				height: 50rpx;
+				& + .button {
+					margin-left: 20rpx;
+				}
+			}
 		}
 		> .foot {
 			display: grid;

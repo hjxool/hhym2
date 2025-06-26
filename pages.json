@@ -81,7 +81,8 @@
 			"van-dropdown-menu": "/wxcomponents/vant/dropdown-menu/index",
 			"van-dropdown-item": "/wxcomponents/vant/dropdown-item/index",
 			"van-datetime-picker": "/wxcomponents/vant/datetime-picker/index",
-			"van-search": "/wxcomponents/vant/search/index"
+			"van-search": "/wxcomponents/vant/search/index",
+			"van-action-sheet": "/wxcomponents/vant/action-sheet/index"
 		},
 		"disableScroll": true,
 		"enablePullDownRefresh": false
