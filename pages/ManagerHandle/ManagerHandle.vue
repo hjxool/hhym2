@@ -18,7 +18,7 @@
 					<view>
 						<view class="label">金额</view>
 
-						<view v-show="编辑.当前 != item.id">{{ item.pay }}</view>
+						<view v-show="编辑.当前 != item.id" style="padding-top: 10rpx;">{{ item.pay }}</view>
 						<input v-show="编辑.当前 == item.id" v-model="编辑.金额" style="width: 70%" type="number" />
 					</view>
 				</view>
@@ -206,7 +206,7 @@ function 编辑信息(type, item) {
 	}
 }
 function 审核(type, item) {
-	弹窗(`确定${type} ${item.name} ${item.start}~${item.end} ${item.room} 的预约？`, '确认');
+	弹窗(`确定 ${type} ${item.name} ${item.start}~${item.end} ${item.room} 的预约？`, '确认');
 }
 function 弹窗操作(type, item) {
 	switch (type) {

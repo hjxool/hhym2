@@ -10,16 +10,24 @@
 						<view class="phone">{{ item.phone }}</view>
 						<view class="grid">
 							<view>
-								<view class="title">订单总数</view>
-								<view>{{ item.订单总数 }}</view>
+								<view class="title">时间</view>
+								<view>{{ item.start.replaceAll('/', '.') }} ~ {{ item.end.replaceAll('/', '.') }}</view>
 							</view>
 							<view>
-								<view class="title">在本店消费</view>
-								<view>{{ item.在本店消费 }}</view>
+								<view class="title">宠物</view>
+								<view>{{ item.pets.map((e) => e.昵称).join('、') }}</view>
 							</view>
-							<view style="grid-column-start: 1; grid-column-end: 3">
-								<view class="title">从何了解</view>
-								<view>{{ item.从何了解 || '无' }}</view>
+							<view>
+								<view class="title">金额</view>
+								<view style="padding-top: 10rpx">{{ item.金额 }}</view>
+							</view>
+							<view>
+								<view class="title">房间</view>
+								<view>{{ item.房间 }}</view>
+							</view>
+							<view>
+								<view class="title">订单状态</view>
+								<view :style="{ color: 订单状态[item.订单状态].color }">{{ 订单状态[item.订单状态].label }}</view>
 							</view>
 						</view>
 						<view class="button" @click="显示弹窗(item.pets)">查看宠物</view>
@@ -53,32 +61,24 @@ const 列表 = ref([
 	{
 		name: '彰化',
 		phone: '13398978787',
-		订单总数: 5,
-		在本店消费: 1389,
-		从何了解: '奥数嗲手段是对安睡的哈岁的和',
+		start: '2025/7/1',
+		end: '2025/7/12',
+		金额: 320,
+		房间: '标准间2',
+		订单状态: -1,
 		pets: [
 			{ 昵称: '测试4', 年龄: 12, 性别: 1, 品种: '梨花', 性格: '普通', 是否绝育: 1, 是否有耳螨: 0, 是否携带传染病: 1, 上一次驱虫时间: '', 上一次疫苗时间: '', 特殊要求: '' },
-			{
-				昵称: '测试3',
-				年龄: 1,
-				性别: 0,
-				品种: '银渐层',
-				性格: '普通',
-				是否绝育: 0,
-				是否有耳螨: 0,
-				是否携带传染病: 0,
-				上一次驱虫时间: '',
-				上一次疫苗时间: '',
-				特殊要求: '还的口味口哦懂啊水浇地哦嫁鸡随鸡爹较耐送到家哦i'
-			}
+			{ 昵称: '测试6', 年龄: 12, 性别: 1, 品种: '梨花', 性格: '普通', 是否绝育: 1, 是否有耳螨: 0, 是否携带传染病: 1, 上一次驱虫时间: '', 上一次疫苗时间: '', 特殊要求: '' }
 		]
 	},
 	{
 		name: '测试2',
 		phone: '13398978787',
-		订单总数: 2,
-		在本店消费: 530,
-		从何了解: '',
+		start: '2025/8/1',
+		end: '2025/8/12',
+		金额: 1320,
+		房间: '标准间1',
+		订单状态: 1,
 		pets: [
 			{ 昵称: '测试5', 年龄: 1, 性别: 0, 品种: '银渐层', 性格: '普通', 是否绝育: 0, 是否有耳螨: 0, 是否携带传染病: 0, 上一次驱虫时间: '', 上一次疫苗时间: '', 特殊要求: '' }
 		]
@@ -87,6 +87,20 @@ const 列表 = ref([
 const 弹窗 = ref({
 	show: false,
 	list: []
+});
+const 订单状态 = ref({
+	'-1': {
+		label: '已取消',
+		color: '#999'
+	},
+	1: {
+		label: '已完成',
+		color: '#52c41a'
+	},
+	0: {
+		label: '待确认',
+		color: '#faad14'
+	}
 });
 
 // 方法
@@ -147,7 +161,6 @@ function 显示弹窗(pets) {
 }
 .page {
 	overflow: hidden;
-	padding-top: 32rpx;
 	> .flexGrow {
 		overflow: hidden;
 		padding: 32rpx;
@@ -161,6 +174,7 @@ function 显示弹窗(pets) {
 				padding: 24rpx;
 				box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.06);
 				gap: 16rpx;
+				position: relative;
 				& + .card {
 					margin-top: 40rpx;
 				}

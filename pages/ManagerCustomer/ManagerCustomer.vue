@@ -147,7 +147,6 @@ function 显示弹窗(pets) {
 }
 .page {
 	overflow: hidden;
-	padding-top: 32rpx;
 	> .flexGrow {
 		overflow: hidden;
 		padding: 32rpx;
