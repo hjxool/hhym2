@@ -47,10 +47,13 @@
 			"path": "pages/ManagerCustomer/ManagerCustomer"
 		},
 		{
-			"path" : "pages/ManagerOrder/ManagerOrder",
-			"style" : 
-			{
-				"navigationBarTitleText" : ""
+			"path": "pages/ManagerOrder/ManagerOrder"
+		},
+		{
+			"path": "pages/ManagerRules/ManagerRules",
+			"style": {
+				"navigationBarTitleText": "配置计价规则",
+				"navigationBarBackgroundColor": "#fff"
 			}
 		}
 	],
