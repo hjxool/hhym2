@@ -55,6 +55,9 @@
 				"navigationBarTitleText": "配置计价规则",
 				"navigationBarBackgroundColor": "#fff"
 			}
+		},
+		{
+			"path" : "pages/ManagerPhotos/ManagerPhotos"
 		}
 	],
 	"globalStyle": {

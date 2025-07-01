@@ -149,7 +149,6 @@ function 显示弹窗(type, args) {
 					];
 				}, 1000);
 			} else {
-				console.log(args.detail.name);
 				列表.value.find((e) => e.id == 编辑.value.当前).room = args.detail.name;
 				// 保存到服务器
 			}
