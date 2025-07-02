@@ -45,18 +45,7 @@
 		</view>
 	</cusScrollView>
 
-	<van-popup :show="宠物详情.show" @close="宠物详情.show = false">
-		<view class="popup">
-			<view style="overflow: auto; height: 100%; padding-right: 40rpx">
-				<view class="viewBox" v-for="item in 宠物详情.list" :key="item.name">
-					<view :class="{ row: key == '特殊要求' }" v-for="[key, value] in Object.entries(item)" :key="key">
-						<view class="label">{{ key }}</view>
-						<view :style="回显样式(key, value)">{{ 回显(key, value) }}</view>
-					</view>
-				</view>
-			</view>
-		</view>
-	</van-popup>
+	<PetsDetail :show="宠物详情.show" @close="宠物详情.show = false" :宠物列表="宠物详情.list" />
 
 	<van-action-sheet :show="编辑.显示房间列表" :actions="编辑.房间列表" @close="编辑.显示房间列表 = false" @select="显示弹窗('选择房间', $event)" />
 
@@ -67,6 +56,7 @@
 import { ref } from 'vue';
 import cusScrollView from '/Components/cusScrollView/cusScrollView.vue';
 import Notify from '/Components/notify/notify.vue';
+import PetsDetail from '/Components/petsDetail/petsDetail.vue';
 import { 计算天数 } from '/Api/时间参数.js';
 import { 消息, 弹窗 } from '/Api/提示.js';
 
@@ -153,37 +143,6 @@ function 显示弹窗(type, args) {
 				// 保存到服务器
 			}
 			break;
-	}
-}
-function 回显(key, value) {
-	switch (key) {
-		case '年龄':
-			return value;
-		case '性别':
-			return value ? '弟弟' : '妹妹';
-		case '是否绝育':
-		case '是否有耳螨':
-		case '是否携带传染病':
-			return value ? '是' : '否';
-		default:
-			return value || '无';
-	}
-}
-function 回显样式(key, value) {
-	switch (key) {
-		case '是否绝育':
-			return {
-				color: value ? '' : '#ee0a24'
-			};
-		case '是否有耳螨':
-		case '是否携带传染病':
-			return {
-				color: value ? '#ee0a24' : ''
-			};
-		default:
-			return {
-				color: ''
-			};
 	}
 }
 function 编辑信息(type, item) {
@@ -284,26 +243,6 @@ function 弹窗操作(type, item) {
 				border-radius: 32rpx;
 				padding: 26rpx 0;
 			}
-		}
-	}
-}
-.popup {
-	width: 80vw;
-	height: 80vh;
-	overflow: hidden;
-	padding: 40rpx 0 40rpx 40rpx;
-	.viewBox {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 20rpx;
-		& + .viewBox {
-			margin-top: 40rpx;
-			border-top: 2rpx solid #eee;
-			padding-top: 40rpx;
-		}
-		.row {
-			grid-column-start: 1;
-			grid-column-end: 3;
 		}
 	}
 }

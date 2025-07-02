@@ -58,6 +58,9 @@
 		},
 		{
 			"path" : "pages/ManagerPhotos/ManagerPhotos"
+		},
+		{
+			"path" : "pages/ManagerAddOrder/ManagerAddOrder"
 		}
 	],
 	"globalStyle": {
