@@ -70,7 +70,7 @@
 
 	<CusCalendar :show="显示日历" @close="显示日历 = false" />
 
-	<Notify />
+	<Notify @confirm="确认弹窗()" />
 </template>
 
 <script setup>
@@ -79,7 +79,7 @@ import { useStore } from 'vuex';
 import CusCalendar from '/Components/cusCalendar/cusCalendar.vue';
 import Notify from '/Components/notify/notify.vue';
 import Swipe from '/Components/swipe/swipe.vue';
-import { 消息 } from '/Api/提示.js';
+import { 消息, 弹窗 } from '/Api/提示.js';
 
 // 属性
 const instance = getCurrentInstance().proxy;
@@ -123,6 +123,8 @@ const 房间最大数量 = {
 	标准间: 2,
 	豪华间: 4
 };
+let 当前操作;
+
 查询宠物();
 
 channel.on('数据', (data) => {
@@ -223,8 +225,8 @@ function 勾选协议({ detail }) {
 }
 function 操作宠物(type, index) {
 	if (type == '删除') {
-		消息(`删除 ${form.value.宠物列表[index].name} 信息成功`);
-		form.value.宠物列表.splice(index, 1);
+		弹窗(`确定删除 ${form.value.宠物列表[index].name} 的信息？`, '确认');
+		当前操作 = index;
 	} else {
 		uni.navigateTo({
 			url: '/pages/UserPetInfo/UserPetInfo',
@@ -290,6 +292,13 @@ function 跳转(type) {
 }
 function 查询宠物() {
 	form.value.宠物列表 = [{ name: '测试2', age: 11, 性别: 0, 品种: '11', 性格: '22', 绝育: 0, 耳螨: 0, 传染病: 0, 驱虫: '44', 疫苗: '55', 要求: '' }];
+}
+function 确认弹窗() {
+	let name = form.value.宠物列表[当前操作].name;
+	form.value.宠物列表.splice(当前操作, 1);
+	setTimeout(() => {
+		消息(`删除 ${name} 信息成功`);
+	}, 500);
 }
 </script>
 

@@ -37,9 +37,13 @@
 							<view>{{ item2.start.replaceAll('/', '.') }} ~ {{ item2.end.replaceAll('/', '.') }} 共{{ 计算天数(item2.start, item2.end) }}天</view>
 						</view>
 
-						<view class="rowLayout">
-							<view class="label">宠物</view>
-							<view>{{ item2.pets.join('、') }}</view>
+						<view class="rowLayout" style="justify-content: space-between">
+							<view class="rowLayout">
+								<view class="label">宠物</view>
+								<view>{{ item2.pets.map((e) => e.昵称).join('、') }}</view>
+							</view>
+
+							<view class="button" @click="宠物详情(item2.pets)">详情</view>
 						</view>
 
 						<view class="rowLayout">
@@ -54,10 +58,13 @@
 			</view>
 		</view>
 	</van-popup>
+
+	<PetsDetail :show="详情.宠物详情显示" @close="详情.宠物详情显示 = false" :宠物列表="详情.宠物详情" />
 </template>
 
 <script setup>
 import cusScrollView from '/Components/cusScrollView/cusScrollView.vue';
+import PetsDetail from '/Components/petsDetail/petsDetail.vue';
 import { ref } from 'vue';
 import { 今天, 计算天数 } from '/Api/时间参数.js';
 
@@ -70,33 +77,137 @@ const 检索范围 = {
 };
 const 详情 = ref({
 	show: false,
-	list: []
+	list: [],
+	宠物详情显示: false,
+	宠物详情: []
 });
 // 测试数据
 let 订单 = {
-	'2025/6/25': [
+	'2025/8/25': [
 		{
 			name: '测试1',
 			phone: '1111111',
 			orders: [
-				{ start: '2025/6/25', end: '2025/7/1', pets: ['测试2', '测试3'], pay: '560', room: '豪华间1' },
-				{ start: '2025/6/25', end: '2025/7/1', pets: ['测试4'], pay: '180', room: '标准间3' }
+				{
+					start: '2025/8/25',
+					end: '2025/9/1',
+					pets: [
+						{
+							昵称: '测试6',
+							年龄: 12,
+							性别: 1,
+							品种: '梨花',
+							性格: '普通',
+							是否绝育: 1,
+							是否有耳螨: 0,
+							是否携带传染病: 1,
+							上一次驱虫时间: '',
+							上一次疫苗时间: '',
+							特殊要求: ''
+						}
+					],
+					pay: '560',
+					room: '豪华间1'
+				},
+				{
+					start: '2025/8/25',
+					end: '2025/9/1',
+					pets: [
+						{
+							昵称: '测试6',
+							年龄: 12,
+							性别: 1,
+							品种: '梨花',
+							性格: '普通',
+							是否绝育: 1,
+							是否有耳螨: 0,
+							是否携带传染病: 1,
+							上一次驱虫时间: '',
+							上一次疫苗时间: '',
+							特殊要求: ''
+						}
+					],
+					pay: '180',
+					room: '标准间3'
+				}
 			]
 		},
 		{
 			name: '测试7',
 			phone: '333333333',
 			orders: [
-				{ start: '2025/6/25', end: '2025/7/8', pets: ['测试22', '测试33'], pay: '560', room: '豪华间1' },
-				{ start: '2025/6/25', end: '2025/7/8', pets: ['测试445'], pay: '180', room: '标准间3' }
+				{
+					start: '2025/8/25',
+					end: '2025/9/8',
+					pets: [
+						{
+							昵称: '测试6',
+							年龄: 12,
+							性别: 1,
+							品种: '梨花',
+							性格: '普通',
+							是否绝育: 1,
+							是否有耳螨: 0,
+							是否携带传染病: 1,
+							上一次驱虫时间: '',
+							上一次疫苗时间: '',
+							特殊要求: ''
+						}
+					],
+					pay: '560',
+					room: '豪华间1'
+				},
+				{
+					start: '2025/8/25',
+					end: '2025/9/8',
+					pets: [
+						{
+							昵称: '测试6',
+							年龄: 12,
+							性别: 1,
+							品种: '梨花',
+							性格: '普通',
+							是否绝育: 1,
+							是否有耳螨: 0,
+							是否携带传染病: 1,
+							上一次驱虫时间: '',
+							上一次疫苗时间: '',
+							特殊要求: ''
+						}
+					],
+					pay: '180',
+					room: '标准间3'
+				}
 			]
 		}
 	],
-	'2025/7/3': [
+	'2025/7/13': [
 		{
 			name: '测试5',
 			phone: '222222222222',
-			orders: [{ start: '2025/7/3', end: '2025/7/10', pets: ['测试6'], pay: '160', room: '标准间1' }]
+			orders: [
+				{
+					start: '2025/7/13',
+					end: '2025/7/20',
+					pets: [
+						{
+							昵称: '测试4',
+							年龄: 12,
+							性别: 1,
+							品种: '梨花',
+							性格: '普通',
+							是否绝育: 1,
+							是否有耳螨: 0,
+							是否携带传染病: 1,
+							上一次驱虫时间: '',
+							上一次疫苗时间: '',
+							特殊要求: ''
+						}
+					],
+					pay: '160',
+					room: '标准间1'
+				}
+			]
 		}
 	]
 };
@@ -196,9 +307,13 @@ function 构造月(str) {
 	return result;
 }
 function 显示详情(detail) {
-	if(!detail) return
+	if (!detail) return;
 	详情.value.show = true;
 	详情.value.list = detail;
+}
+function 宠物详情(pets) {
+	详情.value.宠物详情显示 = true;
+	详情.value.宠物详情 = pets;
 }
 </script>
 
@@ -289,6 +404,9 @@ function 显示详情(detail) {
 				margin-left: auto;
 				color: #e54d42;
 				font-weight: bold;
+			}
+			.button {
+				color: #1989fa;
 			}
 		}
 	}

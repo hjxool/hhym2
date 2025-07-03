@@ -24,7 +24,7 @@
 	</view>
 
 	<van-popup :show="自定义.当前修改" position="bottom" custom-style="height: 684rpx;" @close="自定义.当前修改 = ''">
-		<van-datetime-picker :value="自定义.date" @confirm="确认($event)" type="date" :min-date="自定义.min" />
+		<van-datetime-picker :value="自定义.date" @confirm="确认($event)" type="date" :min-date="自定义.min" @cancel="自定义.当前修改 = ''" />
 	</van-popup>
 </template>
 
