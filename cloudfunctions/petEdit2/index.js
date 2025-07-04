@@ -17,12 +17,14 @@ exports.main = async (event, context) => {
 		type,
 		data
 	} = event
+	if (!type) return {
+		msg: '缺少type',
+		code: 400
+	}
 	// 先判断是否有该用户 如果没有则不能增删改宠物信息
-	let user = await 客户列表.where({
-		_id: OPENID
-	}).get().then(({
+	let user = await 客户列表.doc(OPENID).get().then(({
 		data
-	}) => data[0]).catch(err => false)
+	}) => data).catch(err => false)
 	if (!user) return {
 		msg: '用户不存在',
 		code: 400

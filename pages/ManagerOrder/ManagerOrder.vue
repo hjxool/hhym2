@@ -1,7 +1,7 @@
 <template>
 	<cusScrollView :加载="查询数据" class="scroll">
 		<view class="page colLayout">
-			<van-search class="noShrink" :value="关键字" @search="查询数据('刷新')" @clear="查询数据('刷新')" placeholder="客户名关键词" />
+			<van-search class="noShrink" :value="关键字" @search="查询数据('刷新')" @clear="查询数据('刷新')" placeholder="客户名或电话或宠物名" />
 
 			<view class="flexGrow">
 				<view class="viewBox">

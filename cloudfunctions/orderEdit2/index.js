@@ -6,7 +6,7 @@ cloud.init({
 	traceUser: true
 }); // 使用当前云环境
 const db = cloud.database();
-const 客户列表 = db.collection("customers2");
+const 订单列表 = db.collection("orders2");
 const _ = db.command; // 指令
 
 async function 分页查询(data) {
@@ -17,18 +17,14 @@ async function 分页查询(data) {
 			code: 400
 		}
 	}
+	let conditions = []
 	if (data.userId) {
-		return 客户列表.doc(data.userId).get().then(({
-			data
-		}) => ({
-			msg: '成功',
-			code: 200,
-			data
-		}))
+		conditions.push({
+			userId: data.userId
+		})
 	}
-	let collection = 客户列表
 	if (data.keyWords?.trim()) {
-		collection = 客户列表.where(_.or([{
+		conditions.push(_.or([{
 				name: db.RegExp({
 					regexp: keyWords,
 					options: 'i'
@@ -48,6 +44,19 @@ async function 分页查询(data) {
 			}
 		]))
 	}
+	let collection
+	switch (conditions.length) {
+		case 0:
+			collection = 订单列表
+			break
+		case 1:
+			collection = 订单列表.where(conditions[0])
+			break
+		default:
+			// 多个条件用and连接
+			collection = 订单列表.where(_.and(conditions))
+			break
+	}
 	return collection.skip((data.pageNum - 1) * data.pageSize).limit(data.pageSize).get().then(({
 		data
 	}) => ({
@@ -58,7 +67,7 @@ async function 分页查询(data) {
 }
 
 const keys = ['name', 'phone', 'pets']
-async function 新增用户(data) {
+async function 新增订单(data) {
 	// 校验
 	for (let key in data) {
 		if (!keys.includes(key)) {
@@ -69,67 +78,72 @@ async function 新增用户(data) {
 		}
 		if (!data[key]?.length) {
 			return {
-				msg: '创建用户错误',
+				msg: '创建订单错误',
 				code: 400
 			}
 		}
 	}
 	let {
+		room,
+		start,
+		end,
+		pay,
+		status,
 		userId,
 		name,
 		phone,
 		pets,
-		knowFrom
 	} = data
-	return 客户列表.add({
+	return 订单列表.add({
 		data: {
-			_id: userId,
+			room,
+			start: new Date(start),
+			end: new Date(end),
+			pay,
+			status,
+			userId,
 			name,
 			phone,
 			pets,
-			knowFrom: knowFrom || '',
-			// 添加初始化字段
-			orderCount: 0,
-			totalAmount: 0
 		}
 	}).then(() => ({
-		msg: '创建用户成功',
+		msg: '创建订单成功',
 		code: 200
 	}))
 }
 
-async function 编辑用户(data) {
-	if (!data.userId) {
+async function 编辑订单(data) {
+	if (!data._id) {
 		return {
-			msg: '缺少用户ID',
+			msg: '缺少订单ID',
 			code: 400
 		}
 	}
 	let d = {}
 	for (let key in data) {
-		if (key != '_id' && key != 'userId') {
+		if (key != '_id') {
 			d[key] = data[key]
 		}
 	}
-	return 客户列表.doc(data.userId).update({
+	return 订单列表.doc(data._id).update({
 		data: d
 	}).then(() => ({
-		msg: '更新用户成功',
+		msg: '更新订单成功',
 		code: 200
 	}))
 }
 
-async function 删除用户(data) {
+async function 删除订单(data) {
 	if (!data?.length) {
 		return {
-			msg: '缺少用户ID列表',
+			msg: '缺少订单ID列表',
 			code: 400
 		}
 	}
-	return 客户列表.where({
+	return 订单列表.where({
 		_id: _.in(data)
 	}).remove().then(() => ({
-		msg: '删除用户成功',
+		msg: '删除订单成功',
 		code: 200
 	}))
 }
@@ -149,26 +163,17 @@ exports.main = async (event, context) => {
 	}
 	let p
 	switch (type) {
-		case '个人信息':
-			p = 客户列表.doc(OPENID).get().then(({
-				data
-			}) => ({
-				msg: '成功',
-				code: 200,
-				data
-			}))
-			break
 		case '查询':
 			p = 分页查询(data)
 			break
 		case '新增':
-			p = 新增用户(data)
+			p = 新增订单(data)
 			break
 		case '编辑':
-			p = 编辑用户(data)
+			p = 编辑订单(data)
 			break
 		case '删除':
-			p = 删除用户(data)
+			p = 删除订单(data)
 			break
 	}
 	return p.catch(({

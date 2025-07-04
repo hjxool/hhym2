@@ -53,7 +53,8 @@ export default createStore({
 					}
 				]
 			},
-			宠物数量: 1
+			宠物数量: 1,
+			用户ID: ''
 		};
 	},
 	mutations: {
