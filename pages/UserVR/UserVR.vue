@@ -4,7 +4,7 @@
 		<!-- 热点 -->
 		<view class="hotspot textEllipsis" v-for="item in 房间[当前区域].hotspots" :style="热点显示(item)">
 			<view v-if="item.type == '区域'" class="area" @click="切换区域(item)">{{ item.label }}</view>
-			<view v-if="item.type == '房间'" class="room" @click="选择房间(item.label)">{{ item.label }}</view>
+			<view v-if="item.type == '房间'" class="room" @click="选择房间(item)">{{ item.label }}{{ item.disabled ? '(占用)' : '' }}</view>
 		</view>
 		<!-- 小地图 -->
 		<view class="minimap">
@@ -28,7 +28,7 @@
 <script setup>
 import { createScopedThreejs } from 'threejs-miniprogram';
 import Controller from '/Api/threeJS控制器.js';
-import { getCurrentInstance, onBeforeUnmount, ref } from 'vue';
+import { getCurrentInstance, onBeforeUnmount, ref, watch } from 'vue';
 import { 弹窗 } from '/Api/提示.js';
 import Notify from '/Components/notify/notify.vue';
 import { useStore } from 'vuex';
@@ -37,7 +37,7 @@ import { useStore } from 'vuex';
 const instance = getCurrentInstance().proxy;
 const channel = instance.getOpenerEventChannel();
 let 前一页;
-channel.on('前一页', (data) => {
+channel.on('前一页', data => {
 	前一页 = data;
 });
 const store = useStore();
@@ -70,6 +70,22 @@ const loading = ref(true);
 const 模糊过渡 = ref(false);
 
 let 所选房间;
+
+// 房间可用状态改变 则更新热点信息
+watch(
+	() => store.state.房间可用状态列表,
+	value => {
+		for (let [, val] of Object.entries(房间.value)) {
+			for (let val2 of val.hotspots) {
+				if (val2.type == '房间') {
+					let find = value.find(e => e.name == val2.label);
+					find && (val2.disabled = find.disabled);
+				}
+			}
+		}
+	},
+	{ immediate: true }
+);
 
 onBeforeUnmount(() => {
 	// 页面关闭时卸载渲染任务 否则会一直执行
@@ -145,9 +161,9 @@ function 添加房间信息() {
 		大厅: {
 			img: 'https://636c-cloud1-0gzy726e39ba4d96-1320186052.tcb.qcloud.la/%E5%A4%A7%E5%8E%85.jpg?sign=4698aec1129c91668d43e40d4e3c316f&t=1749536714',
 			hotspots: [
-				{ label: '标准间1', position: new THREE.Vector3(-2, 0.5, 1.5), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间' },
+				{ label: '标准间1', position: new THREE.Vector3(-2, 0.5, 1.5), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间', disabled: false },
 				{ label: '娱乐室', position: new THREE.Vector3(1.8, 0.3, -1.2), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '区域' },
-				{ label: '标准间2', position: new THREE.Vector3(0, 0, -1), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间' }
+				{ label: '标准间2', position: new THREE.Vector3(0, 0, -1), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间', disabled: false }
 			],
 			mapPosition: { x: 37, y: 70, deg: 0 },
 			初始朝向: 180 // 相机朝向与小地图扇形偏差角度
@@ -164,7 +180,7 @@ function 场景内添加几何体() {
 	const geometry = new THREE.SphereGeometry(50, 60, 40);
 	// 反转几何体使贴图在内部
 	geometry.scale(-1, 1, 1);
-	textureLoader.load(房间.value[当前区域.value].img, (newTexture) => {
+	textureLoader.load(房间.value[当前区域.value].img, newTexture => {
 		const material = new THREE.MeshBasicMaterial({ map: newTexture });
 		VR.几何体 = new THREE.Mesh(geometry, material);
 		VR.场景.add(VR.几何体);
@@ -232,7 +248,7 @@ function 切换区域(spot) {
 	textureLoader.load(
 		房间.value[当前区域.value].img,
 		// 加载图片回调
-		(newTexture) => {
+		newTexture => {
 			let { x, y, deg } = 房间.value[当前区域.value].mapPosition;
 			小地图定位.value.x = x;
 			小地图定位.value.y = y;
@@ -266,8 +282,9 @@ function 选择房间(value) {
 			所选房间 = '';
 			break;
 		default:
-			所选房间 = value;
-			弹窗(`确认选择 ${value} ？`, '确认');
+			if (value.disabled) return;
+			所选房间 = value.label;
+			弹窗(`确认选择 ${所选房间} ？`, '确认');
 			break;
 	}
 }

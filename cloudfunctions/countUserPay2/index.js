@@ -11,9 +11,6 @@ const _ = db.command; // 指令
 
 // 云函数入口函数
 exports.main = async (event, context) => {
-	const {
-		OPENID
-	} = cloud.getWXContext();
 	let {
 		userId
 	} = event
@@ -22,7 +19,8 @@ exports.main = async (event, context) => {
 		code: 400
 	}
 	let res = await 订单列表.where({
-		userId
+		userId,
+		status: 1 // 只统计已确认订单
 	}).get().then(({
 		data
 	}) => data).catch(({
@@ -35,12 +33,23 @@ exports.main = async (event, context) => {
 		return res
 	}
 	let totalAmount = res.data.reduce((pre, cur) => pre + cur.pay, 0)
-	return {
-		msg: '成功',
-		code: 200,
+	// 更新客户信息
+	return cloud.callFunction({
+		name: 'userEdit2',
 		data: {
-			totalAmount,
-			orderCount: res.data.length
+			type: '编辑',
+			data: {
+				userId,
+				orderCount: res.data.length,
+				totalAmount,
+			}
 		}
-	}
+	}).then(({
+		result
+	}) => result).catch(({
+		message
+	}) => ({
+		msg: message,
+		code: 400,
+	}))
 };

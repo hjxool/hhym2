@@ -10,6 +10,9 @@ import {
 	计算天数,
 	一天
 } from '../Api/时间参数.js'
+import {
+	请求接口
+} from '/Api/请求接口.js';
 
 export default createStore({
 	state() {
@@ -54,7 +57,8 @@ export default createStore({
 				]
 			},
 			宠物数量: 1,
-			用户ID: ''
+			用户ID: '',
+			房间可用状态列表: []
 		};
 	},
 	mutations: {
@@ -143,6 +147,25 @@ export default createStore({
 		},
 		总天数(state) {
 			return 计算天数(state.日期.入住, state.日期.离店)
+		}
+	},
+	actions: {
+		async 更新房间可用状态({
+			state,
+			commit
+		}) {
+			if (state.日期.入住 && state.日期.离店) {
+				let res = await 请求接口('useableRoom2', {
+					start: state.日期.入住,
+					end: state.日期.离店
+				})
+				if (res) {
+					commit('setState', {
+						key: '房间可用状态列表',
+						value: res
+					})
+				}
+			}
 		}
 	}
 });

@@ -57,7 +57,7 @@ async function 分页查询(data) {
 	}))
 }
 
-const keys = ['name', 'phone', 'pets']
+const keys = ['userId', 'name', 'phone', 'pets']
 async function 新增用户(data) {
 	// 校验
 	for (let key in data) {
@@ -69,7 +69,7 @@ async function 新增用户(data) {
 		}
 		if (!data[key]?.length) {
 			return {
-				msg: '创建用户错误',
+				msg: '有参数为空',
 				code: 400
 			}
 		}
@@ -108,7 +108,7 @@ async function 编辑用户(data) {
 	let d = {}
 	for (let key in data) {
 		if (key != '_id' && key != 'userId') {
-			d[key] = data[key]
+			d[key] = data[key] || ''
 		}
 	}
 	return 客户列表.doc(data.userId).update({
@@ -136,9 +136,6 @@ async function 删除用户(data) {
 
 // 云函数入口函数
 exports.main = async (event, context) => {
-	const {
-		OPENID
-	} = cloud.getWXContext();
 	let {
 		type,
 		data
@@ -150,7 +147,7 @@ exports.main = async (event, context) => {
 	let p
 	switch (type) {
 		case '个人信息':
-			p = 客户列表.doc(OPENID).get().then(({
+			p = 客户列表.doc(data.userId).get().then(({
 				data
 			}) => ({
 				msg: '成功',

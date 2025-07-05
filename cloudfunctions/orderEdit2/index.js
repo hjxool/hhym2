@@ -9,6 +9,22 @@ const db = cloud.database();
 const 订单列表 = db.collection("orders2");
 const _ = db.command; // 指令
 
+function 更新用户费用(userId) {
+	return cloud.callFunction({
+		name: 'countUserPay2',
+		data: {
+			userId,
+		}
+	}).then(({
+		result
+	}) => result).catch(({
+		message
+	}) => ({
+		msg: message,
+		code: 400
+	}))
+}
+
 async function 分页查询(data) {
 	// 校验必需字段
 	if (!data.pageSize || !data.pageNum) {
@@ -44,6 +60,28 @@ async function 分页查询(data) {
 			}
 		]))
 	}
+	// 时间不能直接赋值
+	if (data.start) {
+		// 开始时间之后的订单
+		let t = new Date(event.start)
+		if (isNaN(t.getTime())) return {
+			msg: '日期格式不正确',
+			code: 400
+		}
+		conditions.push({
+			end: _.gte(t)
+		})
+	}
+	if (data.end) {
+		let t = new Date(event.end)
+		if (isNaN(t.getTime())) return {
+			msg: '日期格式不正确',
+			code: 400
+		}
+		conditions.push({
+			start: _.lte(t)
+		})
+	}
 	let collection
 	switch (conditions.length) {
 		case 0:
@@ -62,11 +100,22 @@ async function 分页查询(data) {
 	}) => ({
 		msg: '成功',
 		code: 200,
-		data
+		data: data.map(e => {
+			let d = {
+				...e
+			}
+			// 注意 订单时间是Date对象 查询回来的结果会转成 ISO 8601 格式的字符串
+			// 因此要单独处理下
+			let t = new Date(e.start)
+			d.start = `${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()}`
+			t = new Date(e.end)
+			d.end = `${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()}`
+			return d
+		})
 	}))
 }
 
-const keys = ['name', 'phone', 'pets']
+const keys = ['room', 'start', 'end', 'pay', 'status', 'userId', 'name', 'phone', 'pets']
 async function 新增订单(data) {
 	// 校验
 	for (let key in data) {
@@ -76,40 +125,36 @@ async function 新增订单(data) {
 				code: 400
 			}
 		}
-		if (!data[key]?.length) {
+		if (key != 'status' && !data[key]?.length) {
 			return {
-				msg: '创建订单错误',
+				msg: '订单参数为空',
 				code: 400
 			}
 		}
 	}
-	let {
-		room,
-		start,
-		end,
-		pay,
-		status,
-		userId,
-		name,
-		phone,
-		pets,
-	} = data
 	return 订单列表.add({
 		data: {
-			room,
-			start: new Date(start),
-			end: new Date(end),
-			pay,
-			status,
-			userId,
-			name,
-			phone,
-			pets,
+			room: data.room,
+			start: new Date(data.start),
+			end: new Date(data.end),
+			pay: data.pay,
+			status: data.status,
+			userId: data.userId,
+			name: data.name,
+			phone: data.phone,
+			pets: data.pets,
 		}
-	}).then(() => ({
-		msg: '创建订单成功',
-		code: 200
-	}))
+	}).then(() => {
+		if (data.status == 1) {
+			// 添加的是已完成订单 则更新用户信息
+			return 更新用户费用(data.userId)
+		} else {
+			return {
+				msg: '创建订单成功',
+				code: 200
+			}
+		}
+	})
 }
 
 async function 编辑订单(data) {
@@ -122,15 +167,30 @@ async function 编辑订单(data) {
 	let d = {}
 	for (let key in data) {
 		if (key != '_id') {
-			d[key] = data[key]
+			if (key == 'start' || key == 'end') {
+				let t = new Date(data[key])
+				if (isNaN(t.getTime())) return {
+					msg: '日期格式错误',
+					code: 400
+				}
+				d[key] = t
+			} else {
+				d[key] = data[key]
+			}
 		}
 	}
 	return 订单列表.doc(data._id).update({
 		data: d
-	}).then(() => ({
-		msg: '更新订单成功',
-		code: 200
-	}))
+	}).then(() => {
+		if (data.status == 1) {
+			return 更新用户费用(data.userId)
+		} else {
+			return {
+				msg: '更新订单成功',
+				code: 200
+			}
+		}
+	})
 }
 
 async function 删除订单(data) {

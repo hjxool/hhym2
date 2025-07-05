@@ -126,7 +126,7 @@ function 显示弹窗(type, value) {
 			编辑.value.当前编辑类型 = type;
 			编辑.value.日期选择器标题 = type == 'start' ? '起始日期' : '结束日期';
 			编辑.value.显示日期 = true;
-			编辑.value.日期 = new Date(value[type]).getTime();
+			编辑.value.日期 = value[type] ? new Date(value[type]).getTime() : Date.now();
 			break;
 		case '选择日期':
 			编辑.value.显示日期 = false;

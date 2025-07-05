@@ -30,7 +30,7 @@
 
 			<view class="formBox noShrink" @click="跳转('VR')">
 				<view class="title">房间</view>
-				<view class="color1" style="justify-self: end">{{ 房间 }}</view>
+				<view class="color1" :style="{ color: 房间.disabled ? '#999' : '' }" style="justify-self: end">{{ 房间.name }}{{ 房间.disabled ? '(占用)' : '' }}</view>
 			</view>
 
 			<view class="formBox noShrink">
@@ -74,7 +74,7 @@
 </template>
 
 <script setup>
-import { computed, getCurrentInstance, ref } from 'vue';
+import { computed, getCurrentInstance, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import CusCalendar from '/Components/cusCalendar/cusCalendar.vue';
 import Notify from '/Components/notify/notify.vue';
@@ -97,7 +97,7 @@ const form = ref({
 const 总价 = computed(() => {
 	if (!form.value.宠物列表.length) return 0;
 	let { 标准间优惠, 豪华间优惠 } = store.getters.折扣总价;
-	let t = 房间.value.substring(0, 3);
+	let t = 房间.value.name.substring(0, 3);
 	return t == '标准间' ? 标准间优惠 * 100 : 豪华间优惠 * 100;
 });
 const 提示 = computed(() => {
@@ -118,7 +118,10 @@ const 日期 = computed(() => {
 	return `${start[0]}年${start[1]}月${start[2]}日 ~ ${end[0]}年${end[1]}月${end[2]}日`;
 });
 const 显示日历 = ref(false);
-const 房间 = ref('标准间1');
+const 房间 = ref({
+	name: '标准间1',
+	disabled: false
+});
 const 房间最大数量 = {
 	标准间: 2,
 	豪华间: 4
@@ -127,7 +130,7 @@ let 当前操作;
 
 查询宠物();
 
-channel.on('数据', (data) => {
+channel.on('数据', data => {
 	if (data) {
 		store.commit('setState', {
 			key: '日期',
@@ -137,21 +140,35 @@ channel.on('数据', (data) => {
 			}
 		});
 
-		房间.value = data.房间名;
+		房间.value.name = data.房间名;
 		form.value.联系人 = data.联系人;
 		form.value.联系号 = data.联系号;
 		form.value.从何 = data.从何;
 		for (let val of form.value.宠物列表) {
-			if (data.寄养宠物.find((e) => e == val.name)) {
+			if (data.寄养宠物.find(e => e == val.name)) {
 				val.选中 = true;
 			}
 		}
 		勾选宠物();
 	}
 });
-channel.on('房间', (data) => {
-	房间.value = data;
+channel.on('房间', data => {
+	// 能跳转过来的 肯定是可用房间
+	房间.value.name = data;
+	房间.value.disabled = false;
 });
+
+// 如果重选了日期 则房间可用状态也会变
+// 因此需要在房间可用状态改变时 重新判断当前房间是否可用
+watch(
+	() => store.state.更新房间可用状态,
+	value => {
+		let find = value.find(e => e.name == 房间.value.name);
+		房间.value.disabled = find.disabled;
+	},
+	// 除了从VR跳转过来 还可能从重新预定跳转过来 因此要更新房间可用状态
+	{ immediate: true }
+);
 
 // 方法
 function 提交() {
@@ -179,8 +196,15 @@ function 提交() {
 	if (!count) {
 		消息('请至少勾选一个宠物', '失败');
 		return;
-	} else if (count > 房间最大数量[房间.value]) {
-		消息(`当前房间类型不允许超过 ${房间最大数量[房间.value]} 只`, '失败');
+	} else {
+		let max = 房间最大数量[房间.value.name.substring(0, 3)];
+		if (count > max) {
+			消息(`当前房间类型不允许超过 ${max} 只`, '失败');
+			return;
+		}
+	}
+	if (房间.value.disabled) {
+		消息('所选房间在当前时段不可用', '失败');
 		return;
 	}
 	setTimeout(() => {
@@ -199,7 +223,7 @@ function 勾选宠物(type, args) {
 		case '全选':
 			let { detail } = args;
 			form.value.全选 = detail;
-			form.value.宠物列表.forEach((e) => {
+			form.value.宠物列表.forEach(e => {
 				e.选中 = form.value.全选;
 			});
 			break;
@@ -213,7 +237,7 @@ function 勾选宠物(type, args) {
 		value: count || 1 // 最少也是1
 	});
 	// 看是否全选
-	let t = form.value.宠物列表.find((e) => e.选中 == false);
+	let t = form.value.宠物列表.find(e => e.选中 == false);
 	if (t) {
 		form.value.全选 = false;
 	} else {
@@ -239,7 +263,7 @@ function 操作宠物(type, index) {
 					switch (res.type) {
 						case '添加':
 							// 宠物名作为唯一ID 需要验证
-							if (form.value.宠物列表.find((e) => e.name == res.data.name)) {
+							if (form.value.宠物列表.find(e => e.name == res.data.name)) {
 								消息('昵称重复了哦', '失败');
 								return;
 							}
@@ -283,7 +307,9 @@ function 跳转(type) {
 				},
 				events: {
 					房间(data) {
-						房间.value = data;
+						// 能跳转回来的肯定是可用房间
+						房间.value.name = data;
+						房间.value.disabled = false;
 					}
 				}
 			});
