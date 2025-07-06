@@ -71,22 +71,6 @@ const 模糊过渡 = ref(false);
 
 let 所选房间;
 
-// 房间可用状态改变 则更新热点信息
-watch(
-	() => store.state.房间可用状态列表,
-	value => {
-		for (let [, val] of Object.entries(房间.value)) {
-			for (let val2 of val.hotspots) {
-				if (val2.type == '房间') {
-					let find = value.find(e => e.name == val2.label);
-					find && (val2.disabled = find.disabled);
-				}
-			}
-		}
-	},
-	{ immediate: true }
-);
-
 onBeforeUnmount(() => {
 	// 页面关闭时卸载渲染任务 否则会一直执行
 	canvas节点.cancelAnimationFrame(renderId);
@@ -150,7 +134,7 @@ function 初始化(res) {
 	VR.场景.add(arrowX);
 	VR.场景.add(arrowY);
 	VR.场景.add(arrowZ);
-
+	// 初始化后才有的THREE
 	添加房间信息();
 	场景内添加几何体();
 
@@ -163,7 +147,18 @@ function 添加房间信息() {
 			hotspots: [
 				{ label: '标准间1', position: new THREE.Vector3(-2, 0.5, 1.5), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间', disabled: false },
 				{ label: '娱乐室', position: new THREE.Vector3(1.8, 0.3, -1.2), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '区域' },
-				{ label: '标准间2', position: new THREE.Vector3(0, 0, -1), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间', disabled: false }
+				{ label: '标准间2', position: new THREE.Vector3(0, 0, -1), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间', disabled: false },
+				{ label: '标准间3', position: new THREE.Vector3(1, 0, -1), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间', disabled: false },
+				{ label: '标准间4', position: new THREE.Vector3(1, 0.2, -1), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间', disabled: false },
+				{ label: '标准间5', position: new THREE.Vector3(1, 0.1, -1), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间', disabled: false },
+				{ label: '标准间6', position: new THREE.Vector3(0.5, 0.2, -1), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间', disabled: false },
+				{ label: '标准间7', position: new THREE.Vector3(0.8, 0.1, 1), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间', disabled: false },
+				{ label: '标准间8', position: new THREE.Vector3(0.3, 0.4, -1), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间', disabled: false },
+				{ label: '标准间9', position: new THREE.Vector3(0.3, 0, -1), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间', disabled: false },
+				{ label: '标准间10', position: new THREE.Vector3(0.8, 0, -1), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间', disabled: false },
+				{ label: '标准间11', position: new THREE.Vector3(1, 0.45, -1), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间', disabled: false },
+				{ label: '豪华间1', position: new THREE.Vector3(0.6, 0.6, 1), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间', disabled: false },
+				{ label: '豪华间2', position: new THREE.Vector3(0.33, 0.33, 1.5), opacity: 0, screenPosition: { x: 0, y: 0 }, type: '房间', disabled: false }
 			],
 			mapPosition: { x: 37, y: 70, deg: 0 },
 			初始朝向: 180 // 相机朝向与小地图扇形偏差角度
@@ -175,6 +170,21 @@ function 添加房间信息() {
 			初始朝向: 180
 		}
 	};
+	// 房间可用状态改变 则更新热点信息
+	watch(
+		() => store.state.房间可用状态列表,
+		value => {
+			for (let [, val] of Object.entries(房间.value)) {
+				for (let val2 of val.hotspots) {
+					if (val2.type == '房间') {
+						let find = value.find(e => e.name == val2.label);
+						find && (val2.disabled = find.disabled);
+					}
+				}
+			}
+		},
+		{ immediate: true }
+	);
 }
 function 场景内添加几何体() {
 	const geometry = new THREE.SphereGeometry(50, 60, 40);

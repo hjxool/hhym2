@@ -47,9 +47,9 @@ exports.main = async (event, context) => {
 	}).then(({
 		result
 	}) => result).catch(({
-		message
+		errMsg
 	}) => ({
-		msg: message,
+		msg: errMsg,
 		code: 400,
 	}))
 };

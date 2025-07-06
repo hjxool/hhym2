@@ -13,7 +13,7 @@ async function 分页查询(data) {
 	// 校验必需字段
 	if (!data.pageSize || !data.pageNum) {
 		return {
-			msg: '缺少参数',
+			msg: '查询用户参数缺失',
 			code: 400
 		}
 	}

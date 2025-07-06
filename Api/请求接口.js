@@ -10,6 +10,7 @@ export async function 请求接口(name, data) {
 	if (data) {
 		options['data'] = data
 	}
+	console.log(`${name}接口请求参数`, data)
 	return wx.cloud.callFunction(options)
 		.then(({
 			result: {
@@ -18,6 +19,7 @@ export async function 请求接口(name, data) {
 				data
 			}
 		}) => {
+			console.log(`${name}接口返回数据`, data)
 			if (code == 200) {
 				return data
 			} else {
@@ -25,8 +27,10 @@ export async function 请求接口(name, data) {
 				return false
 			}
 		})
-		.catch(err => {
-			弹窗(err)
+		.catch(({
+			errMsg
+		}) => {
+			弹窗(errMsg)
 			return false
 		})
 }

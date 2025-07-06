@@ -6,7 +6,7 @@ cloud.init({
 	traceUser: true
 }); // 使用当前云环境
 const db = cloud.database();
-const 客户列表 = db.collection("customers2");
+const 订单列表 = db.collection("orders2");
 const _ = db.command; // 指令
 
 const 房间 = []
@@ -21,27 +21,26 @@ for (var i = 1; i <= 2; i++) {
 exports.main = async (event, context) => {
 	// 校验必要字段
 	if (!event.start || !event.end) return {
-		msg: '缺少日期',
+		msg: '可用房间查询缺少日期',
 		code: 400
 	}
 	let start = new Date(event.start)
 	let end = new Date(event.end)
 	if (isNaN(start.getTime()) || isNaN(end.getTime())) return {
-		msg: '日期格式不正确',
+		msg: '可用房间查询日期格式不正确',
 		code: 400
 	}
-	let res = await cloud.callFunction({
-		name: 'orderEdit2',
-		data: {
-			type: '查询',
-			data: {
-				start: event.start,
-				end: event.end
-			}
-		}
-	}).then(({
-		result
-	}) => result).catch(({
+	// 订单查询接口是分页查询 不适合用在这 因此重写一遍查询
+	let res = await 订单列表.where({
+		start: _.lte(end),
+		end: _.gte(start)
+	}).get().then(({
+		data
+	}) => ({
+		msg: '可用房间查询成功',
+		code: 200,
+		data
+	})).catch(({
 		message
 	}) => ({
 		msg: message,

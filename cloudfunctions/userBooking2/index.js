@@ -6,7 +6,6 @@ cloud.init({
 	traceUser: true
 }); // 使用当前云环境
 const db = cloud.database();
-const 订单列表 = db.collection("customers2");
 const _ = db.command; // 指令
 
 // 云函数入口函数
@@ -27,14 +26,14 @@ exports.main = async (event, context) => {
 	}).then(({
 		result
 	}) => result).catch(({
-		message
+		errMsg
 	}) => ({
-		msg: message,
+		msg: errMsg,
 		code: 400
 	}))
 	if (res1.code != 200) return res1
 	if (!res1.data) {
-		// 用户不存在 则创建用户记录 然后创建订单
+		// 用户不存在 则创建用户记录
 		let res2 = await cloud.callFunction({
 			name: 'userEdit2',
 			data: {
@@ -50,9 +49,9 @@ exports.main = async (event, context) => {
 		}).then(({
 			result
 		}) => result).catch(({
-			message
+			errMsg
 		}) => ({
-			msg: message,
+			msg: errMsg,
 			code: 400
 		}))
 		if (res2.code != 200) return res2
@@ -72,9 +71,9 @@ exports.main = async (event, context) => {
 		}).then(({
 			result
 		}) => result).catch(({
-			message
+			errMsg
 		}) => ({
-			msg: message,
+			msg: errMsg,
 			code: 400
 		}))
 		if (res2.code != 200) return res2
@@ -99,9 +98,9 @@ exports.main = async (event, context) => {
 	}).then(({
 		result
 	}) => result).catch(({
-		message
+		errMsg
 	}) => ({
-		msg: message,
+		msg: errMsg,
 		code: 400
 	}))
 };

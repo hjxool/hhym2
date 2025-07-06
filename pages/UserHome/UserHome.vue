@@ -8,11 +8,14 @@
 			<van-tabbar-item name="订单" :info="导航页.num" icon="todo-list-o">我的订单</van-tabbar-item>
 		</van-tabbar>
 	</view>
+
+	<Notify />
 </template>
 
 <script setup>
 import UserReserve from '/Components/userReserve/userReserve.vue';
 import UserOrderList from '/Components/userOrderList/userOrderList.vue';
+import Notify from '/Components/notify/notify.vue';
 import { onBeforeUnmount, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -48,7 +51,8 @@ watch(
 	() => store.state.日期,
 	() => {
 		store.dispatch('更新房间可用状态');
-	}
+	},
+	{ immediate: true }
 );
 
 // 方法

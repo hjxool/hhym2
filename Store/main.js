@@ -91,7 +91,7 @@ export default createStore({
 			for (let val of state.费用.规则) {
 				if (val.type == '按天数' && total >= val.大于 && 最低折扣 > val.折扣) {
 					// 如果达到某一天数界限 且 最低折扣大于该天数对应折扣 则更新最低折扣
-					最低折扣 = discount
+					最低折扣 = val.折扣
 				}
 			}
 			let 单天额外费用 = 30 * (state.宠物数量 - 1)

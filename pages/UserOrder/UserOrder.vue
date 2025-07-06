@@ -163,8 +163,10 @@ channel.on('房间', data => {
 watch(
 	() => store.state.更新房间可用状态,
 	value => {
-		let find = value.find(e => e.name == 房间.value.name);
-		房间.value.disabled = find.disabled;
+		if (value?.length) {
+			let find = value.find(e => e.name == 房间.value.name);
+			房间.value.disabled = find.disabled;
+		}
 	},
 	// 除了从VR跳转过来 还可能从重新预定跳转过来 因此要更新房间可用状态
 	{ immediate: true }

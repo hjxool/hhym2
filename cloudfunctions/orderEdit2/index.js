@@ -18,9 +18,9 @@ function 更新用户费用(userId) {
 	}).then(({
 		result
 	}) => result).catch(({
-		message
+		errMsg
 	}) => ({
-		msg: message,
+		msg: errMsg,
 		code: 400
 	}))
 }
@@ -29,7 +29,7 @@ async function 分页查询(data) {
 	// 校验必需字段
 	if (!data.pageSize || !data.pageNum) {
 		return {
-			msg: '缺少参数',
+			msg: '订单查询参数缺失',
 			code: 400
 		}
 	}
