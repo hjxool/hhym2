@@ -30,6 +30,7 @@ export async function 请求接口(name, data) {
 		.catch(({
 			errMsg
 		}) => {
+			console.log(`${name}接口请求异常`, errmsg)
 			弹窗(errMsg)
 			return false
 		})

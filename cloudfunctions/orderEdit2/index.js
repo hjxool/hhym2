@@ -63,7 +63,7 @@ async function 分页查询(data) {
 	// 时间不能直接赋值
 	if (data.start) {
 		// 开始时间之后的订单
-		let t = new Date(event.start)
+		let t = new Date(data.start)
 		if (isNaN(t.getTime())) return {
 			msg: '日期格式不正确',
 			code: 400
@@ -73,7 +73,7 @@ async function 分页查询(data) {
 		})
 	}
 	if (data.end) {
-		let t = new Date(event.end)
+		let t = new Date(data.end)
 		if (isNaN(t.getTime())) return {
 			msg: '日期格式不正确',
 			code: 400
@@ -95,23 +95,29 @@ async function 分页查询(data) {
 			collection = 订单列表.where(_.and(conditions))
 			break
 	}
-	return collection.skip((data.pageNum - 1) * data.pageSize).limit(data.pageSize).get().then(({
-		data
-	}) => ({
+	return Promise.all([
+		订单列表.count(),
+		collection.skip((data.pageNum - 1) * data.pageSize).limit(data.pageSize).get().then(({
+			data
+		}) => data)
+	]).then(([totalRes, dataRes]) => ({
 		msg: '成功',
 		code: 200,
-		data: data.map(e => {
-			let d = {
-				...e
-			}
-			// 注意 订单时间是Date对象 查询回来的结果会转成 ISO 8601 格式的字符串
-			// 因此要单独处理下
-			let t = new Date(e.start)
-			d.start = `${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()}`
-			t = new Date(e.end)
-			d.end = `${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()}`
-			return d
-		})
+		data: {
+			total: totalRes.total || 0,
+			data: dataRes.map(e => {
+				let d = {
+					...e
+				}
+				// 注意 订单时间是Date对象 查询回来的结果会转成 ISO 8601 格式的字符串
+				// 因此要单独处理下
+				let t = new Date(e.start)
+				d.start = `${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()}`
+				t = new Date(e.end)
+				d.end = `${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()}`
+				return d
+			}),
+		}
 	}))
 }
 

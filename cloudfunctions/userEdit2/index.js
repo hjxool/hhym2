@@ -17,15 +17,6 @@ async function 分页查询(data) {
 			code: 400
 		}
 	}
-	if (data.userId) {
-		return 客户列表.doc(data.userId).get().then(({
-			data
-		}) => ({
-			msg: '成功',
-			code: 200,
-			data
-		}))
-	}
 	let collection = 客户列表
 	if (data.keyWords?.trim()) {
 		collection = 客户列表.where(_.or([{
@@ -48,13 +39,19 @@ async function 分页查询(data) {
 			}
 		]))
 	}
-	return collection.skip((data.pageNum - 1) * data.pageSize).limit(data.pageSize).get().then(({
-		data
-	}) => ({
+	return Promise.all([
+		客户列表.count(),
+		collection.skip((data.pageNum - 1) * data.pageSize).limit(data.pageSize).get().then(({
+			data
+		}) => data)
+	]).then(([totalRes, dataRes]) => {
 		msg: '成功',
 		code: 200,
-		data
-	}))
+		data: {
+			total: totalRes.total || 0,
+			data: dataRes
+		}
+	})
 }
 
 const keys = ['userId', 'name', 'phone', 'pets']
@@ -147,6 +144,10 @@ exports.main = async (event, context) => {
 	let p
 	switch (type) {
 		case '个人信息':
+			if (!data.userId) return {
+				msg: '个人信息缺少ID',
+				code: 400
+			}
 			p = 客户列表.doc(data.userId).get().then(({
 				data
 			}) => ({

@@ -6,7 +6,7 @@
 			<view v-if="form.宠物列表.length" class="petBox">
 				<view class="gap" v-for="(item, index) in form.宠物列表" :key="item.name">
 					<Swipe :right="200" :disable="item.选中">
-						<view class="pet rowLayout" :class="{ selected: item.选中 }" @click="勾选宠物('单选', item)">🐱 {{ item.name }} - {{ item.品种 }}</view>
+						<view class="pet rowLayout" :class="{ selected: item.选中 }" @click="勾选宠物('单选', item)">🐱 {{ item.name }} - {{ item.breed }}</view>
 
 						<template #right>
 							<view class="edit">
@@ -80,6 +80,7 @@ import CusCalendar from '/Components/cusCalendar/cusCalendar.vue';
 import Notify from '/Components/notify/notify.vue';
 import Swipe from '/Components/swipe/swipe.vue';
 import { 消息, 弹窗 } from '/Api/提示.js';
+import { 请求接口 } from '/Api/请求接口.js';
 
 // 属性
 const instance = getCurrentInstance().proxy;
@@ -128,31 +129,33 @@ const 房间最大数量 = {
 };
 let 当前操作;
 
-查询宠物();
+let 是否为新用户;
+查询用户();
 
-channel.on('数据', data => {
+channel.on('数据', (data) => {
 	if (data) {
 		store.commit('setState', {
 			key: '日期',
 			value: {
-				入住: data.入住.replaceAll('-', '/'),
-				离店: data.离店.replaceAll('-', '/')
+				入住: data.start.replaceAll('-', '/'),
+				离店: data.end.replaceAll('-', '/')
 			}
 		});
 
-		房间.value.name = data.房间名;
-		form.value.联系人 = data.联系人;
-		form.value.联系号 = data.联系号;
-		form.value.从何 = data.从何;
+		房间.value.name = data.room;
+		// 用户信息从接口查询
+		// form.value.联系人 = data.name;
+		// form.value.联系号 = data.phone;
+		// form.value.从何 = data.从何;
 		for (let val of form.value.宠物列表) {
-			if (data.寄养宠物.find(e => e == val.name)) {
+			if (data.pets.find((e) => e.name == val.name)) {
 				val.选中 = true;
 			}
 		}
 		勾选宠物();
 	}
 });
-channel.on('房间', data => {
+channel.on('房间', (data) => {
 	// 能跳转过来的 肯定是可用房间
 	房间.value.name = data;
 	房间.value.disabled = false;
@@ -162,18 +165,14 @@ channel.on('房间', data => {
 // 因此需要在房间可用状态改变时 重新判断当前房间是否可用
 watch(
 	() => store.state.更新房间可用状态,
-	value => {
-		if (value?.length) {
-			let find = value.find(e => e.name == 房间.value.name);
-			房间.value.disabled = find.disabled;
-		}
-	},
-	// 除了从VR跳转过来 还可能从重新预定跳转过来 因此要更新房间可用状态
-	{ immediate: true }
+	(value) => {
+		let find = value.find((e) => e.name == 房间.value.name);
+		房间.value.disabled = find.disabled;
+	}
 );
 
 // 方法
-function 提交() {
+async function 提交() {
 	let reg = /^[\u4E00-\u9FA5A-Za-z0-9]+$/;
 	if (!reg.test(form.value.联系人)) {
 		消息('联系人 只能用中英文以及数字', '失败');
@@ -209,13 +208,47 @@ function 提交() {
 		消息('所选房间在当前时段不可用', '失败');
 		return;
 	}
+	uni.showLoading({
+		title: '预约中...'
+	});
+	let selectedPets = [];
+	let pets = [];
+	for (let val of form.value.宠物列表) {
+		let t = {};
+		for (let [key, value] in Object.entries(val)) {
+			if (key != '选中') {
+				t[key] = value;
+			}
+		}
+		pets.push(t);
+		if (val.选中) {
+			selectedPets.push(t);
+		}
+	}
+	let data = {
+		userId: store.state.用户ID,
+		name: form.value.联系人,
+		phone: form.value.联系号,
+		knowFrom: form.value.从何,
+		room: 房间.value.name,
+		start: store.state.日期.入住,
+		end: store.state.日期.离店,
+		pay: 总价.value / 100,
+		selectedPets
+	};
+	// 如果是新用户 则携带所有创建的宠物 以及勾选的宠物
+	// 注册过的用户 则只携带勾选的宠物
+	if (是否为新用户) {
+		data['pets'] = pets;
+	}
+	let res = await 请求接口('userBooking2', data);
+	uni.hideLoading();
+	if (res.code != 200) return;
+	消息('预约成功');
+	uni.$emit('未读消息', '新增');
 	setTimeout(() => {
-		消息('预约成功');
-		uni.$emit('未读消息', '新增');
-		setTimeout(() => {
-			uni.navigateBack({ delta: 3 });
-		}, 1000);
-	}, 500);
+		uni.navigateBack({ delta: 3 });
+	}, 1000);
 }
 function 勾选宠物(type, args) {
 	switch (type) {
@@ -225,7 +258,7 @@ function 勾选宠物(type, args) {
 		case '全选':
 			let { detail } = args;
 			form.value.全选 = detail;
-			form.value.宠物列表.forEach(e => {
+			form.value.宠物列表.forEach((e) => {
 				e.选中 = form.value.全选;
 			});
 			break;
@@ -239,7 +272,7 @@ function 勾选宠物(type, args) {
 		value: count || 1 // 最少也是1
 	});
 	// 看是否全选
-	let t = form.value.宠物列表.find(e => e.选中 == false);
+	let t = form.value.宠物列表.find((e) => e.选中 == false);
 	if (t) {
 		form.value.全选 = false;
 	} else {
@@ -261,13 +294,25 @@ function 操作宠物(type, index) {
 				type == '编辑' && res.eventChannel.emit('数据', form.value.宠物列表[index]);
 			},
 			events: {
-				数据(res) {
+				async 数据(res) {
 					switch (res.type) {
 						case '添加':
 							// 宠物名作为唯一ID 需要验证
-							if (form.value.宠物列表.find(e => e.name == res.data.name)) {
+							if (form.value.宠物列表.find((e) => e.name == res.data.name)) {
 								消息('昵称重复了哦', '失败');
 								return;
+							}
+							// 不是新用户 需要发请求
+							if (!是否为新用户) {
+								uni.showLoading({
+									title: ''
+								});
+								let res = await 请求接口('petEdit2', {
+									type: '新增',
+									data: { ...res.data }
+								});
+								uni.hideLoading();
+								if (res.code != 200) return;
 							}
 							form.value.宠物列表.push({ ...res.data, 选中: false });
 							消息(`添加 ${res.data.name} 成功`);
@@ -280,11 +325,40 @@ function 操作宠物(type, index) {
 									return;
 								}
 							}
+							if (!是否为新用户) {
+								// 注意 要把表单中的选中属性去除
+								let data = {};
+								for (let key in res.data) {
+									if (key != '选中') {
+										data[key] = res.data[key];
+									}
+								}
+								uni.showLoading({
+									title: ''
+								});
+								let res = await 请求接口('petEdit2', {
+									type: '编辑',
+									data
+								});
+								uni.hideLoading();
+								if (res.code != 200) return;
+							}
 							消息(`修改 ${res.data.name} 信息成功`);
-							// 发送到宠物表单时 已经将选中属性携带过去了
+							// 发送到宠物表单时 已经将选中属性携带过去了 不需要再次添加
 							form.value.宠物列表.splice(index, 1, res.data);
 							break;
 						case '删除':
+							if (!是否为新用户) {
+								uni.showLoading({
+									title: ''
+								});
+								let res = await 请求接口('petEdit2', {
+									type: '删除',
+									data: { name: res.data.name }
+								});
+								uni.hideLoading();
+								if (res.code != 200) return;
+							}
 							form.value.宠物列表.splice(index, 1);
 							消息(`删除 ${res.data.name} 信息成功`);
 							break;
@@ -318,12 +392,42 @@ function 跳转(type) {
 			break;
 	}
 }
-function 查询宠物() {
-	form.value.宠物列表 = [{ name: '测试2', age: 11, 性别: 0, 品种: '11', 性格: '22', 绝育: 0, 耳螨: 0, 传染病: 0, 驱虫: '44', 疫苗: '55', 要求: '' }];
+async function 查询用户() {
+	uni.showLoading({
+		title: ''
+	});
+	console.log('其他页面是否能拿到用户id', store.state.用户ID);
+	let res = await 请求接口('userEdit2', {
+		type: '个人信息',
+		data: {
+			userId: store.state.用户ID
+		}
+	});
+	uni.hideLoading();
+	是否为新用户 = true;
+	if (res) {
+		是否为新用户 = false;
+		form.value.联系人 = res.name;
+		form.value.联系号 = res.phone;
+		form.value.宠物列表 = res.pets.map((e) => ({ 选中: false, ...e }));
+		form.value.从何 = res.knowFrom;
+	}
 }
-function 确认弹窗() {
+async function 确认弹窗() {
 	let name = form.value.宠物列表[当前操作].name;
+	if (!是否为新用户) {
+		uni.showLoading({
+			title: ''
+		});
+		let res = await 请求接口('petEdit2', {
+			type: '删除',
+			data: { name }
+		});
+		uni.hideLoading();
+		if (res.code != 200) return;
+	}
 	form.value.宠物列表.splice(当前操作, 1);
+	// 确认弹窗和消息提示时间重叠 导致消息无法显示 需要延迟显示
 	setTimeout(() => {
 		消息(`删除 ${name} 信息成功`);
 	}, 500);

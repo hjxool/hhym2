@@ -37,7 +37,7 @@ import { useStore } from 'vuex';
 const instance = getCurrentInstance().proxy;
 const channel = instance.getOpenerEventChannel();
 let 前一页;
-channel.on('前一页', data => {
+channel.on('前一页', (data) => {
 	前一页 = data;
 });
 const store = useStore();
@@ -173,11 +173,11 @@ function 添加房间信息() {
 	// 房间可用状态改变 则更新热点信息
 	watch(
 		() => store.state.房间可用状态列表,
-		value => {
+		(value) => {
 			for (let [, val] of Object.entries(房间.value)) {
 				for (let val2 of val.hotspots) {
 					if (val2.type == '房间') {
-						let find = value.find(e => e.name == val2.label);
+						let find = value.find((e) => e.name == val2.label);
 						find && (val2.disabled = find.disabled);
 					}
 				}
@@ -190,7 +190,7 @@ function 场景内添加几何体() {
 	const geometry = new THREE.SphereGeometry(50, 60, 40);
 	// 反转几何体使贴图在内部
 	geometry.scale(-1, 1, 1);
-	textureLoader.load(房间.value[当前区域.value].img, newTexture => {
+	textureLoader.load(房间.value[当前区域.value].img, (newTexture) => {
 		const material = new THREE.MeshBasicMaterial({ map: newTexture });
 		VR.几何体 = new THREE.Mesh(geometry, material);
 		VR.场景.add(VR.几何体);
@@ -258,7 +258,7 @@ function 切换区域(spot) {
 	textureLoader.load(
 		房间.value[当前区域.value].img,
 		// 加载图片回调
-		newTexture => {
+		(newTexture) => {
 			let { x, y, deg } = 房间.value[当前区域.value].mapPosition;
 			小地图定位.value.x = x;
 			小地图定位.value.y = y;

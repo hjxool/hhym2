@@ -37,28 +37,28 @@ const channel = instance.getOpenerEventChannel();
 const 表单 = ref([
 	{ label: '昵称', type: 'input', 属性: 'name', placeholder: '必填' },
 	{ label: '年龄', type: 'input', 属性: 'age', placeholder: '必填' },
-	{ label: '性别', type: 'button', 属性: '性别', value0: '母', value1: '公' },
-	{ label: '品种', type: 'input', 属性: '品种', placeholder: '必填' },
-	{ label: '性格', type: 'input', 属性: '性格' },
-	{ label: '是否绝育', type: 'button', 属性: '绝育', value0: '否', value1: '是' },
-	{ label: '是否有耳螨', type: 'button', 属性: '耳螨', value0: '否', value1: '是' },
-	{ label: '是否携带猫藓、猫瘟、鼻支等传染病', type: 'button', 属性: '传染病', value0: '否', value1: '是' },
-	{ label: '上一次驱虫时间', type: 'input', 属性: '驱虫' },
-	{ label: '上一次疫苗时间', type: 'input', 属性: '疫苗', placeholder: '低于八月龄小猫需抗体检测记录' },
-	{ label: '特殊要求(喂药、生骨肉等)', type: 'textarea', 属性: '要求' }
+	{ label: '性别', type: 'button', 属性: 'gender', value0: '母', value1: '公' },
+	{ label: '品种', type: 'input', 属性: 'breed', placeholder: '必填' },
+	{ label: '性格', type: 'input', 属性: 'temperament' },
+	{ label: '是否绝育', type: 'button', 属性: 'isNeutered', value0: '否', value1: '是' },
+	{ label: '是否有耳螨', type: 'button', 属性: 'hasEarMites', value0: '否', value1: '是' },
+	{ label: '是否携带猫藓、猫瘟、鼻支等传染病', type: 'button', 属性: 'hasInfectiousDisease', value0: '否', value1: '是' },
+	{ label: '上一次驱虫时间', type: 'input', 属性: 'lastDewormingDate' },
+	{ label: '上一次疫苗时间', type: 'input', 属性: 'lastVaccinationDate', placeholder: '低于八月龄小猫需抗体检测记录' },
+	{ label: '特殊要求(喂药、生骨肉等)', type: 'textarea', 属性: 'specialRequirements' }
 ]);
 const form = ref({
 	name: '',
 	age: '',
-	性别: 0,
-	品种: '',
-	性格: '',
-	绝育: 0,
-	耳螨: 0,
-	传染病: 0,
-	驱虫: '',
-	疫苗: '',
-	要求: ''
+	gender: 0,
+	breed: '',
+	temperament: '',
+	isNeutered: 0,
+	hasEarMites: 0,
+	hasInfectiousDisease: 0,
+	lastDewormingDate: '',
+	lastVaccinationDate: '',
+	specialRequirements: ''
 });
 const 操作类型 = ref('');
 
@@ -89,7 +89,7 @@ function 操作(type) {
 	}
 	channel.emit('数据', {
 		type,
-		data: form.value
+		data: { ...form.value }
 	});
 	uni.navigateBack();
 }
