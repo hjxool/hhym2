@@ -34,9 +34,18 @@
 import cusScrollView from '/Components/cusScrollView/cusScrollView.vue';
 import Notify from '/Components/notify/notify.vue';
 import { 消息, 弹窗 } from '/Api/提示.js';
-import { ref } from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
+import { useStore } from 'vuex';
+
+onBeforeUnmount(() => {
+	store.commit('setState', {
+		key: '提示.show',
+		value: false
+	});
+});
 
 // 属性
+const store = useStore();
 const 导航栏 = ref({
 	active: '相册',
 	options: ['相册', '房间']

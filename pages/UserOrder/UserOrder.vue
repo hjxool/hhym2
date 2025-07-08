@@ -74,13 +74,20 @@
 </template>
 
 <script setup>
-import { computed, getCurrentInstance, ref, watch } from 'vue';
+import { computed, getCurrentInstance, onBeforeUnmount, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import CusCalendar from '/Components/cusCalendar/cusCalendar.vue';
 import Notify from '/Components/notify/notify.vue';
 import Swipe from '/Components/swipe/swipe.vue';
 import { 消息, 弹窗 } from '/Api/提示.js';
 import { 请求接口 } from '/Api/请求接口.js';
+
+onBeforeUnmount(() => {
+	store.commit('setState', {
+		key: '提示.show',
+		value: false
+	});
+});
 
 // 属性
 const instance = getCurrentInstance().proxy;
@@ -128,6 +135,7 @@ const 房间最大数量 = {
 	豪华间: 4
 };
 let 当前操作;
+const 重新预约宠物数据 = ref([]);
 
 let 是否为新用户;
 查询用户();
@@ -143,16 +151,9 @@ channel.on('数据', (data) => {
 		});
 
 		房间.value.name = data.room;
-		// 用户信息从接口查询
-		// form.value.联系人 = data.name;
-		// form.value.联系号 = data.phone;
-		// form.value.从何 = data.从何;
-		for (let val of form.value.宠物列表) {
-			if (data.pets.find((e) => e.name == val.name)) {
-				val.选中 = true;
-			}
-		}
-		勾选宠物();
+		// 因为每次都是新打开预约界面 因此会自动调用查询用户信息 不需要手动再调
+		// 注意 这里因为页面初始就会执行 此时还没有数据 要等数据回来了再执行
+		重新预约宠物数据.value = data.pets;
 	}
 });
 channel.on('房间', (data) => {
@@ -168,6 +169,20 @@ watch(
 	(value) => {
 		let find = value.find((e) => e.name == 房间.value.name);
 		房间.value.disabled = find.disabled;
+	}
+);
+// 有时候通道数据并不总是比请求回来的快 因此改为监听
+watch(
+	() => 重新预约宠物数据.value,
+	(value) => {
+		if (value?.length) {
+			for (let val of form.value.宠物列表) {
+				if (value.find((e) => e.name == val.name)) {
+					val.选中 = true;
+				}
+			}
+			勾选宠物();
+		}
 	}
 );
 
@@ -215,7 +230,7 @@ async function 提交() {
 	let pets = [];
 	for (let val of form.value.宠物列表) {
 		let t = {};
-		for (let [key, value] in Object.entries(val)) {
+		for (let [key, value] of Object.entries(val)) {
 			if (key != '选中') {
 				t[key] = value;
 			}
@@ -243,7 +258,7 @@ async function 提交() {
 	}
 	let res = await 请求接口('userBooking2', data);
 	uni.hideLoading();
-	if (res.code != 200) return;
+	if (!res) return;
 	消息('预约成功');
 	uni.$emit('未读消息', '新增');
 	setTimeout(() => {
@@ -307,12 +322,12 @@ function 操作宠物(type, index) {
 								uni.showLoading({
 									title: ''
 								});
-								let res = await 请求接口('petEdit2', {
+								let d = await 请求接口('petEdit2', {
 									type: '新增',
 									data: { ...res.data }
 								});
 								uni.hideLoading();
-								if (res.code != 200) return;
+								if (!d) return;
 							}
 							form.value.宠物列表.push({ ...res.data, 选中: false });
 							消息(`添加 ${res.data.name} 成功`);
@@ -336,12 +351,12 @@ function 操作宠物(type, index) {
 								uni.showLoading({
 									title: ''
 								});
-								let res = await 请求接口('petEdit2', {
+								let d = await 请求接口('petEdit2', {
 									type: '编辑',
 									data
 								});
 								uni.hideLoading();
-								if (res.code != 200) return;
+								if (!d) return;
 							}
 							消息(`修改 ${res.data.name} 信息成功`);
 							// 发送到宠物表单时 已经将选中属性携带过去了 不需要再次添加
@@ -352,12 +367,12 @@ function 操作宠物(type, index) {
 								uni.showLoading({
 									title: ''
 								});
-								let res = await 请求接口('petEdit2', {
+								let d = await 请求接口('petEdit2', {
 									type: '删除',
 									data: { name: res.data.name }
 								});
 								uni.hideLoading();
-								if (res.code != 200) return;
+								if (!d) return;
 							}
 							form.value.宠物列表.splice(index, 1);
 							消息(`删除 ${res.data.name} 信息成功`);
@@ -396,7 +411,6 @@ async function 查询用户() {
 	uni.showLoading({
 		title: ''
 	});
-	console.log('其他页面是否能拿到用户id', store.state.用户ID);
 	let res = await 请求接口('userEdit2', {
 		type: '个人信息',
 		data: {
@@ -409,6 +423,7 @@ async function 查询用户() {
 		是否为新用户 = false;
 		form.value.联系人 = res.name;
 		form.value.联系号 = res.phone;
+		console.log('此时有重新预约宠物数据吗', 重新预约宠物数据);
 		form.value.宠物列表 = res.pets.map((e) => ({ 选中: false, ...e }));
 		form.value.从何 = res.knowFrom;
 	}
@@ -424,7 +439,7 @@ async function 确认弹窗() {
 			data: { name }
 		});
 		uni.hideLoading();
-		if (res.code != 200) return;
+		if (!res) return;
 	}
 	form.value.宠物列表.splice(当前操作, 1);
 	// 确认弹窗和消息提示时间重叠 导致消息无法显示 需要延迟显示

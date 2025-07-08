@@ -72,6 +72,10 @@ const 模糊过渡 = ref(false);
 let 所选房间;
 
 onBeforeUnmount(() => {
+	store.commit('setState', {
+		key: '提示.show',
+		value: false
+	});
 	// 页面关闭时卸载渲染任务 否则会一直执行
 	canvas节点.cancelAnimationFrame(renderId);
 	// 避免多个控制器

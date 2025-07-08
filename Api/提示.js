@@ -27,7 +27,7 @@ export function 消息(msg, type = '成功') {
 			show: true,
 			msg,
 			type: '消息',
-			msgType: 消息类型[type],
+			msgType: 消息类型[type]
 		}
 	})
 }

@@ -17,7 +17,6 @@ async function 识别用户() {
 	let res = await 请求接口('isManager2');
 	uni.hideLoading();
 	// 保存当前用户id
-	console.log('是否拿到用户id', res.id);
 	store.commit('setState', {
 		key: '用户ID',
 		value: res.id

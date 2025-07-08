@@ -63,7 +63,7 @@ async function 分页查询(data) {
 	// 时间不能直接赋值
 	if (data.start) {
 		// 开始时间之后的订单
-		let t = new Date(data.start)
+		let t = new Date(`${data.start} 00:00:00`)
 		if (isNaN(t.getTime())) return {
 			msg: '日期格式不正确',
 			code: 400
@@ -73,7 +73,7 @@ async function 分页查询(data) {
 		})
 	}
 	if (data.end) {
-		let t = new Date(data.end)
+		let t = new Date(`${data.end} 00:00:00`)
 		if (isNaN(t.getTime())) return {
 			msg: '日期格式不正确',
 			code: 400
@@ -127,11 +127,11 @@ async function 新增订单(data) {
 	for (let key in data) {
 		if (!keys.includes(key)) {
 			return {
-				msg: '缺少参数',
+				msg: '新增订单参数不符',
 				code: 400
 			}
 		}
-		if (key != 'status' && !data[key]?.length) {
+		if ((key != 'status' && key != 'pay') && !data[key]?.length) {
 			return {
 				msg: '订单参数为空',
 				code: 400
@@ -141,8 +141,8 @@ async function 新增订单(data) {
 	return 订单列表.add({
 		data: {
 			room: data.room,
-			start: new Date(data.start),
-			end: new Date(data.end),
+			start: new Date(`${data.start} 00:00:00`),
+			end: new Date(`${data.end} 00:00:00`),
 			pay: data.pay,
 			status: data.status,
 			userId: data.userId,
@@ -174,7 +174,7 @@ async function 编辑订单(data) {
 	for (let key in data) {
 		if (key != '_id') {
 			if (key == 'start' || key == 'end') {
-				let t = new Date(data[key])
+				let t = new Date(`${data[key]} 00:00:00`)
 				if (isNaN(t.getTime())) return {
 					msg: '日期格式错误',
 					code: 400

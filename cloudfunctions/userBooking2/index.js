@@ -21,7 +21,9 @@ exports.main = async (event, context) => {
 		name: 'userEdit2',
 		data: {
 			type: '个人信息',
-			userId: event.userId
+			data: {
+				userId: event.userId
+			}
 		}
 	}).then(({
 		result
@@ -39,7 +41,7 @@ exports.main = async (event, context) => {
 			data: {
 				type: '新增',
 				data: {
-					_id: event.userId,
+					userId: event.userId,
 					name: event.name,
 					phone: event.phone,
 					pets: event.pets,

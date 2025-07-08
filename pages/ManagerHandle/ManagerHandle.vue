@@ -18,7 +18,7 @@
 					<view>
 						<view class="label">金额</view>
 
-						<view v-show="编辑.当前 != item.id" style="padding-top: 4rpx;">{{ item.pay }}</view>
+						<view v-show="编辑.当前 != item.id" style="padding-top: 4rpx">{{ item.pay }}</view>
 						<input v-show="编辑.当前 == item.id" v-model="编辑.金额" style="width: 70%" type="number" />
 					</view>
 				</view>
@@ -53,14 +53,23 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
 import cusScrollView from '/Components/cusScrollView/cusScrollView.vue';
 import Notify from '/Components/notify/notify.vue';
 import PetsDetail from '/Components/petsDetail/petsDetail.vue';
 import { 计算天数 } from '/Api/时间参数.js';
 import { 消息, 弹窗 } from '/Api/提示.js';
+import { useStore } from 'vuex';
+
+onBeforeUnmount(() => {
+	store.commit('setState', {
+		key: '提示.show',
+		value: false
+	});
+});
 
 // 属性
+const store = useStore();
 const 列表 = ref([
 	{
 		id: '1',

@@ -44,32 +44,35 @@ async function 分页查询(data) {
 		collection.skip((data.pageNum - 1) * data.pageSize).limit(data.pageSize).get().then(({
 			data
 		}) => data)
-	]).then(([totalRes, dataRes]) => {
+	]).then(([totalRes, dataRes]) => ({
 		msg: '成功',
 		code: 200,
 		data: {
 			total: totalRes.total || 0,
 			data: dataRes
 		}
-	})
+	}))
 }
 
 const keys = ['userId', 'name', 'phone', 'pets']
 async function 新增用户(data) {
-	// 校验
+	// 用户校验不同于订单 并不需要严格匹配对应参数 但是要确保必要参数
+	let count = 0
 	for (let key in data) {
-		if (!keys.includes(key)) {
-			return {
-				msg: '缺少参数',
-				code: 400
+		if (keys.includes(key)) {
+			count++
+			// 值判断必要参数不能为空
+			if (!data[key]?.length) {
+				return {
+					msg: '新增用户有参数为空',
+					code: 400
+				}
 			}
 		}
-		if (!data[key]?.length) {
-			return {
-				msg: '有参数为空',
-				code: 400
-			}
-		}
+	}
+	if (count != keys.length) return {
+		msg: '新增用户缺少必要参数',
+		code: 400
 	}
 	let {
 		userId,
@@ -148,12 +151,16 @@ exports.main = async (event, context) => {
 				msg: '个人信息缺少ID',
 				code: 400
 			}
-			p = 客户列表.doc(data.userId).get().then(({
+			// 这里不能用doc(data.userId) 因为查询并不一定要求非得有数据
+			// 有数据就回显 没数据就作为标识 但doc查询不到对应id会报错
+			p = 客户列表.where({
+				_id: data.userId
+			}).get().then(({
 				data
 			}) => ({
 				msg: '成功',
 				code: 200,
-				data
+				data: data[0]
 			}))
 			break
 		case '查询':

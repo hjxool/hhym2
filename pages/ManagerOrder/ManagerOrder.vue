@@ -23,7 +23,7 @@
 							</view>
 							<view>
 								<view class="title">宠物</view>
-								<view>{{ item.pets.map(e => e.昵称).join('、') }}</view>
+								<view>{{ item.pets.map((e) => e.昵称).join('、') }}</view>
 							</view>
 							<view>
 								<view class="title">金额</view>
@@ -55,13 +55,22 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
 import cusScrollView from '/Components/cusScrollView/cusScrollView.vue';
 import PetsDetail from '/Components/petsDetail/petsDetail.vue';
 import Notify from '/Components/notify/notify.vue';
 import { 消息 } from '/Api/提示.js';
+import { useStore } from 'vuex';
+
+onBeforeUnmount(() => {
+	store.commit('setState', {
+		key: '提示.show',
+		value: false
+	});
+});
 
 // 属性
+const store = useStore();
 const 关键字 = ref('');
 const 列表 = ref([
 	{

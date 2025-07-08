@@ -32,16 +32,13 @@
 		</cusScrollView>
 	</view>
 
-	<Notify @confirm="操作('确认')" @cancel="操作('撤销')" />
-
 	<PetsDetail :show="宠物详情.show" @close="宠物详情.show = false" :宠物列表="宠物详情.list" />
 </template>
 
 <script setup>
 import cusScrollView from '../cusScrollView/cusScrollView.vue';
 import PetsDetail from '/Components/petsDetail/petsDetail.vue';
-import Notify from '/Components/notify/notify.vue';
-import { 消息, 弹窗 } from '/Api/提示.js';
+import { 弹窗 } from '/Api/提示.js';
 import { 计算天数, 今天 } from '/Api/时间参数.js';
 import { ref } from 'vue';
 import { 请求接口 } from '/Api/请求接口.js';
@@ -70,6 +67,12 @@ const 分页 = {
 	pageSize: 20,
 	total: 0
 };
+
+// setup中子组件默认封闭 父组件无法直接访问子组件内容
+// 需要用defineExpose明确需要暴露的属性和方法
+defineExpose({
+	操作
+});
 
 // 方法
 function 切换过滤条件({ detail }) {
@@ -151,8 +154,8 @@ function 操作(type, item) {
 			请求接口('orderEdit2', {
 				type: '编辑',
 				data: {
-					_id: item._id,
-					status: item.status
+					_id: 当前操作订单._id,
+					status: 订单状态['已取消']
 				}
 			}).then((res) => {
 				uni.hideLoading();

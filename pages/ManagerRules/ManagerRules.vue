@@ -74,9 +74,18 @@
 import Notify from '/Components/notify/notify.vue';
 import { 消息, 弹窗 } from '/Api/提示.js';
 import { 今天 } from '/Api/时间参数.js';
-import { ref } from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
+import { useStore } from 'vuex';
+
+onBeforeUnmount(() => {
+	store.commit('setState', {
+		key: '提示.show',
+		value: false
+	});
+});
 
 // 属性
+const store = useStore();
 const form = ref({
 	标准间单价: 88,
 	豪华间单价: 118,

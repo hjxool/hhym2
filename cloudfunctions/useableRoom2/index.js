@@ -24,8 +24,8 @@ exports.main = async (event, context) => {
 		msg: '可用房间查询缺少日期',
 		code: 400
 	}
-	let start = new Date(event.start)
-	let end = new Date(event.end)
+	let start = new Date(`${event.start} 00:00:00`)
+	let end = new Date(`${event.end} 00:00:00`)
 	if (isNaN(start.getTime()) || isNaN(end.getTime())) return {
 		msg: '可用房间查询日期格式不正确',
 		code: 400

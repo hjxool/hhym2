@@ -27,10 +27,19 @@
 
 <script setup>
 import Notify from '/Components/notify/notify.vue';
-import { ref, getCurrentInstance } from 'vue';
+import { ref, getCurrentInstance, onBeforeUnmount } from 'vue';
 import { 消息 } from '/Api/提示.js';
+import { useStore } from 'vuex';
+
+onBeforeUnmount(() => {
+	store.commit('setState', {
+		key: '提示.show',
+		value: false
+	});
+});
 
 // 属性
+const store = useStore();
 const instance = getCurrentInstance().proxy;
 const channel = instance.getOpenerEventChannel();
 
