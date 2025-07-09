@@ -1,7 +1,7 @@
 <template>
 	<cusScrollView :加载="查询数据" class="scroll">
 		<view class="page">
-			<view class="card colLayout" v-for="item in 列表" :key="item.id">
+			<view class="card colLayout" v-for="item in 列表" :key="item._id">
 				<view class="viewBox">
 					<view>
 						<view class="label">姓名</view>
@@ -13,22 +13,24 @@
 					</view>
 					<view>
 						<view class="label">房间</view>
-						<view @click="显示弹窗('选择房间', item)" :style="{ color: 编辑.当前 == item.id ? '#faad14' : '' }">{{ item.room }}</view>
+
+						<view v-show="编辑.当前 != item._id">{{ item.room }}</view>
+						<view v-show="编辑.当前 == item._id" @click="显示弹窗('选择房间', item)" style="color: #faad14">{{ item.room }}</view>
 					</view>
 					<view>
 						<view class="label">金额</view>
 
-						<view v-show="编辑.当前 != item.id" style="padding-top: 4rpx">{{ item.pay }}</view>
-						<input v-show="编辑.当前 == item.id" v-model="编辑.金额" style="width: 70%" type="number" />
+						<view v-show="编辑.当前 != item._id" style="padding-top: 4rpx">{{ item.pay }}</view>
+						<input v-show="编辑.当前 == item._id" v-model="编辑.金额" style="width: 70%" type="number" />
 					</view>
 				</view>
 
 				<view class="rowLayout edit">
 					<van-button v-show="!编辑.当前" @click="编辑信息('编辑', item)" size="small" type="warning" plain>编辑</van-button>
-					<view v-show="编辑.当前 == item.id" class="button center" @click="编辑信息('确认', item)" style="background: #3981c6">
+					<view v-show="编辑.当前 == item._id" class="button center" @click="编辑信息('确认', item)" style="background: #3981c6">
 						<van-icon name="success" color="#fff" />
 					</view>
-					<view v-show="编辑.当前 == item.id" class="button center" @click="编辑.当前 = ''" style="background: #eee">
+					<view v-show="编辑.当前 == item._id" class="button center" @click="编辑.当前 = ''" style="background: #eee">
 						<van-icon name="cross" />
 					</view>
 
@@ -60,6 +62,7 @@ import PetsDetail from '/Components/petsDetail/petsDetail.vue';
 import { 计算天数 } from '/Api/时间参数.js';
 import { 消息, 弹窗 } from '/Api/提示.js';
 import { useStore } from 'vuex';
+import { 请求接口 } from '/Api/请求接口.js';
 
 onBeforeUnmount(() => {
 	store.commit('setState', {
@@ -70,43 +73,8 @@ onBeforeUnmount(() => {
 
 // 属性
 const store = useStore();
-const 列表 = ref([
-	{
-		id: '1',
-		name: '测试1',
-		start: '2025/6/27',
-		end: '2025/6/29',
-		room: '标准间1',
-		pay: 500,
-		pets: [
-			{
-				昵称: '测试3',
-				年龄: 1,
-				性别: 0,
-				品种: '银渐层',
-				性格: '普通',
-				是否绝育: 0,
-				是否有耳螨: 0,
-				是否携带传染病: 0,
-				上一次驱虫时间: '',
-				上一次疫苗时间: '',
-				特殊要求: '还的口味口哦懂啊水浇地哦嫁鸡随鸡爹较耐送到家哦i'
-			},
-			{ 昵称: '测试4', 年龄: 12, 性别: 1, 品种: '梨花', 性格: '普通', 是否绝育: 1, 是否有耳螨: 0, 是否携带传染病: 1, 上一次驱虫时间: '', 上一次疫苗时间: '', 特殊要求: '' }
-		]
-	},
-	{
-		id: '2',
-		name: '测试2',
-		start: '2025/7/1',
-		end: '2025/7/10',
-		room: '标准间3',
-		pay: 200,
-		pets: [
-			{ 昵称: '测试5', 年龄: 1, 性别: 0, 品种: '银渐层', 性格: '普通', 是否绝育: 0, 是否有耳螨: 0, 是否携带传染病: 0, 上一次驱虫时间: '', 上一次疫苗时间: '', 特殊要求: '' }
-		]
-	}
-]);
+
+const 列表 = ref([]);
 const 宠物详情 = ref({
 	show: false,
 	list: []
@@ -117,22 +85,54 @@ const 编辑 = ref({
 	显示房间列表: false,
 	金额: ''
 });
+const 分页 = {
+	pageNum: 1,
+	pageSize: 20,
+	total: 0
+};
 
 // 方法
 async function 查询数据(type) {
 	if (type == '刷新') {
-		return new Promise((a) => {
-			setTimeout(() => {
-				a();
-			}, 1000);
-		});
+		分页.pageNum = 1;
+		列表.value = [];
+	} else {
+		if (分页.pageNum < Math.ceil(分页.total / 分页.total)) {
+			分页.pageNum++;
+		} else {
+			// 已经是最后一页就不进行查询
+			return;
+		}
 	}
+	return 请求接口('orderEdit2', {
+		type: '查询',
+		data: {
+			pageSize: 分页.pageSize,
+			pageNum: 分页.pageNum,
+			status: 0
+		}
+	}).then(res => {
+		分页.total = res?.total || 0;
+		列表.value.push(...res.data);
+	});
 }
 function 显示弹窗(type, args) {
 	switch (type) {
 		case '宠物详情':
 			宠物详情.value.show = true;
-			宠物详情.value.list = args;
+			宠物详情.value.list = args.map(e => ({
+				昵称: e.name,
+				年龄: e.age,
+				性别: e.gender,
+				品种: e.breed,
+				性格: e.temperament,
+				是否绝育: e.isNeutered,
+				是否有耳螨: e.hasEarMites,
+				是否携带传染病: e.hasInfectiousDisease,
+				上一次驱虫时间: e.lastDewormingDate,
+				上一次疫苗时间: e.lastVaccinationDate,
+				特殊要求: e.specialRequirements
+			}));
 			break;
 		case '选择房间':
 			编辑.value.显示房间列表 = !编辑.value.显示房间列表;
@@ -148,7 +148,7 @@ function 显示弹窗(type, args) {
 					];
 				}, 1000);
 			} else {
-				列表.value.find((e) => e.id == 编辑.value.当前).room = args.detail.name;
+				列表.value.find(e => e._id == 编辑.value.当前).room = args.detail.name;
 				// 保存到服务器
 			}
 			break;
@@ -157,7 +157,7 @@ function 显示弹窗(type, args) {
 function 编辑信息(type, item) {
 	switch (type) {
 		case '编辑':
-			编辑.value.当前 = item.id;
+			编辑.value.当前 = item._id;
 			编辑.value.金额 = item.pay;
 			break;
 		case '确认':

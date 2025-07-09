@@ -34,11 +34,13 @@ async function 分页查询(data) {
 		}
 	}
 	let conditions = []
+	// 根据用户查询
 	if (data.userId) {
 		conditions.push({
 			userId: data.userId
 		})
 	}
+	// 关键字查询
 	if (data.keyWords?.trim()) {
 		conditions.push(_.or([{
 				name: db.RegExp({
@@ -60,7 +62,7 @@ async function 分页查询(data) {
 			}
 		]))
 	}
-	// 时间不能直接赋值
+	// 根据时间查询 时间不能直接赋值
 	if (data.start) {
 		// 开始时间之后的订单
 		let t = new Date(`${data.start} 00:00:00`)
@@ -82,6 +84,12 @@ async function 分页查询(data) {
 			start: _.lte(t)
 		})
 	}
+	// 根据订单状态查询
+	if (data.status !== undefined) {
+		conditions.push({
+			status: data.status
+		})
+	}
 	let collection
 	switch (conditions.length) {
 		case 0:
@@ -96,7 +104,7 @@ async function 分页查询(data) {
 			break
 	}
 	return Promise.all([
-		订单列表.count(),
+		collection.count(), // 应该按查询条件统计
 		collection.skip((data.pageNum - 1) * data.pageSize).limit(data.pageSize).get().then(({
 			data
 		}) => data)

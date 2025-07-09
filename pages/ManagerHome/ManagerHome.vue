@@ -11,7 +11,7 @@
 				<view class="border button colLayout" @click="跳转('待处理')">
 					<image class="icon" src="/Static/img/icon2.png" mode="aspectFit"></image>
 					<view class="title">待处理预约</view>
-					<view class="text">5个待处理</view>
+					<view class="text">{{ 待处理.total ? `${待处理.total} 个待处理` : '没有待处理的工作呦' }}</view>
 				</view>
 			</view>
 
@@ -34,6 +34,7 @@
 import cusScrollView from '/Components/cusScrollView/cusScrollView.vue';
 import cusECharts from '/Components/cusECharts/cusECharts.vue';
 import { ref } from 'vue';
+import { 请求接口 } from '/Api/请求接口.js';
 
 uni.hideHomeButton();
 // 属性
@@ -50,19 +51,31 @@ const 图表 = ref([
 	{ labels: ['q', 'w', 'e', 'r', 't', 'y', 'u'], values: [0, 200, 260, 690, 1000, 1330, 1320], 方向: '横' }
 ]);
 const 显示图表 = ref(false);
+const 待处理 = ref({
+	total: 0,
+	list: []
+});
 
 // 方法
 async function 查询数据(type) {
 	if (type == '刷新') {
 		显示图表.value = false;
-		return new Promise((a) => {
-			setTimeout(() => {
-				setTimeout(() => {
-					显示图表.value = true;
-				}, 800);
-				a();
-			}, 1000);
+		// 分别查询日期接口、订单接口、统计接口
+		请求接口('orderEdit2', {
+			type: '查询',
+			data: {
+				pageSize: 20,
+				pageNum: 1,
+				status: 0
+			}
+		}).then(res => {
+			待处理.value.total = res?.total || 0;
+			待处理.value.list = res.data;
 		});
+		// 统计接口查询完再显示图表
+		setTimeout(() => {
+			显示图表.value = true;
+		}, 800);
 	}
 }
 function 跳转(type) {
@@ -70,9 +83,6 @@ function 跳转(type) {
 		case '日历':
 			uni.navigateTo({
 				url: '/pages/ManagerCalendar/ManagerCalendar',
-				success(res) {
-					res.eventChannel.emit('数据');
-				},
 				events: {
 					数据(data) {}
 				}
@@ -81,10 +91,8 @@ function 跳转(type) {
 		case '待处理':
 			uni.navigateTo({
 				url: '/pages/ManagerHandle/ManagerHandle',
-				success(res) {
-					res.eventChannel.emit('数据');
-				},
 				events: {
+					// 处理完订单返回外层显示的数据
 					数据(data) {}
 				}
 			});

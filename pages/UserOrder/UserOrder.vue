@@ -92,8 +92,8 @@ onBeforeUnmount(() => {
 // 属性
 const instance = getCurrentInstance().proxy;
 const channel = instance.getOpenerEventChannel();
-
 const store = useStore();
+
 const form = ref({
 	宠物列表: [],
 	联系人: '',
