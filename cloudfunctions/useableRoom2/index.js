@@ -33,7 +33,8 @@ exports.main = async (event, context) => {
 	// 订单查询接口是分页查询 不适合用在这 因此重写一遍查询
 	let res = await 订单列表.where({
 		start: _.lte(end),
-		end: _.gte(start)
+		end: _.gte(start),
+		status: 1, // 只检索以确认订单
 	}).get().then(({
 		data
 	}) => ({

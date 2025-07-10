@@ -107,8 +107,13 @@ async function 编辑用户(data) {
 	}
 	let d = {}
 	for (let key in data) {
+		// 这类字段不允许更新
 		if (key != '_id' && key != 'userId') {
-			d[key] = data[key] || ''
+			if (typeof data[key] == 'number') {
+				d[key] = data[key]
+			} else {
+				d[key] = data[key] || ''
+			}
 		}
 	}
 	return 客户列表.doc(data.userId).update({

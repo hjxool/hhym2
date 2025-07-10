@@ -1,7 +1,7 @@
 <template>
 	<cusScrollView :加载="查询数据" class="scroll">
 		<view class="page">
-			<view class="card colLayout" v-for="item in 列表" :key="item._id">
+			<view class="card colLayout" v-for="(item, index) in 列表" :key="item._id">
 				<view class="viewBox">
 					<view>
 						<view class="label">姓名</view>
@@ -40,8 +40,8 @@
 				<view class="line"></view>
 
 				<view class="foot rowLayout">
-					<view class="button center" @click="审核('通过', item)" style="background: #3981c6; color: #fff">同意</view>
-					<view class="button center" @click="审核('拒绝', item)" style="background: #f4f3f3">拒绝</view>
+					<view class="button center" @click="审核('通过', index)" style="background: #3981c6; color: #fff">同意</view>
+					<view class="button center" @click="审核('拒绝', index)" style="background: #f4f3f3">拒绝</view>
 				</view>
 			</view>
 		</view>
@@ -49,9 +49,15 @@
 
 	<PetsDetail :show="宠物详情.show" @close="宠物详情.show = false" :宠物列表="宠物详情.list" />
 
-	<van-action-sheet :show="编辑.显示房间列表" :actions="编辑.房间列表" @close="编辑.显示房间列表 = false" @select="显示弹窗('选择房间', $event)" />
+	<van-action-sheet :show="编辑.显示房间列表" @close="编辑.显示房间列表 = false">
+		<view class="actionSheet">
+			<view class="center" v-for="item in 编辑.房间列表" :key="item.name" @click="显示弹窗('选择房间', item)" :style="{ color: item.disabled ? '#969799' : '' }">
+				{{ item.name }}
+			</view>
+		</view>
+	</van-action-sheet>
 
-	<Notify @confirm="弹窗操作('确认')" @cancel="弹窗操作('取消')" />
+	<Notify @confirm="确认弹窗()" />
 </template>
 
 <script setup>
@@ -89,6 +95,10 @@ const 分页 = {
 	pageNum: 1,
 	pageSize: 20,
 	total: 0
+};
+const 当前编辑 = {
+	index: '',
+	type: ''
 };
 
 // 方法
@@ -135,21 +145,13 @@ function 显示弹窗(type, args) {
 			}));
 			break;
 		case '选择房间':
-			编辑.value.显示房间列表 = !编辑.value.显示房间列表;
 			if (编辑.value.显示房间列表) {
-				编辑.value.房间列表 = [{ loading: true }];
-				setTimeout(() => {
-					// 根据开始结束时间查询房间可用情况
-					编辑.value.房间列表 = [
-						{ name: '标准间1', disabled: false },
-						{ name: '标准间2', disabled: true },
-						{ name: '标准间3', disabled: false },
-						{ name: '豪华间1', disabled: true }
-					];
-				}, 1000);
+				// 禁用项不能选
+				if (args.disabled) return;
+				编辑.value.显示房间列表 = false;
+				列表.value.find(e => e._id == 编辑.value.当前).room = args.name;
 			} else {
-				列表.value.find(e => e._id == 编辑.value.当前).room = args.detail.name;
-				// 保存到服务器
+				编辑.value.显示房间列表 = true;
 			}
 			break;
 	}
@@ -159,6 +161,12 @@ function 编辑信息(type, item) {
 		case '编辑':
 			编辑.value.当前 = item._id;
 			编辑.value.金额 = item.pay;
+			请求接口('useableRoom2', {
+				start: item.start,
+				end: item.end
+			}).then(res => {
+				编辑.value.房间列表 = res;
+			});
 			break;
 		case '确认':
 			let num = Number(编辑.value.金额);
@@ -168,22 +176,41 @@ function 编辑信息(type, item) {
 			}
 			item.pay = num;
 			编辑.value.当前 = '';
-			// 保存到服务器
+			请求接口('orderEdit2', {
+				type: '编辑',
+				data: {
+					_id: item._id,
+					pay: item.pay,
+					room: item.room
+				}
+			}).then(res => {
+				if (!res) {
+					查询数据('刷新');
+				}
+			});
 			break;
 	}
 }
-function 审核(type, item) {
+function 审核(type, index) {
+	当前编辑.index = index;
+	当前编辑.type = type;
+	let item = 列表.value[index];
 	弹窗(`确定 ${type} ${item.name} ${item.start}~${item.end} ${item.room} 的预约？`, '确认');
 }
-function 弹窗操作(type, item) {
-	switch (type) {
-		case '确认':
-			// 通过该订单 成功后删除该列表项
-			break;
-		case '取消':
-			// 拒绝该订单 成功后删除该列表项
-			break;
-	}
+function 确认弹窗() {
+	let item = 列表.value[当前编辑.index];
+	请求接口('orderEdit2', {
+		type: '编辑',
+		data: {
+			_id: item._id,
+			status: 当前编辑.type == '通过' ? 1 : -1,
+			userId: item.userId // 通过订单的话要统计用户支出
+		}
+	}).then(res => {
+		if (res) {
+			列表.value.splice(当前编辑, 1);
+		}
+	});
 }
 </script>
 
@@ -254,5 +281,11 @@ function 弹窗操作(type, item) {
 			}
 		}
 	}
+}
+.actionSheet {
+	max-height: 50vh;
+	overflow: auto;
+	display: grid;
+	grid-auto-rows: 100rpx;
 }
 </style>

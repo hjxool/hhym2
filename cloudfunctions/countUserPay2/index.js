@@ -6,7 +6,7 @@ cloud.init({
 	traceUser: true
 }); // 使用当前云环境
 const db = cloud.database();
-const 订单列表 = db.collection("customers2");
+const 订单列表 = db.collection("orders2");
 const _ = db.command; // 指令
 
 // 云函数入口函数
@@ -23,7 +23,11 @@ exports.main = async (event, context) => {
 		status: 1 // 只统计已确认订单
 	}).get().then(({
 		data
-	}) => data).catch(({
+	}) => ({
+		code: 200,
+		msg: '查询已确认订单成功',
+		data
+	})).catch(({
 		message
 	}) => ({
 		msg: message,

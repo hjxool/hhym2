@@ -105,7 +105,9 @@ async function 分页查询(data) {
 	}
 	return Promise.all([
 		collection.count(), // 应该按查询条件统计
-		collection.skip((data.pageNum - 1) * data.pageSize).limit(data.pageSize).get().then(({
+		// 注意订单应当倒序查找
+		collection.skip((data.pageNum - 1) * data.pageSize).limit(data.pageSize).orderBy('start', 'desc')
+		.get().then(({
 			data
 		}) => data)
 	]).then(([totalRes, dataRes]) => ({

@@ -29,9 +29,10 @@ const 导航页 = ref({
 });
 const ordersRef = ref(null);
 
-uni.$on('未读消息', (type) => {
+uni.$on('未读消息', type => {
 	switch (type) {
 		case '新增':
+			ordersRef.value.查询订单('刷新');
 			if (!导航页.value.num) {
 				导航页.value.num = 1;
 			} else {
