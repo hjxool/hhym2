@@ -160,10 +160,24 @@ async function 新增订单(data) {
 			phone: data.phone,
 			pets: data.pets,
 		}
-	}).then(() => {
+	}).then(async ({
+		_id
+	}) => {
+		// add成功后会返回新创建记录的文档ID
 		if (data.status == 1) {
 			// 添加的是已完成订单 则更新用户信息
-			return 更新用户费用(data.userId)
+			let res = await 更新用户费用(data.userId)
+			if (res.code != 200) {
+				// 回滚删除订单
+				return 订单列表.doc(_id).remove().then(() => ({
+					msg: '更新用户费用失败回滚订单成功',
+					code: 400
+				})).catch(() => ({
+					msg: '更新用户费用失败回滚订单失败',
+					code: 400
+				}))
+			}
+			return res
 		} else {
 			return {
 				msg: '创建订单成功',
@@ -197,9 +211,23 @@ async function 编辑订单(data) {
 	}
 	return 订单列表.doc(data._id).update({
 		data: d
-	}).then(() => {
+	}).then(async () => {
 		if (data.status == 1) {
-			return 更新用户费用(data.userId)
+			let res = await 更新用户费用(data.userId)
+			if (res.code != 200) {
+				return 订单列表.doc(data._id).update({
+					// 正常应该先存原始数据 此处还原 但是偷懒一下
+					// 因为使用场景只存在单独更新订单状态的情况
+					status: 0
+				}).then(() => ({
+					msg: '更新用户费用失败回滚订单成功',
+					code: 400
+				})).catch(() => ({
+					msg: '更新用户费用失败回滚订单失败',
+					code: 400
+				}))
+			}
+			return res
 		} else {
 			return {
 				msg: '更新订单成功',

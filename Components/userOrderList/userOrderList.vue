@@ -16,7 +16,7 @@
 						<view>{{ item.start }}至{{ item.end }}</view>
 						<view>共{{ 计算天数(item.start, item.end) }}天</view>
 						<view class="rowLayout">
-							<view>🐱 {{ item.pets.map(e => e.name).join('、') }}</view>
+							<view>🐱 {{ item.pets.map((e) => e.name).join('、') }}</view>
 							<view @click="操作('显示弹窗', item.pets)" style="color: #1989fa; margin-left: auto; font-size: 32rpx">查看</view>
 						</view>
 					</view>
@@ -83,7 +83,7 @@ function 切换过滤条件({ detail }) {
 			列表.value = 总列表;
 			break;
 		default:
-			列表.value = 总列表.filter(e => e.status == 订单状态[detail.title]);
+			列表.value = 总列表.filter((e) => e.status == 订单状态[detail.title]);
 			break;
 	}
 }
@@ -123,7 +123,7 @@ async function 查询订单(type) {
 			if (过滤显示.value.select == '全部') {
 				列表.value = 总列表;
 			} else {
-				列表.value = 总列表.filter(e => e.status == 订单状态[过滤显示.value.select]);
+				列表.value = 总列表.filter((e) => e.status == 订单状态[过滤显示.value.select]);
 			}
 			if (过滤显示.value.select == '全部' || 过滤显示.value.select == '待确认') {
 				uni.$emit('未读消息', '已读');
@@ -135,7 +135,7 @@ async function 查询订单(type) {
 				列表.value.push(...res.data);
 			} else {
 				// 其他类别下 返回的数据过滤后再添加到显示列表
-				let list = res.data.filter(e => e.status == 订单状态[过滤显示.value.select]);
+				let list = res.data.filter((e) => e.status == 订单状态[过滤显示.value.select]);
 				列表.value.push(...list);
 			}
 		}
@@ -150,7 +150,8 @@ function 操作(type, item) {
 		case '确认':
 			// 请求接口后更改订单状态 不用刷新 避免调两次接口
 			uni.showLoading({
-				title: ''
+				title: '',
+				mask: true
 			});
 			请求接口('orderEdit2', {
 				type: '编辑',
@@ -158,7 +159,7 @@ function 操作(type, item) {
 					_id: 当前操作订单._id,
 					status: 订单状态['已取消']
 				}
-			}).then(res => {
+			}).then((res) => {
 				uni.hideLoading();
 				if (res) {
 					当前操作订单.status = 订单状态['已取消'];
@@ -178,7 +179,7 @@ function 操作(type, item) {
 			break;
 		case '显示弹窗':
 			宠物详情.value.show = true;
-			宠物详情.value.list = item.map(e => ({
+			宠物详情.value.list = item.map((e) => ({
 				昵称: e.name,
 				年龄: e.age,
 				性别: e.gender,

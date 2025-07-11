@@ -85,7 +85,8 @@ onBeforeUnmount(() => {
 // 方法
 function 初始化(res) {
 	uni.showLoading({
-		title: '加载中...'
+		title: '加载中...',
+		mask: true
 	});
 	// 获取元素节点 但是不同于浏览器环境 所以不能直接用
 	canvas节点 = res[0].node;
@@ -250,7 +251,8 @@ function 更新热点数据() {
 function 切换区域(spot) {
 	模糊过渡.value = true;
 	uni.showLoading({
-		title: '加载中...'
+		title: '加载中...',
+		mask: true
 	});
 
 	当前区域.value = spot.label;

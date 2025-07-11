@@ -61,7 +61,7 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, ref } from 'vue';
+import { getCurrentInstance, onBeforeUnmount, ref } from 'vue';
 import cusScrollView from '/Components/cusScrollView/cusScrollView.vue';
 import Notify from '/Components/notify/notify.vue';
 import PetsDetail from '/Components/petsDetail/petsDetail.vue';
@@ -75,10 +75,13 @@ onBeforeUnmount(() => {
 		key: '提示.show',
 		value: false
 	});
+	channel.emit('待处理', 列表.value.length);
 });
 
 // 属性
 const store = useStore();
+const instance = getCurrentInstance().proxy;
+const channel = instance.getOpenerEventChannel();
 
 const 列表 = ref([]);
 const 宠物详情 = ref({
@@ -121,7 +124,7 @@ async function 查询数据(type) {
 			pageNum: 分页.pageNum,
 			status: 0
 		}
-	}).then(res => {
+	}).then((res) => {
 		分页.total = res?.total || 0;
 		列表.value.push(...res.data);
 	});
@@ -130,7 +133,7 @@ function 显示弹窗(type, args) {
 	switch (type) {
 		case '宠物详情':
 			宠物详情.value.show = true;
-			宠物详情.value.list = args.map(e => ({
+			宠物详情.value.list = args.map((e) => ({
 				昵称: e.name,
 				年龄: e.age,
 				性别: e.gender,
@@ -149,7 +152,7 @@ function 显示弹窗(type, args) {
 				// 禁用项不能选
 				if (args.disabled) return;
 				编辑.value.显示房间列表 = false;
-				列表.value.find(e => e._id == 编辑.value.当前).room = args.name;
+				列表.value.find((e) => e._id == 编辑.value.当前).room = args.name;
 			} else {
 				编辑.value.显示房间列表 = true;
 			}
@@ -164,7 +167,7 @@ function 编辑信息(type, item) {
 			请求接口('useableRoom2', {
 				start: item.start,
 				end: item.end
-			}).then(res => {
+			}).then((res) => {
 				编辑.value.房间列表 = res;
 			});
 			break;
@@ -176,6 +179,10 @@ function 编辑信息(type, item) {
 			}
 			item.pay = num;
 			编辑.value.当前 = '';
+			uni.showLoading({
+				title: '',
+				mask: true
+			});
 			请求接口('orderEdit2', {
 				type: '编辑',
 				data: {
@@ -183,7 +190,8 @@ function 编辑信息(type, item) {
 					pay: item.pay,
 					room: item.room
 				}
-			}).then(res => {
+			}).then((res) => {
+				uni.hideLoading();
 				if (!res) {
 					查询数据('刷新');
 				}
@@ -198,6 +206,10 @@ function 审核(type, index) {
 	弹窗(`确定 ${type} ${item.name} ${item.start}~${item.end} ${item.room} 的预约？`, '确认');
 }
 function 确认弹窗() {
+	uni.showLoading({
+		title: '',
+		mask: true
+	});
 	let item = 列表.value[当前编辑.index];
 	请求接口('orderEdit2', {
 		type: '编辑',
@@ -206,7 +218,8 @@ function 确认弹窗() {
 			status: 当前编辑.type == '通过' ? 1 : -1,
 			userId: item.userId // 通过订单的话要统计用户支出
 		}
-	}).then(res => {
+	}).then((res) => {
+		uni.hideLoading()
 		if (res) {
 			列表.value.splice(当前编辑, 1);
 		}

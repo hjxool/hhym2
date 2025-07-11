@@ -13,7 +13,10 @@ const store = useStore();
 
 // 方法
 async function 识别用户() {
-	uni.showLoading();
+	uni.showLoading({
+		title: '',
+		mask: true
+	});
 	let res = await 请求接口('isManager2');
 	uni.hideLoading();
 	// 保存当前用户id

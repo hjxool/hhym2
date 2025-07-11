@@ -137,7 +137,7 @@ const 房间最大数量 = {
 let 当前操作;
 const 重新预约宠物数据 = ref([]);
 
-channel.on('数据', data => {
+channel.on('数据', (data) => {
 	if (data) {
 		store.commit('setState', {
 			key: '日期',
@@ -153,7 +153,7 @@ channel.on('数据', data => {
 		重新预约宠物数据.value = data.pets;
 	}
 });
-channel.on('房间', data => {
+channel.on('房间', (data) => {
 	// 能跳转过来的 肯定是可用房间
 	房间.value.name = data;
 	房间.value.disabled = false;
@@ -163,8 +163,8 @@ channel.on('房间', data => {
 // 因此需要在房间可用状态改变时 重新判断当前房间是否可用
 watch(
 	() => store.state.更新房间可用状态,
-	value => {
-		let find = value.find(e => e.name == 房间.value.name);
+	(value) => {
+		let find = value.find((e) => e.name == 房间.value.name);
 		房间.value.disabled = find.disabled;
 	}
 );
@@ -210,7 +210,8 @@ async function 提交() {
 		return;
 	}
 	uni.showLoading({
-		title: '预约中...'
+		title: '预约中...',
+		mask: true
 	});
 	let selectedPets = [];
 	let pets = [];
@@ -259,7 +260,7 @@ function 勾选宠物(type, args) {
 		case '全选':
 			let { detail } = args;
 			form.value.全选 = detail;
-			form.value.宠物列表.forEach(e => {
+			form.value.宠物列表.forEach((e) => {
 				e.选中 = form.value.全选;
 			});
 			break;
@@ -273,7 +274,7 @@ function 勾选宠物(type, args) {
 		value: count || 1 // 最少也是1
 	});
 	// 看是否全选
-	let t = form.value.宠物列表.find(e => e.选中 == false);
+	let t = form.value.宠物列表.find((e) => e.选中 == false);
 	if (t) {
 		form.value.全选 = false;
 	} else {
@@ -299,14 +300,15 @@ function 操作宠物(type, index) {
 					switch (res.type) {
 						case '添加':
 							// 宠物名作为唯一ID 需要验证
-							if (form.value.宠物列表.find(e => e.name == res.data.name)) {
+							if (form.value.宠物列表.find((e) => e.name == res.data.name)) {
 								消息('昵称重复了哦', '失败');
 								return;
 							}
 							// 不是新用户 需要发请求
 							if (!是否为新用户) {
 								uni.showLoading({
-									title: ''
+									title: '',
+									mask: true
 								});
 								let d = await 请求接口('petEdit2', {
 									type: '新增',
@@ -335,7 +337,8 @@ function 操作宠物(type, index) {
 									}
 								}
 								uni.showLoading({
-									title: ''
+									title: '',
+									mask: true
 								});
 								let d = await 请求接口('petEdit2', {
 									type: '编辑',
@@ -351,7 +354,8 @@ function 操作宠物(type, index) {
 						case '删除':
 							if (!是否为新用户) {
 								uni.showLoading({
-									title: ''
+									title: '',
+									mask: true
 								});
 								let d = await 请求接口('petEdit2', {
 									type: '删除',
@@ -395,7 +399,8 @@ function 跳转(type) {
 }
 async function 查询用户() {
 	uni.showLoading({
-		title: ''
+		title: '',
+		mask: true
 	});
 	let res = await 请求接口('userEdit2', {
 		type: '个人信息',
@@ -409,10 +414,10 @@ async function 查询用户() {
 		是否为新用户 = false;
 		form.value.联系人 = res.name;
 		form.value.联系号 = res.phone;
-		form.value.宠物列表 = res.pets.map(e => ({ 选中: false, ...e }));
+		form.value.宠物列表 = res.pets.map((e) => ({ 选中: false, ...e }));
 		form.value.从何 = res.knowFrom;
 		for (let val of form.value.宠物列表) {
-			if (重新预约宠物数据.value.find(e => e.name == val.name)) {
+			if (重新预约宠物数据.value.find((e) => e.name == val.name)) {
 				val.选中 = true;
 			}
 		}
@@ -423,7 +428,8 @@ async function 确认弹窗() {
 	let name = form.value.宠物列表[当前操作].name;
 	if (!是否为新用户) {
 		uni.showLoading({
-			title: ''
+			title: '',
+			mask: true
 		});
 		let res = await 请求接口('petEdit2', {
 			type: '删除',

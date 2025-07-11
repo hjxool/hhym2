@@ -40,7 +40,7 @@
 						<view class="rowLayout" style="justify-content: space-between">
 							<view class="rowLayout">
 								<view class="label">宠物</view>
-								<view>{{ item2.pets.map((e) => e.昵称).join('、') }}</view>
+								<view>{{ item2.pets.map((e) => e.name).join('、') }}</view>
 							</view>
 
 							<view class="button" @click="宠物详情(item2.pets)">详情</view>
@@ -67,6 +67,7 @@ import cusScrollView from '/Components/cusScrollView/cusScrollView.vue';
 import PetsDetail from '/Components/petsDetail/petsDetail.vue';
 import { ref } from 'vue';
 import { 今天, 计算天数 } from '/Api/时间参数.js';
+import { 请求接口 } from '/Api/请求接口.js';
 
 // 属性
 const 星期 = ref(['日', '一', '二', '三', '四', '五', '六']);
@@ -81,158 +82,29 @@ const 详情 = ref({
 	宠物详情显示: false,
 	宠物详情: []
 });
-// 测试数据
-let 订单 = {
-	'2025/8/25': [
-		{
-			name: '测试1',
-			phone: '1111111',
-			orders: [
-				{
-					start: '2025/8/25',
-					end: '2025/9/1',
-					pets: [
-						{
-							昵称: '测试6',
-							年龄: 12,
-							性别: 1,
-							品种: '梨花',
-							性格: '普通',
-							是否绝育: 1,
-							是否有耳螨: 0,
-							是否携带传染病: 1,
-							上一次驱虫时间: '',
-							上一次疫苗时间: '',
-							特殊要求: ''
-						}
-					],
-					pay: '560',
-					room: '豪华间1'
-				},
-				{
-					start: '2025/8/25',
-					end: '2025/9/1',
-					pets: [
-						{
-							昵称: '测试6',
-							年龄: 12,
-							性别: 1,
-							品种: '梨花',
-							性格: '普通',
-							是否绝育: 1,
-							是否有耳螨: 0,
-							是否携带传染病: 1,
-							上一次驱虫时间: '',
-							上一次疫苗时间: '',
-							特殊要求: ''
-						}
-					],
-					pay: '180',
-					room: '标准间3'
-				}
-			]
-		},
-		{
-			name: '测试7',
-			phone: '333333333',
-			orders: [
-				{
-					start: '2025/8/25',
-					end: '2025/9/8',
-					pets: [
-						{
-							昵称: '测试6',
-							年龄: 12,
-							性别: 1,
-							品种: '梨花',
-							性格: '普通',
-							是否绝育: 1,
-							是否有耳螨: 0,
-							是否携带传染病: 1,
-							上一次驱虫时间: '',
-							上一次疫苗时间: '',
-							特殊要求: ''
-						}
-					],
-					pay: '560',
-					room: '豪华间1'
-				},
-				{
-					start: '2025/8/25',
-					end: '2025/9/8',
-					pets: [
-						{
-							昵称: '测试6',
-							年龄: 12,
-							性别: 1,
-							品种: '梨花',
-							性格: '普通',
-							是否绝育: 1,
-							是否有耳螨: 0,
-							是否携带传染病: 1,
-							上一次驱虫时间: '',
-							上一次疫苗时间: '',
-							特殊要求: ''
-						}
-					],
-					pay: '180',
-					room: '标准间3'
-				}
-			]
-		}
-	],
-	'2025/7/13': [
-		{
-			name: '测试5',
-			phone: '222222222222',
-			orders: [
-				{
-					start: '2025/7/13',
-					end: '2025/7/20',
-					pets: [
-						{
-							昵称: '测试4',
-							年龄: 12,
-							性别: 1,
-							品种: '梨花',
-							性格: '普通',
-							是否绝育: 1,
-							是否有耳螨: 0,
-							是否携带传染病: 1,
-							上一次驱虫时间: '',
-							上一次疫苗时间: '',
-							特殊要求: ''
-						}
-					],
-					pay: '160',
-					room: '标准间1'
-				}
-			]
-		}
-	]
-};
 
 初始化();
 
 // 方法
 async function 查询数据(type) {
 	if (type == '刷新') {
-		return new Promise((a) => {
-			setTimeout(() => {
-				let list = Object.entries(订单);
-				for (let month of 日期列表.value) {
-					for (let day of month.days) {
-						day.detail = null;
-						for (let [start, value] of list) {
-							if (day.date == start) {
-								day.detail = value;
-							}
-						}
+		if (!检索范围.end) return;
+		let res = await 请求接口('calendarSearch', {
+			start: 检索范围.start,
+			end: 检索范围.end
+		});
+		if (!res) return;
+		let list = Object.entries(res.data);
+		for (let month of 日期列表.value) {
+			for (let day of month.days) {
+				day.detail = null;
+				for (let [start, value] of list) {
+					if (day.date == start) {
+						day.detail = value;
 					}
 				}
-				a();
-			}, 1000);
-		});
+			}
+		}
 	}
 }
 async function 初始化() {
@@ -250,19 +122,10 @@ async function 初始化() {
 	日期列表.value.push(构造月(nextMonth));
 	// 查询当月和下个月的订单
 	arr = nextMonth.split('/');
-	let year;
-	let month;
-	if (arr[1] == 12) {
-		year = Number(arr[0]) + 1;
-		month = 1;
-	} else {
-		year = Number(arr[0]);
-		month = Number(arr[1]) + 1;
-	}
+	let year = arr[0];
+	let month = arr[1];
 	let total = new Date(year, month, 0).getDate();
-	let start = 今天;
 	检索范围.end = `${year}/${month}/${total}`;
-	// 测试数据
 	查询数据('刷新');
 }
 function 构造月(str) {
@@ -313,7 +176,19 @@ function 显示详情(detail) {
 }
 function 宠物详情(pets) {
 	详情.value.宠物详情显示 = true;
-	详情.value.宠物详情 = pets;
+	详情.value.宠物详情 = pets.map((e) => ({
+		昵称: e.name,
+		年龄: e.age,
+		性别: e.gender,
+		品种: e.breed,
+		性格: e.temperament,
+		是否绝育: e.isNeutered,
+		是否有耳螨: e.hasEarMites,
+		是否携带传染病: e.hasInfectiousDisease,
+		上一次驱虫时间: e.lastDewormingDate,
+		上一次疫苗时间: e.lastVaccinationDate,
+		特殊要求: e.specialRequirements
+	}));
 }
 </script>
 
@@ -328,6 +203,7 @@ function 宠物详情(pets) {
 }
 .page {
 	padding: 0 32rpx 80rpx;
+	padding-right: 0;
 	display: grid;
 	grid-template-rows: 80rpx auto;
 	overflow: hidden;
@@ -339,9 +215,11 @@ function 宠物详情(pets) {
 		align-items: center;
 		justify-items: center;
 		font-size: 32rpx;
+		padding-right: 32rpx;
 	}
 	> .scrollBox {
 		overflow: auto;
+		padding-right: 32rpx;
 		.title {
 			font-weight: bold;
 			padding: 40rpx 0;
