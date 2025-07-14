@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 // 不能用
 // import * as echarts from '/wxcomponents/ec-canvas/echarts.js';
 const echarts = require('../../wxcomponents/ec-canvas/echarts.js');
@@ -20,6 +20,32 @@ const ec = ref({
 	disableTouch: true
 });
 let chartObj;
+// 监听数据发生变化时 重新渲染
+watch(
+	() => props.options,
+	(options) => {
+		if (!options?.labels || !options.values) return;
+		let o = {
+			series: [
+				{
+					data: options.values
+				}
+			]
+		};
+		// 判断更新哪个轴
+		if (props.options.方向 == '横') {
+			o['xAxis'] = {
+				data: options?.labels
+			};
+		} else {
+			o['yAxis'] = {
+				data: options?.labels
+			};
+		}
+		chartObj.setOption(o);
+	},
+	{ deep: true }
+);
 
 // 方法
 function initChart(canvas, width, height, dpr) {

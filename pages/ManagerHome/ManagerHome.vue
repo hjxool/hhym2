@@ -58,11 +58,7 @@ const 功能 = ref([
 ]);
 const 图表 = ref({
 	show: false,
-	data: [
-		{ labels: ['1', '2', '3', '4', '5', '6', '7'], values: [820, 932, 901, 934, 1290, 1330, 1320], 方向: '横' },
-		{ labels: ['a', 'b', 'c', 'd', 'e', 'f', 'g'], values: [560, 700, 901, 934, 1190, 1330, 1320], 方向: '横' },
-		{ labels: ['q', 'w', 'e', 'r', 't', 'y', 'u'], values: [0, 200, 260, 690, 1000, 1330, 1320], 方向: '横' }
-	]
+	data: []
 });
 const 待处理订单数 = ref(0);
 const 日历接待数 = ref(0);
@@ -73,7 +69,7 @@ async function 查询数据(type) {
 		图表.value.show = false;
 		// 分别查询日期接口、订单接口、统计接口
 		let { start, end } = 计算月份();
-		请求接口('calendarSearch', {
+		请求接口('calendarSearch2', {
 			start,
 			end
 		}).then((res) => {
@@ -89,10 +85,7 @@ async function 查询数据(type) {
 		}).then((res) => {
 			待处理订单数.value = res?.total || 0;
 		});
-		// 统计接口查询完再显示图表
-		setTimeout(() => {
-			图表.value.show = true;
-		}, 800);
+		图表查询();
 	}
 }
 function 跳转(type) {
@@ -141,6 +134,46 @@ function 计算月份() {
 		start: 今天,
 		end: `${year}/${month}/${total}`
 	};
+}
+function 图表查询() {
+	// 以当前所在周进行查询
+	let week = new Date(今天).getDay(); // 0(周日)到6(周六)
+	let 偏差值 = week == 0 ? 6 : week - 1;
+	let 周一 = new Date(今天);
+	// setDate是Date实例上的 不能直接用Date.setDate
+	// setDate很智能 传入正数则对应某一天 传入0则设置为上个月最后一天
+	// 传入负数则从上个月最后一天往前推算 传入大于当月天数则顺延到下个月
+	周一.setDate(周一.getDate() - 偏差值);
+	let 周末 = new Date(今天);
+	周末.setDate(周一.getDate() + 6);
+	let res1 = 请求接口('incomeStatistics2', {
+		type: '自定义',
+		data: {
+			start: `${周一.getFullYear()}/${周一.getMonth() + 1}/${周一.getDate()}`,
+			end: `${周末.getFullYear()}/${周末.getMonth() + 1}/${周末.getDate()}`
+		}
+	});
+	let arr = 今天.split('/');
+	let res2 = 请求接口('incomeStatistics2', {
+		type: '按月',
+		data: {
+			year: arr[0],
+			month: arr[1]
+		}
+	});
+	let res3 = 请求接口('incomeStatistics2', {
+		type: '按年',
+		data: {
+			year: arr[0]
+		}
+	});
+	// 所有数据回来后一起渲染 否则后面后面几条数据渲染不上去
+	Promise.all([res1, res2, res3]).then(([data1, data2, data3]) => {
+		图表.value.show = true;
+		图表.value.data[0] = { 方向: '横', ...data1 };
+		图表.value.data[1] = { 方向: '横', ...data2 };
+		图表.value.data[2] = { 方向: '横', ...data3 };
+	});
 }
 </script>
 

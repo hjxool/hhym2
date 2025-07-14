@@ -89,7 +89,7 @@ const 详情 = ref({
 async function 查询数据(type) {
 	if (type == '刷新') {
 		if (!检索范围.end) return;
-		let res = await 请求接口('calendarSearch', {
+		let res = await 请求接口('calendarSearch2', {
 			start: 检索范围.start,
 			end: 检索范围.end
 		});
