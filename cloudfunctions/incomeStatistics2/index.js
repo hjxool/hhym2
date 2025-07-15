@@ -59,7 +59,7 @@ async function 统计某年收入(data) {
 		for (let i = start2; i < end2; i += 一天) {
 			// 转换成月 累加到对应月
 			let month = new Date(i).getMonth() + 1
-			result[month] = result[month] + 每日费用
+			result[month] = Math.floor((result[month] + 每日费用) * 10) / 10
 		}
 	}
 	let labels = Object.keys(result)
@@ -107,7 +107,7 @@ async function 统计某月收入(data) {
 		for (let i = start2; i < end2; i += 一天) {
 			// 转换成天 累加到对应天
 			let day = new Date(i).getDate()
-			result[day] = result[day] + 每日费用
+			result[day] = Math.floor((result[day] + 每日费用) * 10) / 10
 		}
 	}
 	let labels = Object.keys(result)
@@ -151,7 +151,7 @@ async function 统计自定义范围内收入(data) {
 			// 转换成日期 累加到对应日期
 			let t = new Date(i)
 			let date = `${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()}`
-			result[date] = result[date] + 每日费用
+			result[date] = Math.floor((result[date] + 每日费用) * 10) / 10
 		}
 	}
 	let labels = Object.keys(result)

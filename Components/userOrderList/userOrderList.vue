@@ -105,8 +105,11 @@ async function 查询订单(type) {
 		分页.pageNum = 1;
 	} else {
 		// 没有下一页就不进行请求
-		if (分页.pageNum < Math.ceil(分页.total / 分页.pageSize)) return;
-		分页.pageNum++;
+		if (分页.pageNum < Math.ceil(分页.total / 分页.pageSize)) {
+			分页.pageNum++;
+		} else {
+			return;
+		}
 	}
 	let res = await 请求接口('orderEdit2', {
 		type: '查询',

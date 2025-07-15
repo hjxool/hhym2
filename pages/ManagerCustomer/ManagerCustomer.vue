@@ -1,25 +1,25 @@
 <template>
 	<cusScrollView :加载="查询数据" class="scroll">
 		<view class="page colLayout">
-			<van-search class="noShrink" :value="关键字" @search="查询数据('刷新')" @clear="查询数据('刷新')" placeholder="宠物名或客户名或联系号码" />
+			<van-search class="noShrink" :value="关键字" @change="搜索框($event)" @search="查询数据('刷新')" @clear="查询数据('刷新')" placeholder="宠物名或客户名或联系号码" />
 
 			<view class="flexGrow">
 				<view class="viewBox">
-					<view class="card colLayout" v-for="item in 列表" :key="item.phone">
+					<view class="card colLayout" v-for="item in 列表" :key="item._id">
 						<view class="name">{{ item.name }}</view>
 						<view class="phone">{{ item.phone }}</view>
 						<view class="grid">
 							<view>
 								<view class="title">订单总数</view>
-								<view>{{ item.订单总数 }}</view>
+								<view>{{ item.orderCount }}</view>
 							</view>
 							<view>
 								<view class="title">在本店消费</view>
-								<view>{{ item.在本店消费 }}</view>
+								<view>{{ item.totalAmount }}</view>
 							</view>
 							<view style="grid-column-start: 1; grid-column-end: 3">
 								<view class="title">从何了解</view>
-								<view>{{ item.从何了解 || '无' }}</view>
+								<view>{{ item.knowFrom || '无' }}</view>
 							</view>
 						</view>
 						<view class="button" @click="显示弹窗(item.pets)">查看宠物</view>
@@ -36,58 +36,65 @@
 import { ref } from 'vue';
 import cusScrollView from '/Components/cusScrollView/cusScrollView.vue';
 import PetsDetail from '/Components/petsDetail/petsDetail.vue';
+import { 请求接口 } from '/Api/请求接口.js';
 
 // 属性
 const 关键字 = ref('');
-const 列表 = ref([
-	{
-		name: '彰化',
-		phone: '13398978787',
-		订单总数: 5,
-		在本店消费: 1389,
-		从何了解: '奥数嗲手段是对安睡的哈岁的和',
-		pets: [
-			{ 昵称: '测试4', 年龄: 12, 性别: 1, 品种: '梨花', 性格: '普通', 是否绝育: 1, 是否有耳螨: 0, 是否携带传染病: 1, 上一次驱虫时间: '', 上一次疫苗时间: '', 特殊要求: '' },
-			{
-				昵称: '测试3',
-				年龄: 1,
-				性别: 0,
-				品种: '银渐层',
-				性格: '普通',
-				是否绝育: 0,
-				是否有耳螨: 0,
-				是否携带传染病: 0,
-				上一次驱虫时间: '',
-				上一次疫苗时间: '',
-				特殊要求: '还的口味口哦懂啊水浇地哦嫁鸡随鸡爹较耐送到家哦i'
-			}
-		]
-	},
-	{
-		name: '测试2',
-		phone: '13398978787',
-		订单总数: 2,
-		在本店消费: 530,
-		从何了解: '',
-		pets: [
-			{ 昵称: '测试5', 年龄: 1, 性别: 0, 品种: '银渐层', 性格: '普通', 是否绝育: 0, 是否有耳螨: 0, 是否携带传染病: 0, 上一次驱虫时间: '', 上一次疫苗时间: '', 特殊要求: '' }
-		]
-	}
-]);
+const 列表 = ref([]);
 const 弹窗 = ref({
 	show: false,
 	list: []
 });
+const 分页 = {
+	total: 0,
+	pageNum: 1,
+	pageSize: 5
+};
 
 // 方法
 async function 查询数据(type) {
 	if (type == '刷新') {
+		分页.pageNum = 1;
+		列表.value = [];
 	} else {
+		if (分页.pageNum < Math.ceil(分页.total / 分页.pageSize)) {
+			分页.pageNum++;
+		} else {
+			return;
+		}
 	}
+	请求接口('userEdit2', {
+		type: '查询',
+		data: {
+			pageNum: 分页.pageNum,
+			pageSize: 分页.pageSize,
+			keyWords: 关键字.value
+		}
+	}).then((res) => {
+		if (res && res.data) {
+			分页.total = res.total;
+			列表.value.push(...res.data);
+		}
+	});
 }
 function 显示弹窗(pets) {
 	弹窗.value.show = true;
-	弹窗.value.list = pets;
+	弹窗.value.list = pets.map((e) => ({
+		昵称: e.name,
+		年龄: e.age,
+		性别: e.gender,
+		品种: e.breed,
+		性格: e.temperament,
+		是否绝育: e.isNeutered,
+		是否有耳螨: e.hasEarMites,
+		是否携带传染病: e.hasInfectiousDisease,
+		上一次驱虫时间: e.lastDewormingDate,
+		上一次疫苗时间: e.lastVaccinationDate,
+		特殊要求: e.specialRequirements
+	}));
+}
+function 搜索框({ detail: value }) {
+	关键字.value = value;
 }
 </script>
 
@@ -113,6 +120,7 @@ function 显示弹窗(pets) {
 		> .viewBox {
 			padding-right: 32rpx;
 			overflow: auto;
+			height: 100%;
 			.card {
 				background-color: #ffffff;
 				border-radius: 32rpx;
@@ -141,6 +149,7 @@ function 显示弹窗(pets) {
 					.title {
 						font-size: 30rpx;
 						color: #888;
+						margin-bottom: 10rpx;
 					}
 				}
 				> .button {

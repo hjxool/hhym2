@@ -41,22 +41,22 @@ async function 分页查询(data) {
 		})
 	}
 	// 关键字查询
-	if (data.keyWords?.trim()) {
+	if (data.keyWords && data.keyWords?.trim()) {
 		conditions.push(_.or([{
 				name: db.RegExp({
-					regexp: keyWords,
+					regexp: data.keyWords,
 					options: 'i'
 				})
 			},
 			{
 				phone: db.RegExp({
-					regexp: keyWords,
+					regexp: data.keyWords,
 					options: 'i'
 				})
 			},
 			{
 				'pets.name': db.RegExp({
-					regexp: keyWords,
+					regexp: data.keyWords,
 					options: 'i'
 				})
 			}

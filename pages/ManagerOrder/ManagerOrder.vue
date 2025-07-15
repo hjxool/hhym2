@@ -9,11 +9,11 @@
 				</view>
 				<view class="button center" @click="选择日期('查询')">查询</view>
 			</view>
-			<van-search class="noShrink" :value="关键字" @search="查询数据('刷新')" @clear="查询数据('刷新')" placeholder="客户名或电话或宠物名" />
+			<van-search class="noShrink" :value="关键字" @change="搜索框($event)" @search="查询数据('刷新')" @clear="查询数据('刷新')" placeholder="客户名或电话或宠物名" />
 
 			<view class="flexGrow">
 				<view class="viewBox">
-					<view class="card colLayout" v-for="item in 列表" :key="item.phone">
+					<view class="card colLayout" v-for="item in 列表" :key="item._id">
 						<view class="name">{{ item.name }}</view>
 						<view class="phone">{{ item.phone }}</view>
 						<view class="grid">
@@ -23,19 +23,19 @@
 							</view>
 							<view>
 								<view class="title">宠物</view>
-								<view>{{ item.pets.map((e) => e.昵称).join('、') }}</view>
+								<view>{{ item.pets.map((e) => e.name).join('、') }}</view>
 							</view>
 							<view>
 								<view class="title">金额</view>
-								<view style="padding-top: 10rpx">{{ item.金额 }}</view>
+								<view style="padding-top: 10rpx">{{ item.pay }}</view>
 							</view>
 							<view>
 								<view class="title">房间</view>
-								<view>{{ item.房间 }}</view>
+								<view>{{ item.room }}</view>
 							</view>
 							<view>
 								<view class="title">订单状态</view>
-								<view :style="{ color: 订单状态[item.订单状态].color }">{{ 订单状态[item.订单状态].label }}</view>
+								<view :style="{ color: 订单状态[String(item.status)].color }">{{ 订单状态[String(item.status)].label }}</view>
 							</view>
 						</view>
 						<view class="button" @click="显示弹窗(item.pets)">查看宠物</view>
@@ -61,6 +61,7 @@ import PetsDetail from '/Components/petsDetail/petsDetail.vue';
 import Notify from '/Components/notify/notify.vue';
 import { 消息 } from '/Api/提示.js';
 import { useStore } from 'vuex';
+import { 请求接口 } from '/Api/请求接口.js';
 
 onBeforeUnmount(() => {
 	store.commit('setState', {
@@ -72,33 +73,7 @@ onBeforeUnmount(() => {
 // 属性
 const store = useStore();
 const 关键字 = ref('');
-const 列表 = ref([
-	{
-		name: '彰化',
-		phone: '13398978787',
-		start: '2025/7/1',
-		end: '2025/7/12',
-		金额: 320,
-		房间: '标准间2',
-		订单状态: -1,
-		pets: [
-			{ 昵称: '测试4', 年龄: 12, 性别: 1, 品种: '梨花', 性格: '普通', 是否绝育: 1, 是否有耳螨: 0, 是否携带传染病: 1, 上一次驱虫时间: '', 上一次疫苗时间: '', 特殊要求: '' },
-			{ 昵称: '测试6', 年龄: 12, 性别: 1, 品种: '梨花', 性格: '普通', 是否绝育: 1, 是否有耳螨: 0, 是否携带传染病: 1, 上一次驱虫时间: '', 上一次疫苗时间: '', 特殊要求: '' }
-		]
-	},
-	{
-		name: '测试2',
-		phone: '13398978787',
-		start: '2025/8/1',
-		end: '2025/8/12',
-		金额: 1320,
-		房间: '标准间1',
-		订单状态: 1,
-		pets: [
-			{ 昵称: '测试5', 年龄: 1, 性别: 0, 品种: '银渐层', 性格: '普通', 是否绝育: 0, 是否有耳螨: 0, 是否携带传染病: 0, 上一次驱虫时间: '', 上一次疫苗时间: '', 特殊要求: '' }
-		]
-	}
-]);
+const 列表 = ref([]);
 const 弹窗 = ref({
 	宠物详情显示: false,
 	宠物详情: [],
@@ -124,16 +99,60 @@ const 日期 = ref({
 	离店: '',
 	当前操作: ''
 });
+const 分页 = {
+	total: 0,
+	pageNum: 1,
+	pageSize: 5
+};
 
 // 方法
 async function 查询数据(type) {
 	if (type == '刷新') {
+		分页.pageNum = 1;
+		列表.value = [];
 	} else {
+		if (分页.pageNum < Math.ceil(分页.total / 分页.pageSize)) {
+			分页.pageNum++;
+		} else {
+			return;
+		}
 	}
+	let data = {
+		pageNum: 分页.pageNum,
+		pageSize: 分页.pageSize,
+		keyWords: 关键字.value
+	};
+	if (日期.value.入住) {
+		data['start'] = 日期.value.入住;
+	}
+	if (日期.value.离店) {
+		data['end'] = 日期.value.离店;
+	}
+	请求接口('orderEdit2', {
+		type: '查询',
+		data
+	}).then((res) => {
+		if (res && res.data) {
+			分页.total = res.total;
+			列表.value.push(...res.data);
+		}
+	});
 }
 function 显示弹窗(pets) {
 	弹窗.value.宠物详情显示 = true;
-	弹窗.value.宠物详情 = pets;
+	弹窗.value.宠物详情 = pets.map((e) => ({
+		昵称: e.name,
+		年龄: e.age,
+		性别: e.gender,
+		品种: e.breed,
+		性格: e.temperament,
+		是否绝育: e.isNeutered,
+		是否有耳螨: e.hasEarMites,
+		是否携带传染病: e.hasInfectiousDisease,
+		上一次驱虫时间: e.lastDewormingDate,
+		上一次疫苗时间: e.lastVaccinationDate,
+		特殊要求: e.specialRequirements
+	}));
 }
 function 选择日期(type, e) {
 	switch (type) {
@@ -165,9 +184,12 @@ function 选择日期(type, e) {
 					return;
 				}
 			}
-			查询数据();
+			查询数据('刷新');
 			break;
 	}
+}
+function 搜索框({ detail: value }) {
+	关键字.value = value;
 }
 </script>
 
@@ -205,6 +227,7 @@ function 选择日期(type, e) {
 		> .viewBox {
 			padding-right: 32rpx;
 			overflow: auto;
+			height: 100%;
 			.card {
 				background-color: #ffffff;
 				border-radius: 32rpx;
@@ -233,6 +256,7 @@ function 选择日期(type, e) {
 					.title {
 						font-size: 30rpx;
 						color: #888;
+						margin-bottom: 10rpx;
 					}
 				}
 				> .button {

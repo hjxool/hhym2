@@ -125,8 +125,10 @@ async function 查询数据(type) {
 			status: 0
 		}
 	}).then((res) => {
-		分页.total = res?.total || 0;
-		列表.value.push(...res.data);
+		if (res && res.data) {
+			分页.total = res?.total || 0;
+			列表.value.push(...res.data);
+		}
 	});
 }
 function 显示弹窗(type, args) {
@@ -219,7 +221,7 @@ function 确认弹窗() {
 			userId: item.userId // 通过订单的话要统计用户支出
 		}
 	}).then((res) => {
-		uni.hideLoading()
+		uni.hideLoading();
 		if (res) {
 			列表.value.splice(当前编辑, 1);
 		}

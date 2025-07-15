@@ -14,10 +14,10 @@ const echarts = require('../../wxcomponents/ec-canvas/echarts.js');
 const props = defineProps(['options']);
 const ec = ref({
 	// 配置项
-	onInit: initChart,
+	onInit: initChart
 	// lazyLoad: true
 	// 禁止触屏事件
-	disableTouch: true
+	// disableTouch: true
 });
 let chartObj;
 // 监听数据发生变化时 重新渲染
@@ -40,6 +40,10 @@ watch(
 		} else {
 			o['yAxis'] = {
 				data: options?.labels
+				// axisLabel: {
+				// 	// 14天以内 每一天都显示 超过14天的依次递减显示
+				// 	interval: Math.floor(options.labels.length / 7) - 1
+				// }
 			};
 		}
 		chartObj.setOption(o);
@@ -82,6 +86,17 @@ function initChart(canvas, width, height, dpr) {
 			}
 		];
 	} else if (props.options.方向 == '纵') {
+		option['tooltip'] = {
+			trigger: 'axis',
+			axisPointer: {
+				type: 'shadow'
+			},
+			formatter: function (params) {
+				let args = params[0];
+				let date = args.name;
+				return `${date}: ${args.value}元`;
+			}
+		};
 		option['xAxis'] = {
 			type: 'value',
 			axisLine: { show: false }, // 隐藏坐标轴线

@@ -3,7 +3,7 @@
 		<van-dropdown-menu class="noShrink">
 			<van-dropdown-item @change="切换范围('按年', $event)" :value="选项.按年" :options="选项.按年options" />
 			<van-dropdown-item @change="切换范围('按月', $event)" :value="选项.按月" :options="选项.按月options" />
-			<van-dropdown-item title="自定义">
+			<van-dropdown-item ref="customDateRef" title="自定义">
 				<view class="rowLayout row" @click="自定义.当前修改 = '开始日期'">
 					<view>开始日期</view>
 					<view class="text">{{ 自定义.开始日期 || '未选' }}</view>
@@ -31,6 +31,7 @@
 <script setup>
 import cusECharts from '/Components/cusECharts/cusECharts.vue';
 import { ref } from 'vue';
+import { 请求接口 } from '/Api/请求接口.js';
 
 // 属性
 const 选项 = ref({
@@ -44,10 +45,6 @@ const 数据 = ref({
 	values: [820, 932, 901, 934, 1290, 1330, 1320],
 	方向: '纵'
 });
-const 时间范围 = {
-	year: '',
-	month: ''
-};
 const 自定义 = ref({
 	开始日期: '',
 	结束日期: '',
@@ -56,6 +53,7 @@ const 自定义 = ref({
 	当前修改: ''
 });
 const 加载图表 = ref(false);
+const customDateRef = ref(null);
 
 初始化();
 
@@ -69,7 +67,6 @@ function 初始化() {
 	}
 	let d = new Date();
 	let num = d.getFullYear();
-	时间范围.year = num;
 	for (let i = 0; i <= num - 2022; i++) {
 		选项.value.按年options.push({
 			text: `${num - i}年`,
@@ -77,30 +74,29 @@ function 初始化() {
 			year: num - i
 		});
 	}
-	setTimeout(() => {
-		加载图表.value = true;
-	}, 500);
+	// 默认查询本年
+	查询统计结果('按年');
 }
-function 切换范围(type, { detail: value }) {
+function 切换范围(type, args) {
 	if (type == '自定义') {
 		if (!自定义.value.开始日期 || !自定义.value.结束日期) return;
-		console.log(自定义.value.开始日期, 自定义.value.结束日期);
+		查询统计结果('自定义');
+		customDateRef.value.toggle(false);
 	} else {
 		switch (type) {
 			case '按年':
-				时间范围.year = 选项.value.按年options[value].year;
+				选项.value.按年 = args.detail;
 				break;
 			case '按月':
-				时间范围.month = 选项.value.按月options[value].value;
+				选项.value.按月 = args.detail;
 				break;
 		}
-		if (时间范围.month) {
-			// 查某月
-			let total = new Date(时间范围.year, 时间范围.month, 0).getDate();
-			console.log(`${时间范围.year}/${时间范围.month}/1`, `${时间范围.year}/${时间范围.month}/${total}`);
+		// 判断是否选了月
+		if (选项.value.按月) {
+			查询统计结果('按月');
 		} else {
-			// 查全年
-			console.log(`${时间范围.year}/1/1`, `${时间范围.year}/12/31`);
+			// 只选了年
+			查询统计结果('按年');
 		}
 	}
 }
@@ -110,6 +106,40 @@ function 确认({ detail }) {
 	let d = new Date(detail);
 	自定义.value[自定义.value.当前修改] = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
 	自定义.value.当前修改 = '';
+}
+function 查询统计结果(type) {
+	let data = {};
+	switch (type) {
+		case '按年':
+			data['year'] = 选项.value.按年options[选项.value.按年].year;
+			break;
+		case '按月':
+			data['year'] = 选项.value.按年options[选项.value.按年].year;
+			data['month'] = 选项.value.按月;
+			break;
+		case '自定义':
+			data['start'] = 自定义.value.开始日期;
+			data['end'] = 自定义.value.结束日期;
+			break;
+	}
+	请求接口('incomeStatistics2', {
+		type: type,
+		data
+	}).then((res) => {
+		加载图表.value || (加载图表.value = true);
+		// 如果返回的是数字则添加上年月
+		let labels;
+		switch (type) {
+			case '按年':
+				labels = res.labels.map((e) => `${data['year']}/${e}`);
+				break;
+			case '按月':
+				labels = res.labels.map((e) => `${data['year']}/${data['month']}/${e}`);
+				break;
+		}
+		数据.value.labels = labels;
+		数据.value.values = res.values;
+	});
 }
 </script>
 

@@ -18,29 +18,29 @@ async function 分页查询(data) {
 		}
 	}
 	let collection = 客户列表
-	if (data.keyWords?.trim()) {
+	if (data.keyWords && data.keyWords?.trim()) {
 		collection = 客户列表.where(_.or([{
 				name: db.RegExp({
-					regexp: keyWords,
+					regexp: data.keyWords,
 					options: 'i'
 				})
 			},
 			{
 				phone: db.RegExp({
-					regexp: keyWords,
+					regexp: data.keyWords,
 					options: 'i'
 				})
 			},
 			{
 				'pets.name': db.RegExp({
-					regexp: keyWords,
+					regexp: data.keyWords,
 					options: 'i'
 				})
 			}
 		]))
 	}
 	return Promise.all([
-		客户列表.count(),
+		collection.count(), // 应该按查询条件统计
 		collection.skip((data.pageNum - 1) * data.pageSize).limit(data.pageSize).get().then(({
 			data
 		}) => data)
