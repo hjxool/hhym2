@@ -1,12 +1,5 @@
 <template>
-	<scroll-view
-		@refresherrefresh="下拉刷新()"
-		:refresher-triggered="下拉动画"
-		@scrolltolower="上拉加载()"
-		scroll-y="true"
-		refresher-enabled="true"
-		:style="{ height: props.height || '100%' }"
-	>
+	<scroll-view @refresherrefresh="下拉刷新()" :refresher-triggered="下拉动画" @scrolltolower="上拉加载()" scroll-y="true" refresher-enabled="true" style="height: 100%">
 		<slot></slot>
 		<!-- 上拉加载占位 必须用v-if -->
 		<view v-if="上拉动画" class="center" style="height: 80rpx">
@@ -19,7 +12,7 @@
 import { ref } from 'vue';
 
 // 属性
-const props = defineProps(['加载', 'height']);
+const props = defineProps(['加载']);
 const 下拉动画 = ref(true);
 const 上拉动画 = ref(false);
 
@@ -31,7 +24,6 @@ async function 下拉刷新() {
 }
 async function 上拉加载() {
 	// 防止重复触发
-	debugger
 	if (上拉动画.value) return;
 	上拉动画.value = true;
 	await props.加载('加载');

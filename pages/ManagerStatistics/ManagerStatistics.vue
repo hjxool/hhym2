@@ -125,16 +125,19 @@ function 查询统计结果(type) {
 	请求接口('incomeStatistics2', {
 		type: type,
 		data
-	}).then((res) => {
+	}).then(res => {
 		加载图表.value || (加载图表.value = true);
 		// 如果返回的是数字则添加上年月
 		let labels;
 		switch (type) {
 			case '按年':
-				labels = res.labels.map((e) => `${data['year']}/${e}`);
+				labels = res.labels.map(e => `${data['year']}/${e}`);
 				break;
 			case '按月':
-				labels = res.labels.map((e) => `${data['year']}/${data['month']}/${e}`);
+				labels = res.labels.map(e => `${data['year']}/${data['month']}/${e}`);
+				break;
+			case '自定义':
+				labels = res.labels;
 				break;
 		}
 		数据.value.labels = labels;

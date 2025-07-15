@@ -22,7 +22,7 @@
 						</view>
 						<view>
 							<view class="title">宠物</view>
-							<view>{{ item.pets.map((e) => e.name).join('、') }}</view>
+							<view>{{ item.pets.map(e => e.name).join('、') }}</view>
 						</view>
 						<view>
 							<view class="title">金额</view>
@@ -105,7 +105,6 @@ const 分页 = {
 
 // 方法
 async function 查询数据(type) {
-	console.log(type);
 	if (type == '刷新') {
 		分页.pageNum = 1;
 		列表.value = [];
@@ -130,7 +129,7 @@ async function 查询数据(type) {
 	请求接口('orderEdit2', {
 		type: '查询',
 		data
-	}).then((res) => {
+	}).then(res => {
 		if (res && res.data) {
 			分页.total = res.total;
 			列表.value.push(...res.data);
@@ -139,7 +138,7 @@ async function 查询数据(type) {
 }
 function 显示弹窗(pets) {
 	弹窗.value.宠物详情显示 = true;
-	弹窗.value.宠物详情 = pets.map((e) => ({
+	弹窗.value.宠物详情 = pets.map(e => ({
 		昵称: e.name,
 		年龄: e.age,
 		性别: e.gender,
@@ -213,13 +212,8 @@ function 搜索框({ detail: value }) {
 	}
 	> .flexGrow {
 		overflow: hidden;
-		// padding: 32rpx;
-		// padding-right: 0;
 		.viewBox {
-			// padding-right: 32rpx;
 			padding: 32rpx;
-			overflow: auto;
-			height: 100%;
 			.card {
 				background-color: #ffffff;
 				border-radius: 32rpx;

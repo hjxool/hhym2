@@ -20,15 +20,15 @@
 			</view>
 
 			<view class="title">自定义长期折扣</view>
-			<view class="rowLayout gap" v-for="(item, index) in form.自定义折扣" :key="item.大于">
+			<view class="rowLayout gap" v-for="(item, index) in form.自定义折扣" :key="item.moreThan">
 				<view class="border" style="width: 300rpx">
 					<view class="noShrink unit1">超过</view>
-					<input class="flexGrow" v-model="item.大于" type="text" />
+					<input class="flexGrow" v-model="item.moreThan" type="text" />
 					<view class="unit2 center noShrink">天</view>
 				</view>
 				<view class="line"></view>
 				<view class="border" style="width: 150rpx">
-					<input class="flexGrow" v-model="item.折扣" type="text" />
+					<input class="flexGrow" v-model="item.discount" type="text" />
 					<view class="unit2 center noShrink">%</view>
 				</view>
 				<view class="button del center" @click="显示弹窗('自定义折扣', index)" style="width: 130rpx; height: 70rpx">删除</view>
@@ -76,6 +76,7 @@ import { 消息, 弹窗 } from '/Api/提示.js';
 import { 今天 } from '/Api/时间参数.js';
 import { onBeforeUnmount, ref } from 'vue';
 import { useStore } from 'vuex';
+import { 请求接口 } from '/Api/请求接口.js';
 
 onBeforeUnmount(() => {
 	store.commit('setState', {
@@ -89,14 +90,8 @@ const store = useStore();
 const form = ref({
 	标准间单价: 88,
 	豪华间单价: 118,
-	自定义日期: [
-		{ start: '2025/7/1', end: '2025/7/10', price: 68, type: '标准间' },
-		{ start: '2025/7/5', end: '2025/7/9', price: 68, type: '豪华间' }
-	],
-	自定义折扣: [
-		{ 大于: 10, 折扣: 80 },
-		{ 大于: 20, 折扣: 60 }
-	]
+	自定义日期: [],
+	自定义折扣: []
 });
 const 当前操作对象 = {
 	key: '',
@@ -111,8 +106,33 @@ const 编辑 = ref({
 	显示日期: false,
 	日期选择器标题: ''
 });
+let 配置id;
+
+初始化();
 
 // 方法
+function 初始化() {
+	uni.showLoading({
+		title: '',
+		mask: true
+	});
+	请求接口('ruleEdit2', {
+		type: '查询'
+	}).then(res => {
+		uni.hideLoading();
+		if (res) {
+			配置id = res._id;
+			form.value.标准间单价 = res.roomPrice1 || 0;
+			form.value.豪华间单价 = res.roomPrice2 || 0;
+			let discounts = res.discounts || [];
+			form.value.自定义折扣 = discounts.map(e => ({
+				moreThan: e.moreThan,
+				discount: e.discount * 100
+			}));
+			form.value.自定义日期 = res.datePrices || [];
+		}
+	});
+}
 function 显示弹窗(type, value) {
 	switch (type) {
 		case '自定义折扣':
@@ -151,7 +171,7 @@ function 新增(type) {
 	let data;
 	switch (type) {
 		case '自定义折扣':
-			data = { 大于: '', 折扣: '' };
+			data = { moreThan: '', discount: '' };
 			break;
 		case '自定义日期':
 			data = { start: 今天, end: 今天, price: '', type: '标准间' };
@@ -167,16 +187,16 @@ function 保存() {
 	}
 	let set = new Set();
 	for (let val of form.value.自定义折扣) {
-		if (!numReg.test(val.大于) || !numReg.test(val.折扣)) {
+		if (!numReg.test(val.moreThan) || !numReg.test(val.discount)) {
 			消息('折扣请输入数字', '失败');
 			return;
 		}
 		// 校验列表是否有重复项
-		if (set.has(val.大于)) {
+		if (set.has(val.moreThan)) {
 			消息('存在重复的折扣规则', '失败');
 			return;
 		} else {
-			set.add(val.大于);
+			set.add(val.moreThan);
 		}
 	}
 	set = new Set();
@@ -199,7 +219,33 @@ function 保存() {
 			return;
 		}
 	}
-	// 保存到数据库
+	uni.showLoading({
+		title: '',
+		mask: true
+	});
+	请求接口('ruleEdit2', {
+		type: '编辑',
+		data: {
+			_id: 配置id,
+			roomPrice1: Number(form.value.标准间单价),
+			roomPrice2: Number(form.value.豪华间单价),
+			discounts: form.value.自定义折扣.map(({ moreThan, discount }) => ({
+				moreThan: Number(moreThan),
+				discount: discount / 100
+			})),
+			datePrices: form.value.自定义日期.map(({ start, end, price, type }) => ({
+				start,
+				end,
+				type,
+				price: Number(price)
+			}))
+		}
+	}).then(() => {
+		uni.hideLoading();
+		setTimeout(() => {
+			uni.navigateBack();
+		}, 300);
+	});
 }
 </script>
 

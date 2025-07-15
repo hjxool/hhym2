@@ -1,33 +1,31 @@
 <template>
-	<cusScrollView :加载="查询数据" class="scroll">
-		<view class="page colLayout">
-			<van-search class="noShrink" :value="关键字" @change="搜索框($event)" @search="查询数据('刷新')" @clear="查询数据('刷新')" placeholder="宠物名或客户名或联系号码" />
+	<view class="page colLayout">
+		<van-search class="noShrink" :value="关键字" @change="搜索框($event)" @search="查询数据('刷新')" @clear="查询数据('刷新')" placeholder="宠物名或客户名或联系号码" />
 
-			<view class="flexGrow">
-				<view class="viewBox">
-					<view class="card colLayout" v-for="item in 列表" :key="item._id">
-						<view class="name">{{ item.name }}</view>
-						<view class="phone">{{ item.phone }}</view>
-						<view class="grid">
-							<view>
-								<view class="title">订单总数</view>
-								<view>{{ item.orderCount }}</view>
-							</view>
-							<view>
-								<view class="title">在本店消费</view>
-								<view>{{ item.totalAmount }}</view>
-							</view>
-							<view style="grid-column-start: 1; grid-column-end: 3">
-								<view class="title">从何了解</view>
-								<view>{{ item.knowFrom || '无' }}</view>
-							</view>
+		<cusScrollView :加载="查询数据" class="flexGrow">
+			<view class="viewBox">
+				<view class="card colLayout" v-for="item in 列表" :key="item._id">
+					<view class="name">{{ item.name }}</view>
+					<view class="phone">{{ item.phone }}</view>
+					<view class="grid">
+						<view>
+							<view class="title">订单总数</view>
+							<view>{{ item.orderCount }}</view>
 						</view>
-						<view class="button" @click="显示弹窗(item.pets)">查看宠物</view>
+						<view>
+							<view class="title">在本店消费</view>
+							<view>{{ item.totalAmount }}</view>
+						</view>
+						<view style="grid-column-start: 1; grid-column-end: 3">
+							<view class="title">从何了解</view>
+							<view>{{ item.knowFrom || '无' }}</view>
+						</view>
 					</view>
+					<view class="button" @click="显示弹窗(item.pets)">查看宠物</view>
 				</view>
 			</view>
-		</view>
-	</cusScrollView>
+		</cusScrollView>
+	</view>
 
 	<PetsDetail :show="弹窗.show" @close="弹窗.show = false" :宠物列表="弹窗.list" />
 </template>
@@ -70,7 +68,7 @@ async function 查询数据(type) {
 			pageSize: 分页.pageSize,
 			keyWords: 关键字.value
 		}
-	}).then((res) => {
+	}).then(res => {
 		if (res && res.data) {
 			分页.total = res.total;
 			列表.value.push(...res.data);
@@ -79,7 +77,7 @@ async function 查询数据(type) {
 }
 function 显示弹窗(pets) {
 	弹窗.value.show = true;
-	弹窗.value.list = pets.map((e) => ({
+	弹窗.value.list = pets.map(e => ({
 		昵称: e.name,
 		年龄: e.age,
 		性别: e.gender,
@@ -115,12 +113,8 @@ function 搜索框({ detail: value }) {
 	overflow: hidden;
 	> .flexGrow {
 		overflow: hidden;
-		padding: 32rpx;
-		padding-right: 0;
-		> .viewBox {
-			padding-right: 32rpx;
-			overflow: auto;
-			height: 100%;
+		.viewBox {
+			padding: 32rpx;
 			.card {
 				background-color: #ffffff;
 				border-radius: 32rpx;
