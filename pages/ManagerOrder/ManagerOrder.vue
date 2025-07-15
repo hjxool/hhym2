@@ -1,49 +1,47 @@
 <template>
-	<cusScrollView :加载="查询数据" class="scroll">
-		<view class="page colLayout">
-			<view class="timeSearch rowLayout noShrink">
-				<view class="rowLayout">
-					<view style="color: #1989fa" @click="选择日期('入住')">{{ 日期.入住 || '入住日期' }}</view>
-					<view style="margin: 0 20rpx">至</view>
-					<view style="color: #1989fa" @click="选择日期('离店')">{{ 日期.离店 || '离店日期' }}</view>
-				</view>
-				<view class="button center" @click="选择日期('查询')">查询</view>
+	<view class="page colLayout">
+		<view class="timeSearch rowLayout noShrink">
+			<view class="rowLayout">
+				<view style="color: #1989fa" @click="选择日期('入住')">{{ 日期.入住 || '入住日期' }}</view>
+				<view style="margin: 0 20rpx">至</view>
+				<view style="color: #1989fa" @click="选择日期('离店')">{{ 日期.离店 || '离店日期' }}</view>
 			</view>
-			<van-search class="noShrink" :value="关键字" @change="搜索框($event)" @search="查询数据('刷新')" @clear="查询数据('刷新')" placeholder="客户名或电话或宠物名" />
-
-			<view class="flexGrow">
-				<view class="viewBox">
-					<view class="card colLayout" v-for="item in 列表" :key="item._id">
-						<view class="name">{{ item.name }}</view>
-						<view class="phone">{{ item.phone }}</view>
-						<view class="grid">
-							<view>
-								<view class="title">时间</view>
-								<view>{{ item.start.replaceAll('/', '.') }} ~ {{ item.end.replaceAll('/', '.') }}</view>
-							</view>
-							<view>
-								<view class="title">宠物</view>
-								<view>{{ item.pets.map((e) => e.name).join('、') }}</view>
-							</view>
-							<view>
-								<view class="title">金额</view>
-								<view style="padding-top: 10rpx">{{ item.pay }}</view>
-							</view>
-							<view>
-								<view class="title">房间</view>
-								<view>{{ item.room }}</view>
-							</view>
-							<view>
-								<view class="title">订单状态</view>
-								<view :style="{ color: 订单状态[String(item.status)].color }">{{ 订单状态[String(item.status)].label }}</view>
-							</view>
-						</view>
-						<view class="button" @click="显示弹窗(item.pets)">查看宠物</view>
-					</view>
-				</view>
-			</view>
+			<view class="button center" @click="选择日期('查询')">查询</view>
 		</view>
-	</cusScrollView>
+		<van-search class="noShrink" :value="关键字" @change="搜索框($event)" @search="查询数据('刷新')" @clear="查询数据('刷新')" placeholder="客户名或电话或宠物名" />
+
+		<cusScrollView :加载="查询数据" class="flexGrow">
+			<view class="viewBox">
+				<view class="card colLayout" v-for="item in 列表" :key="item._id">
+					<view class="name">{{ item.name }}</view>
+					<view class="phone">{{ item.phone }}</view>
+					<view class="grid">
+						<view>
+							<view class="title">时间</view>
+							<view>{{ item.start.replaceAll('/', '.') }} ~ {{ item.end.replaceAll('/', '.') }}</view>
+						</view>
+						<view>
+							<view class="title">宠物</view>
+							<view>{{ item.pets.map((e) => e.name).join('、') }}</view>
+						</view>
+						<view>
+							<view class="title">金额</view>
+							<view style="padding-top: 10rpx">{{ item.pay }}</view>
+						</view>
+						<view>
+							<view class="title">房间</view>
+							<view>{{ item.room }}</view>
+						</view>
+						<view>
+							<view class="title">订单状态</view>
+							<view :style="{ color: 订单状态[String(item.status)].color }">{{ 订单状态[String(item.status)].label }}</view>
+						</view>
+					</view>
+					<view class="button" @click="显示弹窗(item.pets)">查看宠物</view>
+				</view>
+			</view>
+		</cusScrollView>
+	</view>
 
 	<PetsDetail :show="弹窗.宠物详情显示" @close="弹窗.宠物详情显示 = false" :宠物列表="弹窗.宠物详情" />
 
@@ -107,6 +105,7 @@ const 分页 = {
 
 // 方法
 async function 查询数据(type) {
+	console.log(type);
 	if (type == '刷新') {
 		分页.pageNum = 1;
 		列表.value = [];
@@ -198,14 +197,6 @@ function 搜索框({ detail: value }) {
 .van-center-leave-active {
 	border-radius: 32rpx;
 }
-.scroll {
-	position: absolute;
-	width: 100vw;
-	height: 100vh;
-	left: 0%;
-	top: 0;
-	overflow: hidden;
-}
 .page {
 	overflow: hidden;
 	> .timeSearch {
@@ -222,10 +213,11 @@ function 搜索框({ detail: value }) {
 	}
 	> .flexGrow {
 		overflow: hidden;
-		padding: 32rpx;
-		padding-right: 0;
-		> .viewBox {
-			padding-right: 32rpx;
+		// padding: 32rpx;
+		// padding-right: 0;
+		.viewBox {
+			// padding-right: 32rpx;
+			padding: 32rpx;
 			overflow: auto;
 			height: 100%;
 			.card {
