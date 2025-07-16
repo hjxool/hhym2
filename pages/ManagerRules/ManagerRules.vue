@@ -20,7 +20,7 @@
 			</view>
 
 			<view class="title">自定义长期折扣</view>
-			<view class="rowLayout gap" v-for="(item, index) in form.自定义折扣" :key="item.moreThan">
+			<view class="rowLayout gap" v-for="(item, index) in form.自定义折扣" :key="index">
 				<view class="border" style="width: 300rpx">
 					<view class="noShrink unit1">超过</view>
 					<input class="flexGrow" v-model="item.moreThan" type="text" />
@@ -43,11 +43,20 @@
 					<view @click="显示弹窗('end', item)">{{ item.end }}</view>
 				</view>
 				<view class="rowLayout" style="margin-top: 20rpx">
-					<view class="border center" @click="显示弹窗('选择房型', item)">{{ item.type }}</view>
+					<view>标准间</view>
 					<view class="line"></view>
 					<view class="border" style="width: 250rpx">
 						<view class="noShrink unit1">¥</view>
-						<input class="flexGrow" v-model="item.price" type="text" />
+						<input class="flexGrow" v-model="item.price1" type="text" />
+						<view class="unit2 center noShrink">/ 晚</view>
+					</view>
+				</view>
+				<view class="rowLayout" style="margin-top: 20rpx">
+					<view>豪华间</view>
+					<view class="line"></view>
+					<view class="border" style="width: 250rpx">
+						<view class="noShrink unit1">¥</view>
+						<input class="flexGrow" v-model="item.price2" type="text" />
 						<view class="unit2 center noShrink">/ 晚</view>
 					</view>
 				</view>
@@ -62,8 +71,6 @@
 	</view>
 
 	<Notify @confirm="弹窗操作()" />
-
-	<van-action-sheet :show="编辑.显示房间类型" :actions="编辑.房间类型" @close="编辑.显示房间类型 = false" @select="显示弹窗('选择房型', $event)" />
 
 	<van-popup :show="编辑.显示日期" position="bottom" custom-style="height: 684rpx;" @close="编辑.显示日期 = false">
 		<van-datetime-picker :value="编辑.日期" @confirm="显示弹窗('选择日期', $event)" :title="编辑.日期选择器标题" :min-date="new Date('2022/7/10').getTime()" type="date" />
@@ -98,8 +105,6 @@ const 当前操作对象 = {
 	value: ''
 };
 const 编辑 = ref({
-	显示房间类型: false,
-	房间类型: [{ name: '标准间' }, { name: '豪华间' }],
 	当前编辑: '',
 	当前编辑类型: '',
 	日期: '',
@@ -118,14 +123,14 @@ function 初始化() {
 	});
 	请求接口('ruleEdit2', {
 		type: '查询'
-	}).then(res => {
+	}).then((res) => {
 		uni.hideLoading();
 		if (res) {
 			配置id = res._id;
 			form.value.标准间单价 = res.roomPrice1 || 0;
 			form.value.豪华间单价 = res.roomPrice2 || 0;
 			let discounts = res.discounts || [];
-			form.value.自定义折扣 = discounts.map(e => ({
+			form.value.自定义折扣 = discounts.map((e) => ({
 				moreThan: e.moreThan,
 				discount: e.discount * 100
 			}));
@@ -140,14 +145,6 @@ function 显示弹窗(type, value) {
 			弹窗(`确认删除？`, '确认');
 			当前操作对象.key = type;
 			当前操作对象.value = value;
-			break;
-		case '选择房型':
-			编辑.value.显示房间类型 = !编辑.value.显示房间类型;
-			if (编辑.value.显示房间类型) {
-				编辑.value.当前编辑 = value;
-			} else {
-				编辑.value.当前编辑.type = value.detail.name;
-			}
 			break;
 		case 'start':
 		case 'end':
@@ -174,7 +171,7 @@ function 新增(type) {
 			data = { moreThan: '', discount: '' };
 			break;
 		case '自定义日期':
-			data = { start: 今天, end: 今天, price: '', type: '标准间' };
+			data = { start: 今天, end: 今天, price1: form.value.标准间单价, price2: form.value.豪华间单价 };
 			break;
 	}
 	form.value[type].push(data);
@@ -199,18 +196,10 @@ function 保存() {
 			set.add(val.moreThan);
 		}
 	}
-	set = new Set();
 	for (let val of form.value.自定义日期) {
-		if (!numReg.test(val.price)) {
+		if (!numReg.test(val.price1) || !numReg.test(val.price2)) {
 			消息('日期价格请输入数字', '失败');
 			return;
-		}
-		let str = `${val.start}-${val.end}-${val.type}-${val.price}`;
-		if (set.has(str)) {
-			消息('存在重复的日期规则', '失败');
-			return;
-		} else {
-			set.add(str);
 		}
 		let s = new Date(val.start).getTime();
 		let e = new Date(val.end).getTime();
@@ -219,6 +208,12 @@ function 保存() {
 			return;
 		}
 	}
+	// 日期不能有重叠
+	if (判断日期区间是否重叠(form.value.自定义日期)) {
+		消息('日期区间不允许重叠', '失败');
+		return;
+	}
+
 	uni.showLoading({
 		title: '',
 		mask: true
@@ -233,11 +228,11 @@ function 保存() {
 				moreThan: Number(moreThan),
 				discount: discount / 100
 			})),
-			datePrices: form.value.自定义日期.map(({ start, end, price, type }) => ({
+			datePrices: form.value.自定义日期.map(({ start, end, price1, price2 }) => ({
 				start,
 				end,
-				type,
-				price: Number(price)
+				price1: Number(price1),
+				price2: Number(price2)
 			}))
 		}
 	}).then(() => {
@@ -246,6 +241,21 @@ function 保存() {
 			uni.navigateBack();
 		}, 300);
 	});
+}
+function 判断日期区间是否重叠(data) {
+	// 先拷贝一份 然后按开始日期升序
+	let list = data.map((e) => ({
+		start: new Date(e.start),
+		end: new Date(e.end)
+	}));
+	list.sort((a, b) => a.start - b.start);
+	for (var i = 0; i < list.length - 1; i++) {
+		// 排过序的区间 如果前一个的结束时间比后一个的开始时间大 则说明重叠
+		if (list[i].end >= list[i + 1].start) {
+			return true;
+		}
+	}
+	return false;
 }
 </script>
 

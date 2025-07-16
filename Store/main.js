@@ -27,35 +27,7 @@ export default createStore({
 				入住: 今天,
 				离店: 明天
 			},
-			费用: {
-				标准间: 88,
-				豪华间: 118,
-				规则: [{
-						type: '按天数',
-						大于: 10,
-						折扣: 0.8
-					},
-					{
-						type: '按天数',
-						大于: 20,
-						折扣: 0.6
-					},
-					{
-						type: '按日期',
-						开始日期: '2025/7/1',
-						结束日期: '2025/7/1',
-						标准间: 50,
-						豪华间: 90
-					},
-					{
-						type: '按日期',
-						开始日期: '2025/7/20',
-						结束日期: '2025/7/23',
-						标准间: 100,
-						豪华间: 200
-					}
-				]
-			},
+			计价规则: {},
 			宠物数量: 1,
 			用户ID: '',
 			房间可用状态列表: []
@@ -88,8 +60,8 @@ export default createStore({
 		折扣总价(state, getters) {
 			let total = getters.总天数
 			let 最低折扣 = 1
-			for (let val of state.费用.规则) {
-				if (val.type == '按天数' && total >= val.大于 && 最低折扣 > val.折扣) {
+			for (let val of state.计价规则.折扣规则) {
+				if (total >= val.moreThan && 最低折扣 > val.discount) {
 					// 如果达到某一天数界限 且 最低折扣大于该天数对应折扣 则更新最低折扣
 					最低折扣 = val.折扣
 				}
@@ -100,48 +72,46 @@ export default createStore({
 				let 原价天数 = getters.总天数
 				let 标准间特价 = 0
 				let 豪华间特价 = 0
-				for (let val of state.费用.规则) {
-					if (val.type == '按日期') {
-						let bs = new Date(val.开始日期).getTime()
-						let be = new Date(val.开始日期).getTime()
-						let start = new Date(state.日期.入住).getTime()
-						// 离店日期不算价格
-						let end = new Date(state.日期.离店).getTime() - 一天
-						let t = 0
-						if (start <= bs) {
-							if (end >= bs && end < be) {
-								t = (end - bs) / 一天 + 1
-							} else if (end >= be) {
-								t = (be - bs) / 一天 + 1
-							}
-						} else if (start > bs && start <= be) {
-							if (end <= be) {
-								t = (end - start) / 一天 + 1
-							} else if (end > be) {
-								t = (be - start) / 一天 + 1
-							}
+				let start = new Date(state.日期.入住).getTime()
+				// 离店日期不算价格
+				let end = new Date(state.日期.离店).getTime() - 一天
+				for (let val of state.计价规则.日期规则) {
+					let bs = new Date(val.start).getTime()
+					let be = new Date(val.start).getTime()
+					let 特价天数 = 0
+					if (start <= bs) {
+						if (end >= bs && end < be) {
+							特价天数 = (end - bs) / 一天 + 1
+						} else if (end >= be) {
+							特价天数 = (be - bs) / 一天 + 1
 						}
-						t = Math.floor(t)
-						原价天数 -= t
-						if (原价天数 < 0) {
-							原价天数 = 0
+					} else if (start > bs && start <= be) {
+						if (end <= be) {
+							特价天数 = (end - start) / 一天 + 1
+						} else if (end > be) {
+							特价天数 = (be - start) / 一天 + 1
 						}
-						let 额外 = 单天额外费用 * t
-						标准间特价 += val.标准间 * t + 额外
-						豪华间特价 += val.豪华间 * t + 额外
 					}
+					特价天数 = Math.floor(特价天数)
+					原价天数 -= 特价天数
+					if (原价天数 < 0) {
+						原价天数 = 0
+					}
+					let 额外 = 单天额外费用 * 特价天数 // 特价期间的多只额外费用
+					标准间特价 += (val.price1 * 特价天数 + 额外)
+					豪华间特价 += (val.price2 * 特价天数 + 额外)
 				}
-				let 额外 = 单天额外费用 * 原价天数
-				let p1 = state.费用.标准间 * 原价天数
-				let p2 = state.费用.豪华间 * 原价天数
+				let 额外 = 单天额外费用 * 原价天数 // 原价期间的多只额外费用
+				let p1 = state.计价规则.标准间 * 原价天数 + 额外
+				let p2 = state.计价规则.豪华间 * 原价天数 + 额外
 				return {
 					标准间优惠: Math.floor((p1 + 标准间特价) * 100) / 100,
 					豪华间优惠: Math.floor((p2 + 豪华间特价) * 100) / 100,
 				}
 			} else {
 				return {
-					标准间优惠: Math.floor((state.费用.标准间 + 30 * (state.宠物数量 - 1)) * total * 最低折扣 * 100) / 100,
-					豪华间优惠: Math.floor((state.费用.豪华间 + 30 * (state.宠物数量 - 1)) * total * 最低折扣 * 100) / 100,
+					标准间优惠: Math.floor((state.计价规则.标准间 + 30 * (state.宠物数量 - 1)) * total * 最低折扣 * 100) / 100,
+					豪华间优惠: Math.floor((state.计价规则.豪华间 + 30 * (state.宠物数量 - 1)) * total * 最低折扣 * 100) / 100,
 				}
 			}
 		},
@@ -166,6 +136,26 @@ export default createStore({
 					})
 				}
 			}
-		}
+		},
+		async 查询计价规则({
+			state,
+			commit
+		}) {
+			let res = await 请求接口('ruleEdit2', {
+				type: '查询'
+			})
+			if (res) {
+				let 日期规则 = [...res.datePrices].sort((a, b) => new Date(a.start) - new Date(b.start))
+				commit('setState', {
+					key: '计价规则',
+					value: {
+						标准间: res.roomPrice1,
+						豪华间: res.roomPrice2,
+						折扣规则: res.discounts,
+						日期规则
+					}
+				})
+			}
+		},
 	}
 });
