@@ -57,7 +57,10 @@
 			}
 		},
 		{
-			"path" : "pages/ManagerPhotos/ManagerPhotos"
+			"path" : "pages/ManagerPhotos/ManagerPhotos",
+			"style": {
+				"navigationBarTitleText": "商铺照片"
+			}
 		},
 		{
 			"path" : "pages/ManagerAddOrder/ManagerAddOrder"
