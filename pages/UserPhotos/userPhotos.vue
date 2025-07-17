@@ -1,10 +1,14 @@
 <template>
 	<view class="page">
-		<view class="img" v-for="item in 图片列表" @click="放大查看(item)" :style="{ background: item }"></view>
+		<view class="img" v-for="item in 图片列表" :key="item._id" @click="放大查看(item.cloudUrl)">
+			<CusImage class="bgImg" :src="item.cloudUrl" />
+		</view>
 
-		<van-overlay :show="弹窗.show" @click="弹窗.show = false">
+		<van-overlay :show="弹窗.show" @click="弹窗.show = false" style="position: relative;z-index: 990;">
 			<view class="pop center">
-				<view class="img" :style="{ background: 弹窗.url }"></view>
+				<view class="img">
+					<CusImage class="bgImg" :src="弹窗.url" />
+				</view>
 			</view>
 		</van-overlay>
 	</view>
@@ -12,6 +16,7 @@
 
 <script setup>
 import { getCurrentInstance, ref } from 'vue';
+import CusImage from '/Components/cusImage/cusImage.vue';
 
 // 属性
 const instance = getCurrentInstance().proxy;
@@ -47,6 +52,8 @@ function 放大查看(img) {
 		border-radius: 20rpx;
 		overflow: hidden;
 		object-fit: contain;
+		position: relative;
+		z-index: 10;
 	}
 }
 .pop {
@@ -55,6 +62,8 @@ function 放大查看(img) {
 	> .img {
 		width: 80%;
 		height: 80%;
+		position: relative;
+		z-index: 10;
 	}
 }
 </style>

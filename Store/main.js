@@ -27,7 +27,12 @@ export default createStore({
 				入住: 今天,
 				离店: 明天
 			},
-			计价规则: {},
+			计价规则: {
+				标准间: '',
+				豪华间: '',
+				折扣规则: [],
+				日期规则: []
+			},
 			宠物数量: 1,
 			用户ID: '',
 			房间可用状态列表: []
@@ -77,7 +82,7 @@ export default createStore({
 				let end = new Date(state.日期.离店).getTime() - 一天
 				for (let val of state.计价规则.日期规则) {
 					let bs = new Date(val.start).getTime()
-					let be = new Date(val.start).getTime()
+					let be = new Date(val.end).getTime()
 					let 特价天数 = 0
 					if (start <= bs) {
 						if (end >= bs && end < be) {

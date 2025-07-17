@@ -1,8 +1,10 @@
 <template>
 	<view class="body" @click="跳转相册()">
 		<swiper @change="轮播事件($event)" autoplay circular style="width: 100%; height: 100%; position: relative">
-			<swiper-item v-for="item in 图片列表" :key="item">
-				<view class="center" :style="{ background: item }">{{ item }}</view>
+			<swiper-item v-for="item in 图片列表" :key="item._id">
+				<view class="center">
+					<CusImage class="bgImg" :src="item.cloudUrl" />
+				</view>
 			</swiper-item>
 		</swiper>
 
@@ -12,10 +14,20 @@
 
 <script setup>
 import { ref } from 'vue';
+import { 请求接口 } from '/Api/请求接口.js';
+import CusImage from '/Components/cusImage/cusImage.vue';
 
 // 属性
-const 图片列表 = ref(['#1E90FF', '#90EE90', '#D2B48C']);
+const 图片列表 = ref([]);
 const 当前索引 = ref(0);
+
+请求接口('photoUpload2', {
+	type: '查询'
+}).then((res) => {
+	if (res) {
+		图片列表.value = res;
+	}
+});
 
 // 方法
 function 轮播事件({ detail: { current } }) {

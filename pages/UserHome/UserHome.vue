@@ -56,7 +56,6 @@ watch(
 	},
 	{ immediate: true }
 );
-store.dispatch('查询计价规则');
 
 // 方法
 function 切换页面({ detail }) {

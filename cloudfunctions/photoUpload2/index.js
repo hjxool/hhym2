@@ -31,13 +31,18 @@ exports.main = async (event, context) => {
 			}))
 			break
 		case '新增':
-			if (!data) return {
+			if (!data.cloudPath) return {
 				code: 400,
-				msg: '未传图片云端地址'
+				msg: '未传图片云端路径'
 			}
+			if (!data.cloudUrl) return {
+				code: 400,
+				msg: '未传文件ID (cloudUrl)'
+			};
 			p = 相册.add({
 				data: {
-					cloudPath: data
+					cloudPath: data.cloudPath,
+					cloudUrl: data.cloudUrl
 				}
 			}).then(() => ({
 				code: 200,
@@ -51,16 +56,57 @@ exports.main = async (event, context) => {
 			}
 			if (!data.cloudPath) return {
 				code: 400,
-				msg: '缺少更新地址'
+				msg: '未传图片cloudPath'
 			}
-			相册.doc(data._id).update({
+			if (!data.cloudUrl) return {
+				code: 400,
+				msg: '未传文件ID (cloudUrl)'
+			};
+			p = 相册.doc(data._id).update({
 				data: {
-					cloudPath: data.cloudPath
+					cloudPath: data.cloudPath,
+					cloudUrl: data.cloudUrl
 				}
 			}).then(() => ({
 				code: 200,
 				msg: '更新相册成功'
 			}))
+			break
+		case '删除文件':
+			if (!data.cloudPath) return {
+				code: 400,
+				msg: '未传文件cloudPath'
+			}
+			p = cloud.deleteFile({
+				fileList: [`cloud://cloud1-0gzy726e39ba4d96/${data.cloudPath}`]
+			}).then(() => ({
+				code: 200,
+				msg: '删除文件成功'
+			}))
+			break
+		case '删除':
+			if (!data._id) return {
+				code: 400,
+				msg: '缺少图片id'
+			}
+			// 删除文件和记录
+			p = 相册.doc(data._id).get().then(async ({
+				data
+			}) => {
+				let res1 = await cloud.deleteFile({
+					fileList: [`cloud://cloud1-0gzy726e39ba4d96/${data.cloudPath}`]
+				}).then(() => ({
+					code: 200,
+					msg: '删除文件成功'
+				})).catch(({
+					message
+				}) => ({
+					code: 400,
+					msg: message
+				}))
+				if (res1.code != 200) return res1
+				return 相册.doc(data._id).remove()
+			})
 			break
 	}
 	return p.catch(({

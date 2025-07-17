@@ -41,13 +41,11 @@ function 保存日期({ detail }) {
 function formatter(day) {
 	if (!day.topInfo) {
 		let time = day.date.getTime();
-		for (let val of store.state.费用.规则) {
-			if (val.type == '按日期') {
-				let bs = new Date(val.开始日期).getTime();
-				let be = new Date(val.开始日期).getTime();
-				if (time >= bs && time <= be) {
-					day.topInfo = `￥${val.标准间}/￥${val.豪华间}`;
-				}
+		for (let val of store.state.计价规则.日期规则) {
+			let bs = new Date(val.start).getTime();
+			let be = new Date(val.end).getTime();
+			if (time >= bs && time <= be) {
+				day.topInfo = `￥${val.price1}/￥${val.price2}`;
 			}
 		}
 	}

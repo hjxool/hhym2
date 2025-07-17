@@ -35,11 +35,12 @@ import CusImage from '../cusImage/cusImage.vue';
 
 // 属性
 const store = useStore();
+
 const 房间 = ref([
 	{
 		name: '标准间',
 		封面: 'cloud://cloud1-0gzy726e39ba4d96.636c-cloud1-0gzy726e39ba4d96-1320186052/房间封面.jpg',
-		原价: computed(() => store.state.费用.标准间),
+		原价: computed(() => store.state.计价规则.标准间),
 		tip1: '最多可入住2只',
 		tip2: '离店当天18点前接走不计入第二天费用',
 		优惠价: computed(() => Math.round((store.getters.折扣总价.标准间优惠 / store.getters.总天数) * 10) / 10)
@@ -47,7 +48,7 @@ const 房间 = ref([
 	{
 		name: '豪华间',
 		封面: 'cloud://cloud1-0gzy726e39ba4d96.636c-cloud1-0gzy726e39ba4d96-1320186052/房间封面.jpg',
-		原价: computed(() => store.state.费用.豪华间),
+		原价: computed(() => store.state.计价规则.豪华间),
 		tip1: '最多可入住4只',
 		tip2: '离店当天18点前接走不计入第二天费用',
 		优惠价: computed(() => Math.round((store.getters.折扣总价.豪华间优惠 / store.getters.总天数) * 10) / 10)

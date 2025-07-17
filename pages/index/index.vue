@@ -26,6 +26,7 @@ async function 识别用户() {
 	});
 	switch (res.身份) {
 		case '用户':
+			await store.dispatch('查询计价规则');
 			uni.reLaunch({
 				url: '/pages/UserHome/UserHome'
 			});

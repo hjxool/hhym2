@@ -12,7 +12,7 @@
 				<view v-show="删除 == item._id" class="button" @touchend.stop="点击('确认删除', item)" style="background: #ff4500">删除</view>
 				<view v-show="勾选 == item._id" class="button" @touchend.stop="点击('更新图片', item)" style="background: #67c23a">更新</view>
 
-				<CusImage class="bgImg" :src="item.cloudPath" />
+				<CusImage class="bgImg" :src="item.cloudUrl" />
 			</view>
 
 			<van-icon @click="点击('新增图片')" name="plus" size="60rpx" />
@@ -52,14 +52,14 @@ async function 查询数据(type) {
 	if (type == '刷新') {
 		请求接口('photoUpload2', {
 			type: '查询'
-		}).then(res => {
+		}).then((res) => {
 			if (res) {
 				列表.value = res;
 			}
 		});
 	}
 }
-function 点击(type, ...args) {
+async function 点击(type, ...args) {
 	if (type == 'start') {
 		开始时间 = args[0].timeStamp;
 		操作对象 = args[1];
@@ -110,14 +110,26 @@ function 点击(type, ...args) {
 					title: '上传中...',
 					mask: true
 				});
-				let res = await wx.cloud.uploadFile({
-					// 存到目录下必需指定名称
-					cloudPath: 'photos/',
-					filePath: tempFiles[0].tempFilePath
-				});
+				let filePath = tempFiles[0].tempFilePath;
+				let 后缀 = filePath.split('.').pop();
+				let cloudPath = `photos/${列表.value.length + 1}.${后缀}`;
+				let cloudUrl = await wx.cloud
+					.uploadFile({
+						cloudPath,
+						filePath
+					})
+					.then(({ fileID }) => fileID)
+					.catch(() => false);
+				if (!cloudUrl) {
+					消息('上传文件失败', '失败');
+					return;
+				}
 				await 请求接口('photoUpload2', {
 					type: '新增',
-					data: res.fileID
+					data: {
+						cloudPath,
+						cloudUrl
+					}
 				});
 				await 查询数据('刷新');
 				uni.hideLoading();
