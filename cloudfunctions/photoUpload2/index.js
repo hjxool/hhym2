@@ -105,7 +105,10 @@ exports.main = async (event, context) => {
 					msg: message
 				}))
 				if (res1.code != 200) return res1
-				return 相册.doc(data._id).remove()
+				return 相册.doc(data._id).remove().then(() => ({
+					code: 200,
+					msg: '删除记录成功'
+				}))
 			})
 			break
 	}

@@ -1,6 +1,6 @@
 <template>
-	<cusScrollView :加载="查询数据" class="scroll">
-		<view class="page colLayout">
+	<cusScrollView :加载="查询数据" class="page">
+		<view class="viewBox colLayout">
 			<view class="head">
 				<view class="border button colLayout" @click="跳转('日历')">
 					<image class="icon" src="/Static/img/icon1.png" mode="aspectFit"></image>
@@ -34,7 +34,7 @@
 			</swiper>
 
 			<view class="flexGrow">
-				<view class="border center button" v-for="item in 功能" @click="跳转(item.page)" :key="item.name">{{ item.name }}</view>
+				<view class="border center button" v-for="item in 功能" @click="跳转(item.name, item.page)" :key="item.name">{{ item.name }}</view>
 			</view>
 		</view>
 	</cusScrollView>
@@ -88,7 +88,7 @@ async function 查询数据(type) {
 		图表查询();
 	}
 }
-function 跳转(type) {
+function 跳转(type, page) {
 	switch (type) {
 		case '日历':
 			uni.navigateTo({
@@ -111,9 +111,19 @@ function 跳转(type) {
 				url: '/pages/ManagerStatistics/ManagerStatistics'
 			});
 			break;
+		case '添加收入':
+			uni.navigateTo({
+				url: page,
+				events: {
+					待处理() {
+						待处理订单数.value++;
+					}
+				}
+			});
+			break;
 		default:
 			uni.navigateTo({
-				url: type
+				url: page
 			});
 			break;
 	}
@@ -178,15 +188,7 @@ function 图表查询() {
 </script>
 
 <style lang="less" scoped>
-.scroll {
-	position: absolute;
-	width: 100vw;
-	height: 100vh;
-	left: 0%;
-	top: 0;
-	overflow: hidden;
-}
-.page {
+.viewBox {
 	padding: 40rpx 20rpx;
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	> .head {

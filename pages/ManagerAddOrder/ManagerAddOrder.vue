@@ -28,14 +28,13 @@
 		</view>
 	</view>
 
-	<van-action-sheet
-		:show="弹窗.选项显示"
-		:actions="列表[弹窗.当前操作]"
-		@close="弹窗.选项显示 = false"
-		@select="弹窗操作(弹窗.当前操作, $event)"
-		cancel-text="取消"
-		@cancel="弹窗操作(弹窗.当前操作, $event)"
-	/>
+	<van-action-sheet :show="弹窗.选项显示" @close="弹窗.选项显示 = false" cancel-text="取消" @cancel="弹窗操作(弹窗.当前操作, null)">
+		<view class="actionSheet">
+			<view class="center" v-for="item in 列表[弹窗.当前操作]" :key="item.name" @click="弹窗操作('房间', item)" :style="{ color: item.disabled ? '#969799' : '' }">
+				{{ item.name }}
+			</view>
+		</view>
+	</van-action-sheet>
 
 	<van-popup :show="弹窗.可选宠物显示" @close="弹窗.可选宠物显示 = false">
 		<view class="petsBox colLayout">
@@ -48,7 +47,7 @@
 							<van-checkbox :value="item.check">{{ item.name }}</van-checkbox>
 						</view>
 
-						<view class="center noShrink" @click="弹窗操作('宠物详情', item.detail)" style="height: 100%; width: 100rpx">
+						<view class="center noShrink" @click="弹窗操作('宠物详情', item)" style="height: 100%; width: 100rpx">
 							<van-icon name="arrow" color="#4c4e52" size="32rpx" />
 						</view>
 					</view>
@@ -66,14 +65,34 @@
 	<van-popup :show="弹窗.日期显示" position="bottom" custom-style="height: 684rpx;" @close="弹窗.日期显示 = false">
 		<van-datetime-picker :value="弹窗.日期" @confirm="弹窗操作('选择日期', $event)" type="date" :min-date="new Date('2022/7/1').getTime()" @cancel="弹窗.日期显示 = false" />
 	</van-popup>
+
+	<van-popup :show="弹窗.客户列表显示" @close="弹窗.客户列表显示 = false" position="bottom" custom-style="height: 60%;" round>
+		<view class="colLayout" style="height: 100%; overflow: hidden">
+			<van-search
+				class="noShrink"
+				:value="弹窗.客户搜索"
+				@change="弹窗.客户搜索 = $event.detail"
+				@search="客户查询('刷新')"
+				@clear="客户查询('刷新')"
+				placeholder="宠物名或客户名或联系号码"
+			/>
+			<cusScrollView :加载="客户查询" class="flexGrow">
+				<view class="userList">
+					<view class="card" v-for="item in 列表.客户" :key="item._id" @click="弹窗操作('客户', item)">{{ item.name }}</view>
+				</view>
+			</cusScrollView>
+		</view>
+	</van-popup>
 </template>
 
 <script setup>
 import Notify from '/Components/notify/notify.vue';
 import PetsDetail from '/Components/petsDetail/petsDetail.vue';
+import cusScrollView from '/Components/cusScrollView/cusScrollView.vue';
 import { 消息 } from '/Api/提示.js';
-import { onBeforeUnmount, ref } from 'vue';
+import { onBeforeUnmount, ref, getCurrentInstance } from 'vue';
 import { useStore } from 'vuex';
+import { 请求接口 } from '/Api/请求接口.js';
 
 onBeforeUnmount(() => {
 	store.commit('setState', {
@@ -84,6 +103,9 @@ onBeforeUnmount(() => {
 
 // 属性
 const store = useStore();
+const instance = getCurrentInstance().proxy;
+const channel = instance.getOpenerEventChannel();
+
 const 弹窗 = ref({
 	选项显示: false,
 	当前操作: '',
@@ -91,7 +113,14 @@ const 弹窗 = ref({
 	宠物详情: [],
 	可选宠物显示: false,
 	日期显示: false,
-	日期: ''
+	日期: '',
+	客户列表显示: false,
+	客户搜索: '',
+	客户分页: {
+		total: 0,
+		pageNum: 1,
+		pageSize: 20
+	}
 });
 const form = ref({
 	客户: '',
@@ -102,79 +131,45 @@ const form = ref({
 	金额: ''
 });
 const 列表 = ref({
-	客户: [
-		{
-			id: '1',
-			name: '测试1',
-			pets: [
-				{
-					name: '啊实打实',
-					detail: {
-						昵称: '测试4',
-						年龄: 12,
-						性别: 1,
-						品种: '梨花',
-						性格: '普通',
-						是否绝育: 1,
-						是否有耳螨: 0,
-						是否携带传染病: 1,
-						上一次驱虫时间: '',
-						上一次疫苗时间: '',
-						特殊要求: ''
-					}
-				},
-				{ name: 'sss', detail: {} }
-			]
-		},
-		{
-			id: '2',
-			name: '测试2',
-			pets: [
-				{ name: '实打实', detail: {} },
-				{ name: 'r日日日', detail: {} }
-			]
-		}
-	],
+	客户: [],
 	房间: [],
 	宠物: []
 });
+let 禁用提交 = false;
 
 // 方法
 function 弹窗操作(type, args) {
 	switch (type) {
 		case '客户':
-			弹窗.value.选项显示 = !弹窗.value.选项显示;
-			if (弹窗.value.选项显示) {
-				// 打开弹窗
-				弹窗.value.当前操作 = '客户';
-			} else {
-				if (args.detail) {
-					// 选了客户 则赋值 并取宠物列表
-					form.value.客户 = args.detail;
-					// 添加勾选属性
-					列表.value.宠物 = args.detail.pets.map((e) => ({ check: false, ...e }));
-					// 绑定新客户时 清除已选宠物
-					form.value.宠物 = [];
-				} else {
-					// 清空客户 则清除客户信息 并清除宠物列表和所选宠物
-					form.value.客户 = '';
-					列表.value.宠物 = [];
-					form.value.宠物 = [];
-				}
+			弹窗.value.客户列表显示 = !弹窗.value.客户列表显示;
+			if (!弹窗.value.客户列表显示) {
+				// 选了客户 则赋值 并取宠物列表
+				form.value.客户 = args;
+				// 添加勾选属性
+				列表.value.宠物 = args.pets.map((e) => ({ check: false, ...e }));
+				// 绑定新客户时 清除已选宠物
+				form.value.宠物 = [];
 			}
 			break;
 		case '房间':
-			if (!列表.value.房间.length) {
-				消息('请先选择日期', '失败');
-				return;
-			}
-			弹窗.value.选项显示 = !弹窗.value.选项显示;
 			if (弹窗.value.选项显示) {
-				// 打开弹窗
-				弹窗.value.当前操作 = '房间';
+				if (args) {
+					// 点击选项
+					// 禁用项不能选
+					if (args.disabled) return;
+					form.value.房间 = args.name;
+				} else {
+					// 点击取消
+					form.value.房间 = '';
+				}
+				弹窗.value.选项显示 = false;
 			} else {
-				// 选择完毕 或 点击取消
-				form.value.房间 = args.detail?.name || '';
+				if (!列表.value.房间.length) {
+					消息('请先选择日期', '失败');
+					return;
+				}
+				弹窗.value.选项显示 = true;
+				弹窗.value.当前操作 = '房间';
 			}
 			break;
 		case '宠物':
@@ -196,7 +191,19 @@ function 弹窗操作(type, args) {
 			break;
 		case '宠物详情':
 			弹窗.value.宠物详情显示 = true;
-			弹窗.value.宠物详情 = [{ ...args }];
+			弹窗.value.宠物详情 = [{ ...args }].map((e) => ({
+				昵称: e.name,
+				年龄: e.age,
+				性别: e.gender,
+				品种: e.breed,
+				性格: e.temperament,
+				是否绝育: e.isNeutered,
+				是否有耳螨: e.hasEarMites,
+				是否携带传染病: e.hasInfectiousDisease,
+				上一次驱虫时间: e.lastDewormingDate,
+				上一次疫苗时间: e.lastVaccinationDate,
+				特殊要求: e.specialRequirements
+			}));
 			break;
 		case '勾选宠物':
 			args.check = !args.check;
@@ -228,25 +235,29 @@ function 弹窗操作(type, args) {
 			弹窗.value.日期显示 = false;
 			// 修改了日期后需要清除原有房间列表
 			列表.value.房间 = [];
+			form.value.房间 = '';
 			// 如果开始和结束日期校验正确 则查询房间列表及使用状况
 			if (form.value.入住日期 && form.value.离店日期) {
 				let s = new Date(form.value.入住日期).getTime();
 				let e = new Date(form.value.离店日期).getTime();
 				// 离店日期不能跟入住日期同一天
 				if (e > s) {
-					// 查询日期范围内房间状态
-					列表.value.房间 = [
-						{ name: '标准间1', disabled: false },
-						{ name: '标准间2', disabled: true },
-						{ name: '标准间3', disabled: false },
-						{ name: '豪华间1', disabled: true }
-					];
+					列表.value.房间 = [{ loading: true }];
+					请求接口('useableRoom2', {
+						start: form.value.入住日期,
+						end: form.value.离店日期
+					}).then((res) => {
+						if (res) {
+							列表.value.房间 = res;
+						}
+					});
 				}
 			}
 			break;
 	}
 }
-function 提交() {
+async function 提交() {
+	if (禁用提交) return;
 	let { 客户, 宠物, 房间, 入住日期, 离店日期, 金额 } = form.value;
 	// 校验表单
 	if (!客户) {
@@ -280,7 +291,70 @@ function 提交() {
 		消息('订单金额只能为数字', '失败');
 		return;
 	}
-	// 提交接口
+	uni.showLoading({
+		title: '提交中...',
+		mask: true
+	});
+	禁用提交 = true;
+	let data = {
+		room: 房间,
+		start: 入住日期,
+		end: 离店日期,
+		pay: 金额,
+		status: 0,
+		userId: 客户._id,
+		name: 客户.name,
+		phone: 客户.phone,
+		pets: 列表.value.宠物.reduce((pre, cur) => {
+			if (宠物.includes(cur.name)) {
+				let item = {};
+				for (let key in cur) {
+					if (key != 'check') {
+						item[key] = cur[key];
+					}
+				}
+				pre.push(item);
+			}
+			return pre;
+		}, [])
+	};
+	let res = await 请求接口('orderEdit2', {
+		type: '新增',
+		data
+	});
+	uni.hideLoading();
+	if (res) {
+		消息('创建订单成功');
+		channel.emit('待处理');
+		setTimeout(() => {
+			uni.navigateBack();
+		}, 1000);
+	}
+}
+async function 客户查询(type) {
+	if (type == '刷新') {
+		弹窗.value.客户分页.pageNum = 1;
+		列表.value.客户 = [];
+	} else {
+		if (弹窗.value.客户分页.pageNum < Math.ceil(弹窗.value.客户分页.total / 弹窗.value.客户分页.pageSize)) {
+			弹窗.value.客户分页.pageNum++;
+		} else {
+			return;
+		}
+	}
+	await 请求接口('userEdit2', {
+		type: '查询',
+		data: {
+			pageNum: 弹窗.value.客户分页.pageNum,
+			pageSize: 弹窗.value.客户分页.pageSize,
+			keyWords: 弹窗.value.客户搜索
+		}
+	}).then((res) => {
+		if (res && res.data) {
+			弹窗.value.客户分页.total = res.total;
+			列表.value.客户.push(...res.data);
+		}
+	});
 }
 </script>
 
@@ -358,5 +432,23 @@ function 提交() {
 			}
 		}
 	}
+}
+.userList {
+	padding: 32rpx;
+	display: flex;
+	flex-wrap: wrap;
+	align-content: flex-start;
+	gap: 32rpx;
+	> .card {
+		padding: 16rpx 32rpx;
+		border-radius: 20rpx;
+		background: #d1d1d1;
+	}
+}
+.actionSheet {
+	max-height: 50vh;
+	overflow: auto;
+	display: grid;
+	grid-auto-rows: 100rpx;
 }
 </style>

@@ -1,12 +1,12 @@
 <template>
-	<cusScrollView :加载="查询数据" class="scroll">
-		<view class="page">
-			<view class="week">
-				<view v-for="item in 星期">{{ item }}</view>
-			</view>
+	<view class="page colLayout">
+		<view class="week noShrink">
+			<view v-for="item in 星期">{{ item }}</view>
+		</view>
 
+		<cusScrollView :加载="查询数据" class="flexGrow" style="overflow: hidden">
 			<view class="scrollBox">
-				<view v-for="item in 日期列表" :key="item.title">
+				<view v-for="(item, i1) in 日期列表" :key="`${item.title}-${i1}`">
 					<view class="title">{{ item.title }}</view>
 					<view class="date">
 						<view class="button" v-for="(day, index) in item.days" :key="index" @click="显示详情(day.detail)">
@@ -16,8 +16,8 @@
 					</view>
 				</view>
 			</view>
-		</view>
-	</cusScrollView>
+		</cusScrollView>
+	</view>
 
 	<van-popup :show="详情.show" @close="详情.show = false" position="bottom" custom-style="height: 60%;" round>
 		<view class="detail">
@@ -193,14 +193,6 @@ function 宠物详情(pets) {
 </script>
 
 <style lang="less" scoped>
-.scroll {
-	position: absolute;
-	width: 100vw;
-	height: 100vh;
-	left: 0%;
-	top: 0;
-	overflow: hidden;
-}
 .page {
 	padding: 0 32rpx 80rpx;
 	padding-right: 0;
@@ -217,8 +209,7 @@ function 宠物详情(pets) {
 		font-size: 32rpx;
 		padding-right: 32rpx;
 	}
-	> .scrollBox {
-		overflow: auto;
+	.scrollBox {
 		padding-right: 32rpx;
 		.title {
 			font-weight: bold;

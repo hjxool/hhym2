@@ -126,7 +126,7 @@ async function 查询数据(type) {
 	if (日期.value.离店) {
 		data['end'] = 日期.value.离店;
 	}
-	请求接口('orderEdit2', {
+	await 请求接口('orderEdit2', {
 		type: '查询',
 		data
 	}).then(res => {

@@ -61,7 +61,7 @@ async function 查询数据(type) {
 			return;
 		}
 	}
-	请求接口('userEdit2', {
+	await 请求接口('userEdit2', {
 		type: '查询',
 		data: {
 			pageNum: 分页.pageNum,

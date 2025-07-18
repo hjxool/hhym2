@@ -1,6 +1,6 @@
 <template>
-	<cusScrollView :加载="查询数据" class="scroll">
-		<view class="page">
+	<cusScrollView :加载="查询数据" class="page">
+		<view class="content">
 			<view class="card colLayout" v-for="(item, index) in 列表" :key="item._id">
 				<view class="viewBox">
 					<view>
@@ -117,7 +117,7 @@ async function 查询数据(type) {
 			return;
 		}
 	}
-	return 请求接口('orderEdit2', {
+	await 请求接口('orderEdit2', {
 		type: '查询',
 		data: {
 			pageSize: 分页.pageSize,
@@ -234,21 +234,12 @@ function 确认弹窗() {
 .van-center-leave-active {
 	border-radius: 32rpx;
 }
-.scroll {
-	position: absolute;
-	width: 100vw;
-	height: 100vh;
-	left: 0%;
-	top: 0;
-	overflow: hidden;
-}
 .label {
 	color: #555;
 	margin-bottom: 10rpx;
 }
-.page {
+.content {
 	padding: 32rpx;
-	overflow: hidden;
 	.card {
 		padding: 24rpx;
 		border-radius: 12rpx;
