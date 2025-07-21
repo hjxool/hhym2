@@ -126,7 +126,6 @@ async function 初始化() {
 	let month = arr[1];
 	let total = new Date(year, month, 0).getDate();
 	检索范围.end = `${year}/${month}/${total}`;
-	查询数据('刷新');
 }
 function 构造月(str) {
 	// 传入日期如果不是1号 则将前面的日期样式改为灰色

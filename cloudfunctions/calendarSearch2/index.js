@@ -55,9 +55,9 @@ exports.main = async (event, context) => {
 	}
 	// 使用聚合操作
 	let res = await 订单列表.aggregate().match({ // 同where条件检索
-		start: _.lte(end),
-		end: _.gte(start),
-		status: 1, // 只检索以确认订单
+		// 注意 不能按照订单的查询方式 只查开始时间在范围内的
+		start: _.gte(start).and(_.lte(end)),
+		status: 0, // 只检索待确认订单
 	}).group({
 		_id: { // _id为必需字段 不然无法执行
 			date: { // 按日期聚类
