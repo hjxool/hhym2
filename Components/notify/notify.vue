@@ -7,8 +7,11 @@
 
 <script setup>
 import { computed, watch } from 'vue';
-import Dialog from '/wxcomponents/vant/dialog/dialog.js';
-import Notify from '/wxcomponents/vant/notify/notify.js';
+// 不能用 打包时会解析出错 因为微信组件大多是以module.exports导出 因此不能用import
+// import Dialog from '../../wxcomponents/vant/dialog/dialog.js';
+// import Notify from '../../wxcomponents/vant/notify/notify.js';
+const { default: Dialog } = require('../../wxcomponents/vant/dialog/dialog.js');
+const { default: Notify } = require('../../wxcomponents/vant/notify/notify.js');
 import { useStore } from 'vuex';
 import { getCurrentInstance } from 'vue';
 
