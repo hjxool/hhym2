@@ -49,13 +49,7 @@
 
 	<PetsDetail :show="宠物详情.show" @close="宠物详情.show = false" :宠物列表="宠物详情.list" />
 
-	<van-action-sheet :show="编辑.显示房间列表" @close="编辑.显示房间列表 = false">
-		<view class="actionSheet">
-			<view class="center" v-for="item in 编辑.房间列表" :key="item.name" @click="显示弹窗('选择房间', item)" :style="{ color: item.disabled ? '#969799' : '' }">
-				{{ item.name }}
-			</view>
-		</view>
-	</van-action-sheet>
+	<seleceRoom :show="编辑.显示房间列表" @close="编辑.显示房间列表 = false" :房间列表="编辑.房间列表" @select="显示弹窗('选择房间', $event)" />
 
 	<Notify @confirm="确认弹窗()" />
 </template>
@@ -65,6 +59,7 @@ import { getCurrentInstance, onBeforeUnmount, ref } from 'vue';
 import cusScrollView from '/Components/cusScrollView/cusScrollView.vue';
 import Notify from '/Components/notify/notify.vue';
 import PetsDetail from '/Components/petsDetail/petsDetail.vue';
+import seleceRoom from '/Components/managerSelectRoom/managerSelectRoom.vue';
 import { 计算天数 } from '/Api/时间参数.js';
 import { 消息, 弹窗 } from '/Api/提示.js';
 import { useStore } from 'vuex';
@@ -151,10 +146,8 @@ function 显示弹窗(type, args) {
 			break;
 		case '选择房间':
 			if (编辑.value.显示房间列表) {
-				// 禁用项不能选
-				if (args.disabled) return;
 				编辑.value.显示房间列表 = false;
-				列表.value.find((e) => e._id == 编辑.value.当前).room = args.name;
+				列表.value.find((e) => e._id == 编辑.value.当前).room = args;
 			} else {
 				编辑.value.显示房间列表 = true;
 			}
@@ -287,11 +280,5 @@ function 确认弹窗() {
 			}
 		}
 	}
-}
-.actionSheet {
-	max-height: 50vh;
-	overflow: auto;
-	display: grid;
-	grid-auto-rows: 100rpx;
 }
 </style>

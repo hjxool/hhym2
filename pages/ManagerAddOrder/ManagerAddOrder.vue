@@ -28,13 +28,7 @@
 		</view>
 	</view>
 
-	<van-action-sheet :show="弹窗.选项显示" @close="弹窗.选项显示 = false" cancel-text="取消" @cancel="弹窗操作(弹窗.当前操作, null)">
-		<view class="actionSheet">
-			<view class="center" v-for="item in 列表[弹窗.当前操作]" :key="item.name" @click="弹窗操作('房间', item)" :style="{ color: item.disabled ? '#969799' : '' }">
-				{{ item.name }}
-			</view>
-		</view>
-	</van-action-sheet>
+	<seleceRoom :show="弹窗.房间显示" @close="弹窗.房间显示 = false" :房间列表="列表.房间" @select="弹窗操作('房间', $event)" />
 
 	<van-popup :show="弹窗.可选宠物显示" @close="弹窗.可选宠物显示 = false">
 		<view class="petsBox colLayout">
@@ -89,6 +83,7 @@
 import Notify from '/Components/notify/notify.vue';
 import PetsDetail from '/Components/petsDetail/petsDetail.vue';
 import cusScrollView from '/Components/cusScrollView/cusScrollView.vue';
+import seleceRoom from '/Components/managerSelectRoom/managerSelectRoom.vue';
 import { 消息 } from '/Api/提示.js';
 import { onBeforeUnmount, ref, getCurrentInstance } from 'vue';
 import { useStore } from 'vuex';
@@ -107,8 +102,7 @@ const instance = getCurrentInstance().proxy;
 const channel = instance.getOpenerEventChannel();
 
 const 弹窗 = ref({
-	选项显示: false,
-	当前操作: '',
+	房间显示: false,
 	宠物详情显示: false,
 	宠物详情: [],
 	可选宠物显示: false,
@@ -152,24 +146,15 @@ function 弹窗操作(type, args) {
 			}
 			break;
 		case '房间':
-			if (弹窗.value.选项显示) {
-				if (args) {
-					// 点击选项
-					// 禁用项不能选
-					if (args.disabled) return;
-					form.value.房间 = args.name;
-				} else {
-					// 点击取消
-					form.value.房间 = '';
-				}
-				弹窗.value.选项显示 = false;
+			if (弹窗.value.房间显示) {
+				弹窗.value.房间显示 = false;
+				form.value.房间 = args;
 			} else {
 				if (!列表.value.房间.length) {
 					消息('请先选择日期', '失败');
 					return;
 				}
-				弹窗.value.选项显示 = true;
-				弹窗.value.当前操作 = '房间';
+				弹窗.value.房间显示 = true;
 			}
 			break;
 		case '宠物':
@@ -242,7 +227,6 @@ function 弹窗操作(type, args) {
 				let e = new Date(form.value.离店日期).getTime();
 				// 离店日期不能跟入住日期同一天
 				if (e > s) {
-					列表.value.房间 = [{ loading: true }];
 					请求接口('useableRoom2', {
 						start: form.value.入住日期,
 						end: form.value.离店日期
@@ -356,6 +340,7 @@ async function 客户查询(type) {
 		}
 	});
 }
+function 选房提示(room) {}
 </script>
 
 <style lang="less" scoped>
@@ -444,11 +429,5 @@ async function 客户查询(type) {
 		border-radius: 20rpx;
 		background: #d1d1d1;
 	}
-}
-.actionSheet {
-	max-height: 50vh;
-	overflow: auto;
-	display: grid;
-	grid-auto-rows: 100rpx;
 }
 </style>
