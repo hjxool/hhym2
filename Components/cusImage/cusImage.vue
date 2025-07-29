@@ -6,7 +6,7 @@
 			<van-loading type="spinner" color="#969799" />
 		</view>
 
-		<view class="popup center" :style="{ opacity: error ? 1 : 0 }">加载失败</view>
+		<view class="popup center" :style="{ opacity: error ? 1 : 0 }" style="transition: none">加载失败</view>
 	</view>
 </template>
 
