@@ -67,7 +67,11 @@ const 当前区域 = ref('门口');
 const 房间 = ref({
 	// 得弄一些空数据 不然会报错
 	门口: {},
-	左侧: {}
+	左侧: {},
+	门口左侧内部: {},
+	门口左侧内部尽头: {},
+	娱乐室门口: {},
+	娱乐室前方内部: {}
 });
 const 小地图定位 = ref({
 	x: '',
@@ -148,7 +152,7 @@ function 初始化(res) {
 		小地图定位.value.deg = Math.floor((angle - 房间.value[当前区域.value].相机与雷达偏移角度) * 10) / 10;
 		// 调试用 旋转时打印小地图deg角度
 		console.log('小地图角度', `${小地图定位.value.deg}°`);
-		console.log('热点相对视窗定位', 房间.value[当前区域.value].hotspots[0].screenPosition);
+		// console.log('热点相对视窗定位', 房间.value[当前区域.value].hotspots[0].screenPosition);
 	});
 	// 调试用 创建始终指向视角中心的箭头
 	指向视角中心的箭头 = new THREE.ArrowHelper(
@@ -212,7 +216,7 @@ function 添加房间信息() {
 					disabled: false
 				}
 			],
-			mapPosition: { x: 37, y: 50, deg: 0 },
+			mapPosition: { x: 60, y: 45, deg: 0 },
 			相机与雷达偏移角度: 144.4, // 相机朝向与小地图扇形偏差角度
 			初始朝向: [-0.614, -0.209, -0.76] // 注意手动设置朝向 必须用 相机朝向 不能用箭头坐标 否则坐标不会发生变化
 		},
@@ -222,6 +226,13 @@ function 添加房间信息() {
 				{
 					label: '门口',
 					position: new THREE.Vector3(9.249762182591223, -0.9117713062512167, 1.0442603553017726),
+					opacity: 0,
+					screenPosition: { x: 0, y: 0 },
+					type: '区域'
+				},
+				{
+					label: '门口左侧内部',
+					position: new THREE.Vector3(-7.555918750013085, -1.218863354486887, 2.716451371455423),
 					opacity: 0,
 					screenPosition: { x: 0, y: 0 },
 					type: '区域'
@@ -267,9 +278,84 @@ function 添加房间信息() {
 					disabled: false
 				}
 			],
-			mapPosition: { x: 20, y: 50, deg: 90 },
+			mapPosition: { x: 30, y: 45, deg: 90 },
 			相机与雷达偏移角度: -173.3,
 			初始朝向: [0.9834072950292505, -0.13020920798994637, 0.126315692761761]
+		},
+		门口左侧内部: {
+			img: 'https://636c-cloud1-0gzy726e39ba4d96-1320186052.tcb.qcloud.la/VR/%E9%97%A8%E5%8F%A3%E5%B7%A6%E4%BE%A7%E5%86%85%E9%83%A8.jpg?sign=d14f19c74afec8ac694d3ed14addcb4f&t=1753841916',
+			hotspots: [
+				{
+					label: '门口左侧',
+					position: new THREE.Vector3(8.304223271036173, -1.9632710131054445, 3.9197806171798453),
+					opacity: 0,
+					screenPosition: { x: 0, y: 0 },
+					type: '区域'
+				},
+				{
+					label: '标准间5',
+					position: new THREE.Vector3(8.866985591105882, -1.0665910787288029, 2.1638504860925623),
+					opacity: 0,
+					screenPosition: { x: 0, y: 0 },
+					type: '房间',
+					disabled: false
+				},
+				{
+					label: '豪华间2',
+					position: new THREE.Vector3(-8.941778927290898, -2.0126181155716725, 1.6374639275715714),
+					opacity: 0,
+					screenPosition: { x: 0, y: 0 },
+					type: '房间',
+					disabled: false
+				},
+				{
+					label: '标准间10',
+					position: new THREE.Vector3(-4.908666820165957, -1.267018938050514, 8.60090720236598),
+					opacity: 0,
+					screenPosition: { x: 0, y: 0 },
+					type: '房间',
+					disabled: false
+				},
+				{
+					label: '标准间11',
+					position: new THREE.Vector3(-2.6993219324251245, -0.8153858551620535, 9.66271774209048),
+					opacity: 0,
+					screenPosition: { x: 0, y: 0 },
+					type: '房间',
+					disabled: false
+				},
+				{
+					label: '门口左侧内部尽头',
+					position: new THREE.Vector3(-0.9255119230000998, -0.7147349835403385, 10.01623599126648),
+					opacity: 0,
+					screenPosition: { x: 0, y: 0 },
+					type: '区域'
+				}
+			],
+			mapPosition: { x: 15, y: 60, deg: 90 },
+			相机与雷达偏移角度: -84.4,
+			初始朝向: [-0.08785796964931601, -0.08439453938267613, 0.9925515295900187]
+		},
+		门口左侧内部尽头: {
+			img: 'https://636c-cloud1-0gzy726e39ba4d96-1320186052.tcb.qcloud.la/VR/%E9%97%A8%E5%8F%A3%E5%B7%A6%E4%BE%A7%E5%86%85%E9%83%A8%E5%B0%BD%E5%A4%B4.jpg?sign=635fe28ea062b6f162687d84aa5ac3fd&t=1753844696',
+			hotspots: [],
+			mapPosition: { x: 60, y: 60, deg: 0 },
+			相机与雷达偏移角度: 0,
+			初始朝向: [-0.614, -0.209, -0.76]
+		},
+		娱乐室门口: {
+			img: 'https://636c-cloud1-0gzy726e39ba4d96-1320186052.tcb.qcloud.la/VR/%E5%A8%B1%E4%B9%90%E5%AE%A4%E9%97%A8%E5%8F%A3.jpg?sign=c9091b228f7ea3e06dc7e686a7fd74d9&t=1753844854',
+			hotspots: [],
+			mapPosition: { x: 60, y: 15, deg: 0 },
+			相机与雷达偏移角度: 0,
+			初始朝向: [-0.614, -0.209, -0.76]
+		},
+		娱乐室前方内部: {
+			img: 'https://636c-cloud1-0gzy726e39ba4d96-1320186052.tcb.qcloud.la/VR/%E5%A8%B1%E4%B9%90%E5%AE%A4%E5%89%8D%E6%96%B9%E5%86%85%E9%83%A8.jpg?sign=847ea957de43c102dc1f46d8683bd36c&t=1753844943',
+			hotspots: [],
+			mapPosition: { x: 15, y: 15, deg: 0 },
+			相机与雷达偏移角度: 0,
+			初始朝向: [-0.614, -0.209, -0.76]
 		}
 	};
 	// 房间可用状态改变 则更新热点信息
