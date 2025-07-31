@@ -88,7 +88,7 @@ import { 请求接口 } from '/Api/请求接口.js';
 onBeforeUnmount(() => {
 	store.commit('setState', {
 		key: '提示.show',
-		value: false
+		value: false,
 	});
 });
 
@@ -98,18 +98,18 @@ const form = ref({
 	标准间单价: 88,
 	豪华间单价: 118,
 	自定义日期: [],
-	自定义折扣: []
+	自定义折扣: [],
 });
 const 当前操作对象 = {
 	key: '',
-	value: ''
+	value: '',
 };
 const 编辑 = ref({
 	当前编辑: '',
 	当前编辑类型: '',
 	日期: '',
 	显示日期: false,
-	日期选择器标题: ''
+	日期选择器标题: '',
 });
 let 配置id;
 
@@ -119,20 +119,20 @@ let 配置id;
 function 初始化() {
 	uni.showLoading({
 		title: '',
-		mask: true
+		mask: true,
 	});
 	请求接口('ruleEdit2', {
-		type: '查询'
+		type: '查询',
 	}).then((res) => {
 		uni.hideLoading();
-		if (res) {
+		if (res && typeof res == 'object') {
 			配置id = res._id;
 			form.value.标准间单价 = res.roomPrice1 || 0;
 			form.value.豪华间单价 = res.roomPrice2 || 0;
 			let discounts = res.discounts || [];
 			form.value.自定义折扣 = discounts.map((e) => ({
 				moreThan: e.moreThan,
-				discount: e.discount * 100
+				discount: e.discount * 100,
 			}));
 			form.value.自定义日期 = res.datePrices || [];
 		}
@@ -216,7 +216,7 @@ function 保存() {
 
 	uni.showLoading({
 		title: '',
-		mask: true
+		mask: true,
 	});
 	请求接口('ruleEdit2', {
 		type: '编辑',
@@ -226,15 +226,15 @@ function 保存() {
 			roomPrice2: Number(form.value.豪华间单价),
 			discounts: form.value.自定义折扣.map(({ moreThan, discount }) => ({
 				moreThan: Number(moreThan),
-				discount: discount / 100
+				discount: discount / 100,
 			})),
 			datePrices: form.value.自定义日期.map(({ start, end, price1, price2 }) => ({
 				start,
 				end,
 				price1: Number(price1),
-				price2: Number(price2)
-			}))
-		}
+				price2: Number(price2),
+			})),
+		},
 	}).then(() => {
 		uni.hideLoading();
 		setTimeout(() => {
@@ -246,7 +246,7 @@ function 判断日期区间是否重叠(data) {
 	// 先拷贝一份 然后按开始日期升序
 	let list = data.map((e) => ({
 		start: new Date(e.start),
-		end: new Date(e.end)
+		end: new Date(e.end),
 	}));
 	list.sort((a, b) => a.start - b.start);
 	for (var i = 0; i < list.length - 1; i++) {

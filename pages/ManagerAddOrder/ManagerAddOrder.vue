@@ -62,14 +62,7 @@
 
 	<van-popup :show="弹窗.客户列表显示" @close="弹窗.客户列表显示 = false" position="bottom" custom-style="height: 60%;" round>
 		<view class="colLayout" style="height: 100%; overflow: hidden">
-			<van-search
-				class="noShrink"
-				:value="弹窗.客户搜索"
-				@change="弹窗.客户搜索 = $event.detail"
-				@search="客户查询('刷新')"
-				@clear="客户查询('刷新')"
-				placeholder="宠物名或客户名或联系号码"
-			/>
+			<van-search class="noShrink" :value="弹窗.客户搜索" @change="弹窗.客户搜索 = $event.detail" @search="客户查询('刷新')" @clear="客户查询('刷新')" placeholder="宠物名或客户名或联系号码" />
 			<cusScrollView :加载="客户查询" class="flexGrow">
 				<view class="userList">
 					<view class="card" v-for="item in 列表.客户" :key="item._id" @click="弹窗操作('客户', item)">{{ item.name }}</view>
@@ -92,7 +85,7 @@ import { 请求接口 } from '/Api/请求接口.js';
 onBeforeUnmount(() => {
 	store.commit('setState', {
 		key: '提示.show',
-		value: false
+		value: false,
 	});
 });
 
@@ -113,8 +106,8 @@ const 弹窗 = ref({
 	客户分页: {
 		total: 0,
 		pageNum: 1,
-		pageSize: 20
-	}
+		pageSize: 20,
+	},
 });
 const form = ref({
 	客户: '',
@@ -122,12 +115,12 @@ const form = ref({
 	宠物: [],
 	入住日期: '',
 	离店日期: '',
-	金额: ''
+	金额: '',
 });
 const 列表 = ref({
 	客户: [],
 	房间: [],
-	宠物: []
+	宠物: [],
 });
 let 禁用提交 = false;
 
@@ -187,7 +180,7 @@ function 弹窗操作(type, args) {
 				是否携带传染病: e.hasInfectiousDisease,
 				上一次驱虫时间: e.lastDewormingDate,
 				上一次疫苗时间: e.lastVaccinationDate,
-				特殊要求: e.specialRequirements
+				特殊要求: e.specialRequirements,
 			}));
 			break;
 		case '勾选宠物':
@@ -229,9 +222,9 @@ function 弹窗操作(type, args) {
 				if (e > s) {
 					请求接口('useableRoom2', {
 						start: form.value.入住日期,
-						end: form.value.离店日期
+						end: form.value.离店日期,
 					}).then((res) => {
-						if (res) {
+						if (res && typeof res == 'object') {
 							列表.value.房间 = res;
 						}
 					});
@@ -277,7 +270,7 @@ async function 提交() {
 	}
 	uni.showLoading({
 		title: '提交中...',
-		mask: true
+		mask: true,
 	});
 	禁用提交 = true;
 	let data = {
@@ -300,11 +293,11 @@ async function 提交() {
 				pre.push(item);
 			}
 			return pre;
-		}, [])
+		}, []),
 	};
 	let res = await 请求接口('orderEdit2', {
 		type: '新增',
-		data
+		data,
 	});
 	uni.hideLoading();
 	if (res) {
@@ -331,8 +324,8 @@ async function 客户查询(type) {
 		data: {
 			pageNum: 弹窗.value.客户分页.pageNum,
 			pageSize: 弹窗.value.客户分页.pageSize,
-			keyWords: 弹窗.value.客户搜索
-		}
+			keyWords: 弹窗.value.客户搜索,
+		},
 	}).then((res) => {
 		if (res && res.data) {
 			弹窗.value.客户分页.total = res.total;

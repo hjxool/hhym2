@@ -34,7 +34,7 @@ import { 请求接口 } from '/Api/请求接口.js';
 onBeforeUnmount(() => {
 	store.commit('setState', {
 		key: '提示.show',
-		value: false
+		value: false,
 	});
 });
 
@@ -51,9 +51,9 @@ let 操作对象; // 需要一个中间变量暂存 如果只用删除无法实�
 async function 查询数据(type) {
 	if (type == '刷新') {
 		await 请求接口('photoUpload2', {
-			type: '查询'
+			type: '查询',
 		}).then((res) => {
-			if (res) {
+			if (res && typeof res == 'object') {
 				列表.value = res;
 			}
 		});
@@ -99,15 +99,15 @@ async function 点击(type, ...args) {
 	} else if (type == '弹窗确认') {
 		uni.showLoading({
 			title: '',
-			mask: true
+			mask: true,
 		});
 		let _id = 删除.value;
 		删除.value = '';
 		await 请求接口('photoUpload2', {
 			type: '删除',
 			data: {
-				_id
-			}
+				_id,
+			},
 		});
 		await 查询数据('刷新');
 		uni.hideLoading();
@@ -120,7 +120,7 @@ async function 点击(type, ...args) {
 			async success({ tempFiles }) {
 				uni.showLoading({
 					title: '上传中...',
-					mask: true
+					mask: true,
 				});
 				let filePath = tempFiles[0].tempFilePath;
 				let 后缀 = filePath.split('.').pop();
@@ -129,7 +129,7 @@ async function 点击(type, ...args) {
 				let cloudUrl = await wx.cloud
 					.uploadFile({
 						cloudPath,
-						filePath
+						filePath,
 					})
 					.then(({ fileID }) => fileID)
 					.catch(() => false);
@@ -142,13 +142,13 @@ async function 点击(type, ...args) {
 					type: '新增',
 					data: {
 						cloudPath,
-						cloudUrl
-					}
+						cloudUrl,
+					},
 				});
 				await 查询数据('刷新');
 				uni.hideLoading();
 			},
-			fail() {}
+			fail() {},
 		});
 	} else if (type == '更新图片') {
 		uni.chooseMedia({
@@ -158,7 +158,7 @@ async function 点击(type, ...args) {
 				勾选.value = '';
 				uni.showLoading({
 					title: '更新中',
-					mask: true
+					mask: true,
 				});
 				let item = args[0];
 				let filePath = tempFiles[0].tempFilePath;
@@ -169,14 +169,14 @@ async function 点击(type, ...args) {
 					请求接口('photoUpload2', {
 						type: '删除文件',
 						data: {
-							cloudPath: item.cloudPath
-						}
+							cloudPath: item.cloudPath,
+						},
 					});
 				}
 				let cloudUrl = await wx.cloud
 					.uploadFile({
 						cloudPath,
-						filePath
+						filePath,
 					})
 					.then(({ fileID }) => fileID)
 					.catch(() => false);
@@ -190,15 +190,15 @@ async function 点击(type, ...args) {
 					data: {
 						_id: item._id,
 						cloudPath,
-						cloudUrl
-					}
+						cloudUrl,
+					},
 				});
 				await 查询数据('刷新');
 				uni.hideLoading();
 			},
 			fail() {
 				勾选.value = '';
-			}
+			},
 		});
 	} else if (type == '清除标记') {
 		删除.value = '';

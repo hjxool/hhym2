@@ -48,31 +48,31 @@ import { useStore } from 'vuex';
 const store = useStore();
 const 过滤显示 = ref({
 	select: '全部',
-	options: ['全部', '待确认', '已完成', '已取消']
+	options: ['全部', '待确认', '已完成', '已取消'],
 });
 const 列表 = ref([]);
 const 订单状态 = {
 	待确认: 0,
 	已完成: 1,
-	已取消: -1
+	已取消: -1,
 };
 let 总列表 = [];
 let 当前操作订单;
 const 宠物详情 = ref({
 	show: false,
-	list: []
+	list: [],
 });
 const 分页 = {
 	pageNum: 1,
 	pageSize: 20,
-	total: 0
+	total: 0,
 };
 
 // setup中子组件默认封闭 父组件无法直接访问子组件内容
 // 需要用defineExpose明确需要暴露的属性和方法
 defineExpose({
 	操作,
-	查询订单 // 从重新预约跳转回订单列表时要刷新数据
+	查询订单, // 从重新预约跳转回订单列表时要刷新数据
 });
 
 // 方法
@@ -116,10 +116,10 @@ async function 查询订单(type) {
 		data: {
 			pageNum: 分页.pageNum,
 			pageSize: 分页.pageSize,
-			userId: store.state.用户ID
-		}
+			userId: store.state.用户ID,
+		},
 	});
-	if (res) {
+	if (res && typeof res == 'object') {
 		分页.total = res.total;
 		总列表.push(...res.data);
 		if (type == '刷新') {
@@ -154,14 +154,14 @@ function 操作(type, item) {
 			// 请求接口后更改订单状态 不用刷新 避免调两次接口
 			uni.showLoading({
 				title: '',
-				mask: true
+				mask: true,
 			});
 			请求接口('orderEdit2', {
 				type: '编辑',
 				data: {
 					_id: 当前操作订单._id,
-					status: 订单状态['已取消']
-				}
+					status: 订单状态['已取消'],
+				},
 			}).then((res) => {
 				uni.hideLoading();
 				if (res) {
@@ -177,7 +177,7 @@ function 操作(type, item) {
 				url: '/pages/UserOrder/UserOrder',
 				success(res) {
 					res.eventChannel.emit('数据', item);
-				}
+				},
 			});
 			break;
 		case '显示弹窗':
@@ -193,7 +193,7 @@ function 操作(type, item) {
 				是否携带传染病: e.hasInfectiousDisease,
 				上一次驱虫时间: e.lastDewormingDate,
 				上一次疫苗时间: e.lastVaccinationDate,
-				特殊要求: e.specialRequirements
+				特殊要求: e.specialRequirements,
 			}));
 			break;
 	}

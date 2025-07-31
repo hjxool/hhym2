@@ -22,9 +22,9 @@ const 图片列表 = ref([]);
 const 当前索引 = ref(0);
 
 请求接口('photoUpload2', {
-	type: '查询'
+	type: '查询',
 }).then((res) => {
-	if (res) {
+	if (res && typeof res == 'object') {
 		图片列表.value = res;
 	}
 });
@@ -38,7 +38,7 @@ function 跳转相册() {
 		url: '/pages/UserPhotos/UserPhotos',
 		success(res) {
 			res.eventChannel.emit('图片列表', 图片列表.value);
-		}
+		},
 	});
 }
 </script>

@@ -410,7 +410,7 @@ async function 查询用户() {
 	});
 	uni.hideLoading();
 	是否为新用户 = true;
-	if (res) {
+	if (res && typeof res == 'object') {
 		是否为新用户 = false;
 		form.value.联系人 = res.name;
 		form.value.联系号 = res.phone;

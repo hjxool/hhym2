@@ -184,6 +184,13 @@ function 添加房间信息() {
 					type: '区域'
 				},
 				{
+					label: '娱乐室门口',
+					position: new THREE.Vector3(-5.828619838918098, -1.2551298237894013, -7.8948830127065275),
+					opacity: 0,
+					screenPosition: { x: 0, y: 0 },
+					type: '区域'
+				},
+				{
 					label: '标准间3',
 					position: new THREE.Vector3(-7.560448743381736, -1.5107909827065207, -6.167901013386097),
 					opacity: 0,
@@ -338,24 +345,103 @@ function 添加房间信息() {
 		},
 		门口左侧内部尽头: {
 			img: 'https://636c-cloud1-0gzy726e39ba4d96-1320186052.tcb.qcloud.la/VR/%E9%97%A8%E5%8F%A3%E5%B7%A6%E4%BE%A7%E5%86%85%E9%83%A8%E5%B0%BD%E5%A4%B4.jpg?sign=635fe28ea062b6f162687d84aa5ac3fd&t=1753844696',
-			hotspots: [],
-			mapPosition: { x: 60, y: 60, deg: 0 },
-			相机与雷达偏移角度: 0,
-			初始朝向: [-0.614, -0.209, -0.76]
+			hotspots: [
+				{
+					label: '门口左侧内部',
+					position: new THREE.Vector3(8.016156733140372, -1.6954956818028228, 0.8223806833632348),
+					opacity: 0,
+					screenPosition: { x: 0, y: 0 },
+					type: '区域'
+				},
+				{
+					label: '豪华间2',
+					position: new THREE.Vector3(7.679044963928053, -1.646729552870659, -3.649903499554488),
+					opacity: 0,
+					screenPosition: { x: 0, y: 0 },
+					type: '房间',
+					disabled: false
+				},
+				{
+					label: '标准间10',
+					position: new THREE.Vector3(4.669809369507625, -2.563990180137565, -7.522291259316369),
+					opacity: 0,
+					screenPosition: { x: 0, y: 0 },
+					type: '房间',
+					disabled: false
+				},
+				{
+					label: '标准间11',
+					position: new THREE.Vector3(-6.361679558649917, -2.65919390062987, -7.096713092610505),
+					opacity: 0,
+					screenPosition: { x: 0, y: 0 },
+					type: '房间',
+					disabled: false
+				}
+			],
+			mapPosition: { x: 60, y: 60, deg: -90 },
+			相机与雷达偏移角度: -3.7,
+			初始朝向: [0.9889972689777664, -0.13408876533286243, -0.06248683834239166]
 		},
 		娱乐室门口: {
 			img: 'https://636c-cloud1-0gzy726e39ba4d96-1320186052.tcb.qcloud.la/VR/%E5%A8%B1%E4%B9%90%E5%AE%A4%E9%97%A8%E5%8F%A3.jpg?sign=c9091b228f7ea3e06dc7e686a7fd74d9&t=1753844854',
-			hotspots: [],
-			mapPosition: { x: 60, y: 15, deg: 0 },
-			相机与雷达偏移角度: 0,
-			初始朝向: [-0.614, -0.209, -0.76]
+			hotspots: [
+				{
+					label: '门口',
+					position: new THREE.Vector3(-9.50814361019563, -0.2687931894131221, -0.4704529513460126),
+					opacity: 0,
+					screenPosition: { x: 0, y: 0 },
+					type: '区域'
+				},
+				{
+					label: '娱乐室前方内部',
+					position: new THREE.Vector3(-2.699963197178341, -0.4665098368474916, -9.407291454647087),
+					opacity: 0,
+					screenPosition: { x: 0, y: 0 },
+					type: '区域'
+				},
+				{
+					label: '豪华间1',
+					position: new THREE.Vector3(-4.814315961582556, -0.6640993301545095, -8.592204906680879),
+					opacity: 0,
+					screenPosition: { x: 0, y: 0 },
+					type: '房间',
+					disabled: false
+				}
+			],
+			mapPosition: { x: 60, y: 15, deg: 180 },
+			相机与雷达偏移角度: -89.4,
+			初始朝向: [-0.23443682163714022, -0.023383241481925065, -0.9718500916697357]
 		},
 		娱乐室前方内部: {
 			img: 'https://636c-cloud1-0gzy726e39ba4d96-1320186052.tcb.qcloud.la/VR/%E5%A8%B1%E4%B9%90%E5%AE%A4%E5%89%8D%E6%96%B9%E5%86%85%E9%83%A8.jpg?sign=847ea957de43c102dc1f46d8683bd36c&t=1753844943',
-			hotspots: [],
-			mapPosition: { x: 15, y: 15, deg: 0 },
-			相机与雷达偏移角度: 0,
-			初始朝向: [-0.614, -0.209, -0.76]
+			hotspots: [
+				{
+					label: '娱乐室门口',
+					position: new THREE.Vector3(-9.44026470453998, -1.3042086793894487, -1.0612849011317849),
+					opacity: 0,
+					screenPosition: { x: 0, y: 0 },
+					type: '区域'
+				},
+				{
+					label: '标准间2',
+					position: new THREE.Vector3(3.135525990318123, -2.5639901801375573, -8.479344491409403),
+					opacity: 0,
+					screenPosition: { x: 0, y: 0 },
+					type: '房间',
+					disabled: false
+				},
+				{
+					label: '标准间1',
+					position: new THREE.Vector3(7.660681899385526, -2.228565164181678, -3.3376344367022273),
+					opacity: 0,
+					screenPosition: { x: 0, y: 0 },
+					type: '房间',
+					disabled: false
+				}
+			],
+			mapPosition: { x: 15, y: 15, deg: 90 },
+			相机与雷达偏移角度: -2.5,
+			初始朝向: [-0.9762816106131231, -0.11755514145441893, -0.18181035585543007]
 		}
 	};
 	// 房间可用状态改变 则更新热点信息
