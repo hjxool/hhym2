@@ -13,16 +13,15 @@
 			</view>
 			<view v-if="item.type == '房间'" class="room" @click="选择房间(item)">{{ item.label }}{{ item.disabled ? '(占用)' : '' }}</view>
 		</view>
-		<!-- 小地图 -->
-		<view class="minimap">
-			<!-- 必须用px -->
+		<!-- 小地图 必须用px -->
+		<!-- <view class="minimap">
 			<view class="indicator center" :style="{ transform: `translate(${小地图定位.x}px, ${小地图定位.y}px)` }">
 				<view class="rotate center" :style="{ transform: `rotate(${小地图定位.deg}deg)` }">
 					<view class="direction"></view>
 					<view class="dot"></view>
 				</view>
 			</view>
-		</view>
+		</view> -->
 		<!-- 模糊过渡效果 -->
 		<view v-show="模糊过渡" class="transition"></view>
 		<!-- 加载遮罩 -->
@@ -73,16 +72,16 @@ const 房间 = ref({
 	娱乐室门口: {},
 	娱乐室前方内部: {}
 });
-const 小地图定位 = ref({
-	x: '',
-	y: '',
-	deg: ''
-});
+// const 小地图定位 = ref({
+// 	x: '',
+// 	y: '',
+// 	deg: ''
+// });
 const loading = ref(true);
 const 模糊过渡 = ref(false);
 
 let 所选房间;
-let 指向视角中心的箭头;
+// let 指向视角中心的箭头;
 
 onBeforeUnmount(() => {
 	store.commit('setState', {
@@ -138,32 +137,32 @@ function 初始化(res) {
 	VR.控制器.minPolarAngle = Math.PI / 6; // 30度
 	VR.控制器.maxPolarAngle = (Math.PI * 5) / 6; // 150度
 	// 控制旋转
-	VR.控制器.addEventListener('change', () => {
-		// 获取相机朝向向量
-		const direction = new THREE.Vector3();
-		VR.摄像头.getWorldDirection(direction);
-		// 调试用 旋转时打印相机三维坐标
-		console.log('相机朝向:', direction);
-		console.log('箭头 3D 坐标:', 指向视角中心的箭头.position);
-		// 计算角度 0-360度
-		// 注意！Three.js 使用的是 右手坐标系 因此需要反转x或z轴
-		let angle = -Math.atan2(direction.x, direction.z) * (180 / Math.PI);
-		// angle = Math.floor((angle + 360) % 360);
-		小地图定位.value.deg = Math.floor((angle - 房间.value[当前区域.value].相机与雷达偏移角度) * 10) / 10;
-		// 调试用 旋转时打印小地图deg角度
-		console.log('小地图角度', `${小地图定位.value.deg}°`);
-		// console.log('热点相对视窗定位', 房间.value[当前区域.value].hotspots[0].screenPosition);
-	});
+	// VR.控制器.addEventListener('change', () => {
+	// 	// 获取相机朝向向量
+	// 	const direction = new THREE.Vector3();
+	// 	VR.摄像头.getWorldDirection(direction);
+	// 	// 调试用 旋转时打印相机三维坐标
+	// 	console.log('相机朝向:', direction);
+	// 	console.log('箭头 3D 坐标:', 指向视角中心的箭头.position);
+	// 	// 计算角度 0-360度
+	// 	// 注意！Three.js 使用的是 右手坐标系 因此需要反转x或z轴
+	// 	let angle = -Math.atan2(direction.x, direction.z) * (180 / Math.PI);
+	// 	// angle = Math.floor((angle + 360) % 360);
+	// 	小地图定位.value.deg = Math.floor((angle - 房间.value[当前区域.value].相机与雷达偏移角度) * 10) / 10;
+	// 	// 调试用 旋转时打印小地图deg角度
+	// 	console.log('小地图角度', `${小地图定位.value.deg}°`);
+	// 	// console.log('热点相对视窗定位', 房间.value[当前区域.value].hotspots[0].screenPosition);
+	// });
 	// 调试用 创建始终指向视角中心的箭头
-	指向视角中心的箭头 = new THREE.ArrowHelper(
-		new THREE.Vector3(0, 0, -1), // 初始方向
-		new THREE.Vector3(0, 0, 0), // 原点
-		1, // 长度
-		0xff0000, // 颜色
-		0.2, // 头部长度
-		0.1 // 头部宽度
-	);
-	VR.场景.add(指向视角中心的箭头);
+	// 指向视角中心的箭头 = new THREE.ArrowHelper(
+	// 	new THREE.Vector3(0, 0, -1), // 初始方向
+	// 	new THREE.Vector3(0, 0, 0), // 原点
+	// 	1, // 长度
+	// 	0xff0000, // 颜色
+	// 	0.2, // 头部长度
+	// 	0.1 // 头部宽度
+	// );
+	// VR.场景.add(指向视角中心的箭头);
 
 	// 初始化后才有的THREE
 	添加房间信息();
@@ -223,8 +222,8 @@ function 添加房间信息() {
 					disabled: false
 				}
 			],
-			mapPosition: { x: 60, y: 45, deg: 0 },
-			相机与雷达偏移角度: 144.4, // 相机朝向与小地图扇形偏差角度
+			// mapPosition: { x: 60, y: 45, deg: 0 },
+			// 相机与雷达偏移角度: 144.4, // 相机朝向与小地图扇形偏差角度
 			初始朝向: [-0.614, -0.209, -0.76] // 注意手动设置朝向 必须用 相机朝向 不能用箭头坐标 否则坐标不会发生变化
 		},
 		门口左侧: {
@@ -285,8 +284,8 @@ function 添加房间信息() {
 					disabled: false
 				}
 			],
-			mapPosition: { x: 30, y: 45, deg: 90 },
-			相机与雷达偏移角度: -173.3,
+			// mapPosition: { x: 30, y: 45, deg: 90 },
+			// 相机与雷达偏移角度: -173.3,
 			初始朝向: [0.9834072950292505, -0.13020920798994637, 0.126315692761761]
 		},
 		门口左侧内部: {
@@ -339,8 +338,8 @@ function 添加房间信息() {
 					type: '区域'
 				}
 			],
-			mapPosition: { x: 15, y: 60, deg: 90 },
-			相机与雷达偏移角度: -84.4,
+			// mapPosition: { x: 15, y: 60, deg: 90 },
+			// 相机与雷达偏移角度: -84.4,
 			初始朝向: [-0.08785796964931601, -0.08439453938267613, 0.9925515295900187]
 		},
 		门口左侧内部尽头: {
@@ -378,8 +377,8 @@ function 添加房间信息() {
 					disabled: false
 				}
 			],
-			mapPosition: { x: 60, y: 60, deg: -90 },
-			相机与雷达偏移角度: -3.7,
+			// mapPosition: { x: 60, y: 60, deg: -90 },
+			// 相机与雷达偏移角度: -3.7,
 			初始朝向: [0.9889972689777664, -0.13408876533286243, -0.06248683834239166]
 		},
 		娱乐室门口: {
@@ -408,8 +407,8 @@ function 添加房间信息() {
 					disabled: false
 				}
 			],
-			mapPosition: { x: 60, y: 15, deg: 180 },
-			相机与雷达偏移角度: -89.4,
+			// mapPosition: { x: 60, y: 15, deg: 180 },
+			// 相机与雷达偏移角度: -89.4,
 			初始朝向: [-0.23443682163714022, -0.023383241481925065, -0.9718500916697357]
 		},
 		娱乐室前方内部: {
@@ -439,8 +438,8 @@ function 添加房间信息() {
 					disabled: false
 				}
 			],
-			mapPosition: { x: 15, y: 15, deg: 90 },
-			相机与雷达偏移角度: -2.5,
+			// mapPosition: { x: 15, y: 15, deg: 90 },
+			// 相机与雷达偏移角度: -2.5,
 			初始朝向: [-0.9762816106131231, -0.11755514145441893, -0.18181035585543007]
 		}
 	};
@@ -473,19 +472,19 @@ function 场景内添加几何体() {
 			uni.hideLoading();
 		}, 200);
 	});
-	let { x, y, deg } = 房间.value[当前区域.value].mapPosition;
-	小地图定位.value.x = x;
-	小地图定位.value.y = y;
-	小地图定位.value.deg = deg;
+	// let { x, y, deg } = 房间.value[当前区域.value].mapPosition;
+	// 小地图定位.value.x = x;
+	// 小地图定位.value.y = y;
+	// 小地图定位.value.deg = deg;
 }
 function 渲染() {
 	renderId = canvas节点.requestAnimationFrame(渲染);
 	// 调试用 更新视角中心箭头位置
 	const 与相机的距离 = 10;
 	const direction = new THREE.Vector3(0, 0, -1).applyQuaternion(VR.摄像头.quaternion);
-	指向视角中心的箭头.position.copy(VR.摄像头.position).add(direction.multiplyScalar(与相机的距离));
+	// 指向视角中心的箭头.position.copy(VR.摄像头.position).add(direction.multiplyScalar(与相机的距离));
 	// 箭头始终指向相机朝向
-	指向视角中心的箭头.setDirection(direction.normalize());
+	// 指向视角中心的箭头.setDirection(direction.normalize());
 
 	// 如果开启了enableDamping(阻尼惯性)则必须在添加这句
 	VR.控制器.update();
@@ -542,11 +541,11 @@ function 切换区域(spot) {
 		房间.value[当前区域.value].img,
 		// 加载图片回调
 		(newTexture) => {
-			let { x, y, deg } = 房间.value[当前区域.value].mapPosition;
-			小地图定位.value.x = x;
-			小地图定位.value.y = y;
-			// 切换区域后 小地图 及 相机视角 的初始朝向
-			小地图定位.value.deg = deg;
+			// let { x, y, deg } = 房间.value[当前区域.value].mapPosition;
+			// 小地图定位.value.x = x;
+			// 小地图定位.value.y = y;
+			// // 切换区域后 小地图 及 相机视角 的初始朝向
+			// 小地图定位.value.deg = deg;
 			VR.控制器.target.set(...房间.value[当前区域.value].初始朝向);
 			VR.摄像头.position.set(0, 0.1, 0.1); // 试试强制固定相机位置
 
@@ -672,52 +671,52 @@ function 选择房间(value) {
 		box-shadow: 4rpx 4rpx 10rpx rgba(255, 153, 102, 0.5);
 	}
 }
-.minimap {
-	position: absolute;
-	top: 20rpx;
-	right: 20rpx;
-	width: 150rpx;
-	height: 150rpx;
-	background: rgba(0, 0, 0, 0.5);
-	border-radius: 8rpx;
-	overflow: hidden;
-	z-index: 20;
-	box-shadow: 0 0 10rpx rgba(0, 0, 0, 0.2);
-	> .indicator {
-		position: absolute;
-		top: 0;
-		left: 0;
-		z-index: 10;
-		width: 0;
-		height: 0;
-		transform-origin: center;
-		transition: all 1s ease;
-		.dot {
-			width: 6px;
-			height: 6px;
-			border-radius: 50%;
-			background-color: #eee;
-			position: absolute;
-		}
-		.direction {
-			position: absolute;
-			z-index: -1;
-			// transform: rotateZ(180deg); // 视角默认就是180度 与图形方向相反
-			width: 30px;
-			height: 30px;
-			background: radial-gradient(circle, rgba(59, 142, 244, 1) 0%, rgba(59, 142, 244, 0) 100%);
-			clip-path: path('M15,15 L7.5,2.5 A15,15 0 0,1 22.5,2.5 Z');
-		}
-		.rotate {
-			position: absolute;
-			top: 0;
-			left: 0;
-			z-index: 10;
-			width: 0;
-			height: 0;
-		}
-	}
-}
+// .minimap {
+// 	position: absolute;
+// 	top: 20rpx;
+// 	right: 20rpx;
+// 	width: 150rpx;
+// 	height: 150rpx;
+// 	background: rgba(0, 0, 0, 0.5);
+// 	border-radius: 8rpx;
+// 	overflow: hidden;
+// 	z-index: 20;
+// 	box-shadow: 0 0 10rpx rgba(0, 0, 0, 0.2);
+// 	> .indicator {
+// 		position: absolute;
+// 		top: 0;
+// 		left: 0;
+// 		z-index: 10;
+// 		width: 0;
+// 		height: 0;
+// 		transform-origin: center;
+// 		transition: all 1s ease;
+// 		.dot {
+// 			width: 6px;
+// 			height: 6px;
+// 			border-radius: 50%;
+// 			background-color: #eee;
+// 			position: absolute;
+// 		}
+// 		.direction {
+// 			position: absolute;
+// 			z-index: -1;
+// 			// transform: rotateZ(180deg); // 视角默认就是180度 与图形方向相反
+// 			width: 30px;
+// 			height: 30px;
+// 			background: radial-gradient(circle, rgba(59, 142, 244, 1) 0%, rgba(59, 142, 244, 0) 100%);
+// 			clip-path: path('M15,15 L7.5,2.5 A15,15 0 0,1 22.5,2.5 Z');
+// 		}
+// 		.rotate {
+// 			position: absolute;
+// 			top: 0;
+// 			left: 0;
+// 			z-index: 10;
+// 			width: 0;
+// 			height: 0;
+// 		}
+// 	}
+// }
 .loading {
 	position: fixed;
 	left: 0%;

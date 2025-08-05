@@ -86,15 +86,13 @@
 			"van-calendar": "/wxcomponents/vant/calendar/index",
 			"van-submit-bar": "/wxcomponents/vant/submit-bar/index",
 			"van-checkbox": "/wxcomponents/vant/checkbox/index",
-			"van-checkbox-group": "/wxcomponents/vant/checkbox-group/index",
 			"van-field": "/wxcomponents/vant/field/index",
 			"ec-canvas": "/wxcomponents/ec-canvas/ec-canvas",
 			"van-popup": "/wxcomponents/vant/popup/index",
 			"van-dropdown-menu": "/wxcomponents/vant/dropdown-menu/index",
 			"van-dropdown-item": "/wxcomponents/vant/dropdown-item/index",
 			"van-datetime-picker": "/wxcomponents/vant/datetime-picker/index",
-			"van-search": "/wxcomponents/vant/search/index",
-			"van-action-sheet": "/wxcomponents/vant/action-sheet/index"
+			"van-search": "/wxcomponents/vant/search/index"
 		},
 		"disableScroll": true,
 		"enablePullDownRefresh": false
