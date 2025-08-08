@@ -530,7 +530,6 @@ function 切换区域(spot) {
 		title: '加载中...',
 		mask: true
 	});
-
 	当前区域.value = spot.label;
 	// 重置新区域数据
 	for (let spot of 房间.value[当前区域.value].hotspots) {
